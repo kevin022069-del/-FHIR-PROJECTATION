@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @media (max-width: 820px) {
+      .mh-dash-root { flex-direction: column !important; }
+      .mh-dash-sidebar { width: 100% !important; flex-direction: row !important; align-items: center !important; overflow-x: auto !important; border-right: none !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; padding: 10px 12px !important; gap: 10px !important; }
+      .mh-dash-sidebar .mh-dash-logo { padding: 0 6px !important; flex: none !important; }
+      .mh-dash-sidebar .mh-dash-profile { margin-top: 0 !important; margin-left: auto !important; border-top: none !important; flex: none !important; padding: 0 0 0 10px !important; }
+      .mh-dash-main { padding: 18px !important; }
+    }
+  </style>
+</helmet>
+<div class="mh-dash-root" style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;display:flex;background:url('./img/bg-dashboard.jpg') center/cover no-repeat,{{ theme.canvas }};font-family:'Noto Sans TC',sans-serif;transition:background .2s" data-screen-label="個案 Dashboard">
+
+  <!-- sidebar -->
+  <div class="mh-dash-sidebar" style="width:220px;flex:none;background:{{ theme.surface }};border-right:1px solid {{ theme.border }};padding:24px 16px;display:flex;flex-direction:column;gap:2px;transition:background .2s">
+    <div class="mh-dash-logo" style="display:flex;align-items:center;gap:10px;padding:6px 10px 22px;flex:none">
+      <div style="width:30px;height:30px;border-radius:9px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);flex:none"></div>
+      <div style="font:700 17px 'Quicksand';color:{{ theme.text }};white-space:nowrap">MindHarbor</div>
+    </div>
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
+      <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap;flex:none">{{ item.label }}</div>
+    </sc-for>
+    <div class="mh-dash-profile" style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:14px 10px;border-top:1px solid {{ theme.border }}">
+      <div style="width:32px;height:32px;border-radius:50%;flex:none;background:url('./img/avatar-user.png') center/cover no-repeat,#DCE6DB"></div>
+      <div style="flex:1">
+        <div style="font:700 13px 'Noto Sans TC';color:{{ theme.text }}">{{ name }}</div>
+        <div style="font:400 11px 'Noto Sans TC';color:{{ theme.textSoft }}">個案帳號</div>
+      </div>
+      <div onClick="{{ goLogout }}" style="width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none" title="登出">
+        <div style="position:relative;width:16px;height:14px">
+          <div style="position:absolute;left:0;top:0;width:9px;height:14px;border:2px solid #B5543C;border-right:none;border-radius:3px 0 0 3px;box-sizing:border-box"></div>
+          <div style="position:absolute;left:7px;top:6px;width:8px;height:2px;background:#B5543C"></div>
+          <div style="position:absolute;left:11px;top:2px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #B5543C"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- main -->
+  <div class="mh-dash-main" style="flex:1;min-width:0;padding:clamp(20px,4vw,36px) clamp(16px,4vw,44px);max-width:1600px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;flex-wrap:wrap;gap:16px">
+      <div style="flex:none;min-width:fit-content">
+        <div style="font:700 clamp(22px,4vw,30px) 'Quicksand';color:{{ theme.text }};display:flex;align-items:center;gap:10px;white-space:nowrap">{{ headerTitle }}
+          <span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F4D58D,#E8B44C)"></span>
+        </div>
+        <div style="font:400 14px 'Noto Sans TC';color:{{ theme.textSoft }};margin-top:6px">{{ headerSubtitle }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex:none">
+        <div style="display:flex;align-items:center;gap:8px;background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:999px;padding:6px 14px 6px 6px">
+          <div style="width:34px;height:34px;border-radius:50%;background:conic-gradient(#C3946F {{ mindDemonDeg }}deg, {{ theme.track }} 0deg);display:flex;align-items:center;justify-content:center">
+            <div style="width:24px;height:24px;border-radius:50%;background:{{ theme.surface }};display:flex;align-items:center;justify-content:center">
+              <div style="position:relative;width:14px;height:12px">
+                <div style="position:absolute;left:0;top:0;width:0;height:0;border-left:2.5px solid transparent;border-right:2.5px solid transparent;border-bottom:4px solid #B5453A;transform:rotate(-18deg)"></div>
+                <div style="position:absolute;right:0;top:0;width:0;height:0;border-left:2.5px solid transparent;border-right:2.5px solid transparent;border-bottom:4px solid #B5453A;transform:rotate(18deg)"></div>
+                <div style="position:absolute;inset:2px 0 0;width:14px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#E28A76,#B5453A)"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font:600 9px 'Noto Sans TC';color:{{ theme.textSoft }};line-height:1.2">心魔指數</div>
+            <div style="font:700 13px 'Quicksand';color:#9A6B54;line-height:1.2">{{ mindDemon }}%</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:999px;padding:6px 14px 6px 6px">
+          <div style="width:34px;height:34px;border-radius:50%;background:conic-gradient(#6FA37C {{ spiritDeg }}deg, {{ theme.track }} 0deg);display:flex;align-items:center;justify-content:center">
+            <div style="width:24px;height:24px;border-radius:50%;background:{{ theme.surface }};display:flex;align-items:center;justify-content:center">
+              <div style="position:relative;width:13px;height:13px">
+                <div style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:7px;height:2.5px;border-radius:50%;border:1.2px solid #E8C766;box-sizing:border-box"></div>
+                <div style="position:absolute;left:0;top:3px;width:13px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#BFE0C4,#6FA37C)"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font:600 9px 'Noto Sans TC';color:{{ theme.textSoft }};line-height:1.2">靈力點數</div>
+            <div style="font:700 13px 'Quicksand';color:#557A60;line-height:1.2">{{ spiritPower }}</div>
+          </div>
+        </div>
+        <button onClick="{{ onCheckin }}" style="{{ checkinBtnStyle }}">{{ checkinBtnLabel }}</button>
+      </div>
+    </div>
+
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ highRisk }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ goCrisis }}" style="background:#FBEAE6;border:1px solid #E8B7A9;border-radius:16px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+          <div style="font:600 14px 'Noto Sans TC';color:#B5543C">偵測到高壓力，已通知心理師 — 點此查看求助資源</div>
+          <div style="font:600 13px 'Noto Sans TC';color:#B5543C">前往 ›</div>
+        </div>
+      </sc-if>
+
+      <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:20px 24px;margin-bottom:24px;font:500 15px 'Noto Sans TC';color:{{ theme.textSoft }};font-style:italic">
+        「每一次面對自己，都是一次內在修練。」
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+        <div onClick="{{ goChat }}" style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:20px;cursor:pointer">
+          <div style="font:700 15px 'Quicksand';margin-bottom:6px;color:{{ theme.text }}">今日聊天</div>
+          <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }};margin-bottom:16px">與 AI 靈光對話，傾訴心情、獲得陪伴</div>
+          <div style="font:600 13px 'Noto Sans TC';color:#557A60">開始聊天 ›</div>
+        </div>
+        <div onClick="{{ goChat }}" style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:20px;cursor:pointer">
+          <div style="font:700 15px 'Quicksand';margin-bottom:6px;color:{{ theme.text }}">壓力量表</div>
+          <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }};margin-bottom:16px">完成 PSS-10 評估，了解今日壓力狀態</div>
+          <div style="font:600 13px 'Noto Sans TC';color:#557A60">{{ scaleCta }}</div>
+        </div>
+        <div onClick="{{ goTasks }}" style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:20px;cursor:pointer">
+          <div style="font:700 15px 'Quicksand';margin-bottom:6px;color:{{ theme.text }}">每日任務</div>
+          <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }};margin-bottom:16px">修練身心習慣，累積靈力、平緩心魔</div>
+          <div style="font:600 13px 'Noto Sans TC';color:#557A60">{{ tasksLabel }}</div>
+        </div>
+        <div onClick="{{ goResultsOrTasks }}" style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:20px;cursor:pointer">
+          <div style="font:700 15px 'Quicksand';margin-bottom:6px;color:{{ theme.text }}">今日總結</div>
+          <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }};margin-bottom:16px">反思與總結今日心得，讓成長被看見</div>
+          <div style="font:600 13px 'Noto Sans TC';color:#557A60">{{ summaryLabel }}</div>
+        </div>
+      </div>
+
+      <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:20px;padding:24px;margin-top:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font:700 16px 'Quicksand';color:{{ theme.text }}">好友動態</div>
+          <div onClick="{{ openFriends }}" style="font:600 12px 'Noto Sans TC';color:#557A60;cursor:pointer">查看全部好友 ›</div>
+        </div>
+        <sc-if value="{{ friends.length }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <sc-for list="{{ friendActivity }}" as="f" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;background:{{ theme.canvas }};border-radius:14px;padding:12px 14px">
+                <div style="position:relative;flex:none">
+                  <div style="width:40px;height:40px;border-radius:50%;background:{{ f.avatarLayer }}radial-gradient(circle at 35% 30%,#D19A76,#9A6B54)"></div>
+                  <div style="{{ f.dotStyle }}"></div>
+                </div>
+                <div>
+                  <div style="font:700 13px 'Noto Sans TC';color:{{ theme.text }}">{{ f.nick }}</div>
+                  <div style="font:400 11px 'Noto Sans TC';color:{{ theme.textSoft }}">{{ f.statusText }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ !friends.length }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ goPairing }}" style="border:1px dashed {{ theme.border }};border-radius:14px;padding:22px;text-align:center;font:400 13px 'Noto Sans TC';color:{{ theme.textSoft }};cursor:pointer">
+            還沒有好友，去「紓壓配對」認識新旅伴吧 ›
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isGrowth }}" hint-placeholder-val="{{ false }}">
+      <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:20px;padding:26px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:18px;color:{{ theme.text }}">近 7 天心魔 / 靈力趨勢</div>
+        <div style="display:flex;align-items:flex-end;gap:14px;height:160px">
+          <sc-for list="{{ growthBars }}" as="b" hint-placeholder-count="7">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px">
+              <div style="width:100%;background:{{ theme.track }};border-radius:6px 6px 0 0;height:{{ b.demonH }}%"></div>
+              <div style="width:100%;background:#9CC3A0;border-radius:6px 6px 0 0;height:{{ b.spiritH }}%"></div>
+              <div style="font:500 10px 'Noto Sans TC';color:{{ theme.textSoft }};margin-top:4px">{{ b.day }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:18px;margin-top:16px;font:500 12px 'Noto Sans TC';color:{{ theme.textSoft }}">
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:{{ theme.track }}"></span>心魔</div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#9CC3A0"></span>靈力</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isBadges }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
+        <sc-for list="{{ badges }}" as="badge" hint-placeholder-count="6">
+          <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:22px;text-align:center;opacity:{{ badge.opacity }}">
+            <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 12px;background:{{ badge.photoLayer }}{{ badge.color }}"></div>
+            <div style="font:700 14px 'Quicksand';color:{{ theme.text }}">{{ badge.name }}</div>
+            <div style="font:400 11px 'Noto Sans TC';color:{{ theme.textSoft }};margin-top:4px">{{ badge.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:480px;display:flex;flex-direction:column;gap:16px">
+        <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:22px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font:700 14px 'Noto Sans TC';color:{{ theme.text }}">深色模式</div>
+            <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }};margin-top:2px">切換淺色／深色主題外觀</div>
+          </div>
+          <div onClick="{{ toggleDark }}" style="{{ darkTrackStyle }}"><div style="{{ darkDotStyle }}"></div></div>
+        </div>
+        <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:22px">
+          <div style="font:700 14px 'Noto Sans TC';color:{{ theme.text }};margin-bottom:12px">帳號資訊</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font:400 13px 'Noto Sans TC';color:{{ theme.textSoft }}">
+            <div>名稱：{{ name }}</div>
+            <div>角色：個案（Patient）</div>
+          </div>
+        </div>
+        <button onClick="{{ clearToday }}" style="border:1px solid #E8B7A9;background:transparent;color:#B5543C;padding:13px;border-radius:14px;font:600 13px 'Noto Sans TC'">清除今日資料（重新開始）</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isFriends }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ friends.length }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:480px">
+          <sc-for list="{{ friends }}" as="f" hint-placeholder-count="2">
+            <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px">
+              <div style="width:40px;height:40px;border-radius:50%;background:{{ f.avatarLayer }}radial-gradient(circle at 35% 30%,#D19A76,#9A6B54);flex:none"></div>
+              <div>
+                <div style="font:700 14px 'Noto Sans TC';color:{{ theme.text }}">{{ f.nick }}</div>
+                <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }}">透過紓壓配對認識 · {{ f.since }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ !friends.length }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:480px;background:{{ theme.surface }};border:1px dashed {{ theme.border }};border-radius:16px;padding:26px;text-align:center;font:400 13px 'Noto Sans TC';color:{{ theme.textSoft }}">
+          還沒有好友，去「紓壓配對」認識新旅伴吧！
+        </div>
+      </sc-if>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
+const BADGES = [
+  {name:'Calm', desc:'保持平靜', color:'#9CC3A0', slug:'calm'},
+  {name:'Focus', desc:'專注當下', color:'#8FA9C4', slug:'focus'},
+  {name:'Courage', desc:'勇於面對', color:'#A688B0', slug:'courage'},
+  {name:'Reflection', desc:'深度反思', color:'#D19A76', slug:'reflection'},
+  {name:'Consistency', desc:'連續 7 天', color:'#E8B44C', slug:'consistency'},
+  {name:'Growth', desc:'心魔下降 50%', color:'#557A60', slug:'growth'},
+];
+
+class Component extends DCLogic {
+  state = { panel: 'overview', darkMode: false };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.openFriendsSignal !== this.props.openFriendsSignal && this.props.openFriendsSignal) {
+      this.setState({ panel: 'friends' });
+    }
+  }
+
+  renderVals() {
+    const p = this.props;
+    const active = 'padding:11px 12px;border-radius:12px;font:700 13px \'Noto Sans TC\';color:#2E4A34;background:#DCE6DB;margin-bottom:2px;cursor:pointer;';
+    const inactive = 'padding:11px 12px;border-radius:12px;font:500 13px \'Noto Sans TC\';color:#7C756B;margin-bottom:2px;cursor:pointer;';
+
+    const goByProgress = () => {
+      if (!p.pssCategory) return p.goChat();
+      if (p.tasksDone < p.tasksTotal) return p.goTasks();
+      if (!p.summaryDone) return p.goSummary();
+      return p.completed ? p.goResults() : p.goSummary();
+    };
+    const items = [
+      {label:'總覽', onClick: () => this.setState({ panel: 'overview' }), key:'overview'},
+      {label:'每日任務', onClick: goByProgress, key:'ext'},
+      {label:'成長記錄', onClick: () => this.setState({ panel: 'growth' }), key:'growth'},
+      {label:'成就徽章', onClick: () => this.setState({ panel: 'badges' }), key:'badges'},
+      {label:'設定中心', onClick: () => this.setState({ panel: 'settings' }), key:'settings'},
+    ];
+    const navItems = items.map(it => ({ label: it.label, onClick: it.onClick, style: this.state.panel === it.key ? active : inactive }));
+
+    const pssLabel = p.pssCategory === 'high' ? '高壓力' : p.pssCategory === 'medium' ? '中壓力' : p.pssCategory === 'low' ? '低壓力' : '尚未評估';
+    const scaleCta = p.pssCategory ? '查看結果 ›' : '開始評估 ›';
+    const tasksLabel = `${p.tasksDone}/${p.tasksTotal} 已完成 ›`;
+    const summaryLabel = p.summaryDone ? '查看今日成果 ›' : '開始總結 ›';
+
+    const titles = { overview: [`Good Morning, ${p.nameVal}`, '今天也是安頓自己的一天'], growth: ['成長記錄', '看見自己每一天的變化'], badges: ['成就徽章', '累積屬於你的修練里程碑'], settings: ['設定中心', '管理你的帳號與外觀偏好'], friends: ['好友列表', '透過紓壓配對認識的旅伴們'] };
+    const [headerTitle, headerSubtitle] = titles[this.state.panel];
+
+    const growthBars = [62,58,55,50,45,40,p.mindDemon].map((d,i) => ({
+      demonH: d, spiritH: Math.min(100, 30 + i*10),
+      day: ['07/05','07/06','07/07','07/08','07/09','07/10','今日'][i],
+    }));
+
+    const badges = BADGES.map((b,i) => ({ ...b, opacity: i < 3 ? 1 : 0.35, photoLayer: `url('./img/badge-${b.slug}.png') center/cover no-repeat,` }));
+
+    const theme = this.state.darkMode
+      ? { canvas:'#211F1B', surface:'#2A2822', border:'#3A362E', text:'#EDE8DE', textSoft:'#B0A99A', track:'#3A362E' }
+      : { canvas:'#F4F0E7', surface:'#FBF9F4', border:'#E6DECF', text:'#423D37', textSoft:'#7C756B', track:'#EDE4D8' };
+
+    return {
+      theme,
+      name: p.nameVal,
+      mindDemon: p.mindDemon,
+      spiritPower: p.spiritPower,
+      mindDemonDeg: Math.round((p.mindDemon/100)*360),
+      spiritDeg: Math.round((Math.min(p.spiritPower,500)/500)*360),
+      pssLabel, scaleCta, tasksLabel, summaryLabel,
+      highRisk: p.highRisk,
+      navItems,
+      headerTitle, headerSubtitle,
+      isOverview: this.state.panel === 'overview',
+      isGrowth: this.state.panel === 'growth',
+      isBadges: this.state.panel === 'badges',
+      isSettings: this.state.panel === 'settings',
+      isFriends: this.state.panel === 'friends',
+      friends: (p.friends || []).map((f, i) => ({ ...f, avatarLayer: `url('./img/avatar-friend-${i + 1}.png') center/cover no-repeat,` })),
+      friendActivity: (p.friends || []).map((f, i) => ({
+        nick: f.nick,
+        statusText: f.online ? '線上' : (f.lastActive || '離線'),
+        avatarLayer: `url('./img/avatar-friend-${i + 1}.png') center/cover no-repeat,`,
+        dotStyle: `position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:${f.online ? '#6ECBAF' : '#C9C2B4'};border:2px solid ${theme.surface}`,
+      })),
+      openFriends: () => this.setState({ panel: 'friends' }),
+      goPairing: p.goPairing,
+      goShop: p.goShop,
+      onCheckin: p.onCheckin,
+      checkinBtnLabel: p.checkedInToday ? '✓ 已簽到' : '簽到 +5',
+      checkinBtnStyle: `border:none;padding:9px 16px;border-radius:999px;font:700 12px 'Noto Sans TC';color:${p.checkedInToday ? theme.textSoft : '#FBF9F4'};background:${p.checkedInToday ? theme.track : '#E8B44C'};cursor:${p.checkedInToday ? 'default' : 'pointer'};white-space:nowrap`,
+      growthBars, badges,
+      goChat: p.goChat, goTasks: p.goTasks,
+      goResultsOrTasks: p.completed ? p.goResults : (() => {}),
+      goCrisis: p.goCrisis, goLogout: p.goLogout,
+      toggleDark: () => this.setState(s => ({ darkMode: !s.darkMode })),
+      darkTrackStyle: `width:40px;height:22px;border-radius:999px;background:${this.state.darkMode?'#557A60':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.darkMode?'flex-end':'flex-start'}`,
+      darkDotStyle: 'width:18px;height:18px;border-radius:50%;background:#FBF9F4',
+      clearToday: () => this.setState({ panel: 'overview' }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @keyframes mh-spin{to{transform:rotate(360deg)}}
+    @keyframes mh-pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+  </style>
+</helmet>
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,36px) clamp(12px,4vw,24px)" data-screen-label="紓壓配對">
+
+  <div style="max-width:640px;margin:0 auto">
+    <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:6px;color:#7C756B;font:600 13px 'Noto Sans TC';cursor:pointer;margin-bottom:18px;width:fit-content;white-space:nowrap">‹ 返回首頁</div>
+
+    <!-- matching -->
+    <sc-if value="{{ isMatching }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:60px 30px;text-align:center">
+        <div style="width:64px;height:64px;border-radius:50%;border:5px solid #DCE6DB;border-top-color:#557A60;margin:0 auto 24px;animation:mh-spin 1s linear infinite"></div>
+        <div style="font:700 18px 'Quicksand';color:#423D37;margin-bottom:8px">正在為你配對陌生旅伴...</div>
+        <div style="font:400 13px 'Noto Sans TC';color:#7C756B">配對成功後，你們將以匿名暱稱互相陪伴、一起完成 5 題紓壓小測驗</div>
+      </div>
+    </sc-if>
+
+    <!-- matched intro -->
+    <sc-if value="{{ isMatched }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:40px 30px;text-align:center;animation:mh-pop .3s ease">
+        <div style="display:flex;justify-content:center;gap:24px;margin-bottom:20px">
+          <div style="width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9CC3A0,#557A60)"></div>
+          <div style="display:flex;align-items:center;font:700 20px 'Quicksand';color:#C9C2B4">×</div>
+          <div style="width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#D19A76,#9A6B54)"></div>
+        </div>
+        <div style="font:700 18px 'Quicksand';color:#423D37;margin-bottom:6px">配對成功！你將與「{{ partnerNick }}」一起完成小測驗</div>
+        <div style="font:400 13px 'Noto Sans TC';color:#7C756B;margin-bottom:24px">全程匿名，不會顯示任何真實帳號資訊</div>
+        <button onClick="{{ startQuiz }}" style="border:none;background:#557A60;color:#FBF9F4;padding:14px 30px;border-radius:999px;font:700 14px 'Noto Sans TC'">開始測驗 ›</button>
+      </div>
+    </sc-if>
+
+    <!-- quiz -->
+    <sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:30px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+          <div style="font:700 16px 'Quicksand'">紓壓知識王</div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B">題目 {{ qNum }} / {{ qTotal }}</div>
+        </div>
+        <div style="height:6px;background:#EDE4D8;border-radius:999px;overflow:hidden;margin-bottom:22px">
+          <div style="height:100%;width:{{ qPct }}%;background:#557A60;border-radius:999px"></div>
+        </div>
+        <div style="font:600 16px/1.6 'Noto Sans TC';color:#423D37;margin-bottom:20px">{{ question }}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px">
+          <sc-for list="{{ options }}" as="opt" hint-placeholder-count="4">
+            <button onClick="{{ opt.onSelect }}" style="{{ opt.style }}">{{ opt.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- encouragement -->
+    <sc-if value="{{ isEncourage }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:30px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:6px">給「{{ partnerNick }}」一句鼓勵</div>
+        <div style="font:400 13px 'Noto Sans TC';color:#7C756B;margin-bottom:18px">{{ partnerNick }} 剛回答了第 {{ qNum }} 題，傳一句話讓對方知道你在這裡</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+          <sc-for list="{{ encouragementOptions }}" as="e" hint-placeholder-count="4">
+            <button onClick="{{ e.onSelect }}" style="text-align:left;border:1px solid #E6DECF;background:#FFFFFF;color:#423D37;padding:13px 16px;border-radius:14px;font:500 14px 'Noto Sans TC'">{{ e.text }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input value="{{ customEncourage }}" onInput="{{ onCustomEncourageChange }}" placeholder="或自己寫一句..." style="flex:1;border:1px solid #E6DECF;border-radius:999px;padding:11px 16px;font:400 13px 'Noto Sans TC';outline:none"/>
+          <button onClick="{{ sendCustomEncourage }}" style="border:none;background:#557A60;color:#FBF9F4;padding:0 20px;border-radius:999px;font:600 13px 'Noto Sans TC'">送出</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- chat log so far -->
+    <sc-if value="{{ showLog }}" hint-placeholder-val="{{ false }}">
+      <div class="mh-scroll" style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:20px;padding:18px;margin-top:16px;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ logEntries }}" as="entry" hint-placeholder-count="3">
+          <div style="{{ entry.style }}">{{ entry.text }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- suggestion exchange -->
+    <sc-if value="{{ isSuggest }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:30px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:6px">給彼此一個放鬆小建議</div>
+        <div style="font:400 13px 'Noto Sans TC';color:#7C756B;margin-bottom:18px">測驗完成了！推薦「{{ partnerNick }}」一件可以放鬆的小事吧</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+          <sc-for list="{{ suggestionOptions }}" as="sg" hint-placeholder-count="4">
+            <button onClick="{{ sg.onSelect }}" style="text-align:left;border:1px solid #E6DECF;background:#FFFFFF;color:#423D37;padding:13px 16px;border-radius:14px;font:500 14px 'Noto Sans TC'">{{ sg.text }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input value="{{ customSuggestion }}" onInput="{{ onCustomSuggestionChange }}" placeholder="或自己寫一個建議..." style="flex:1;border:1px solid #E6DECF;border-radius:999px;padding:11px 16px;font:400 13px 'Noto Sans TC';outline:none"/>
+          <button onClick="{{ sendCustomSuggestion }}" style="border:none;background:#557A60;color:#FBF9F4;padding:0 20px;border-radius:999px;font:600 13px 'Noto Sans TC'">送出</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- add friend -->
+    <sc-if value="{{ isFriendAsk }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:36px 30px;text-align:center">
+        <div style="font:700 18px 'Quicksand';color:#423D37;margin-bottom:10px">「{{ partnerNick }}」建議你：{{ partnerSuggestion }}</div>
+        <div style="font:400 13px 'Noto Sans TC';color:#7C756B;margin-bottom:26px">這趟旅程即將結束，要不要加「{{ partnerNick }}」為好友，之後可以繼續互相鼓勵？</div>
+        <div style="display:flex;gap:12px;justify-content:center">
+          <button onClick="{{ declineFriend }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:13px 26px;border-radius:999px;font:600 14px 'Noto Sans TC'">先不用了</button>
+          <button onClick="{{ acceptFriend }}" style="border:none;background:#557A60;color:#FBF9F4;padding:13px 26px;border-radius:999px;font:700 14px 'Noto Sans TC'">加為好友</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- done -->
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:40px 30px;text-align:center">
+        <div style="width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F4D58D,#E8B44C);margin:0 auto 18px"></div>
+        <div style="font:700 18px 'Quicksand';color:#423D37;margin-bottom:8px">{{ doneTitle }}</div>
+        <div style="font:400 13px/1.7 'Noto Sans TC';color:#7C756B;margin-bottom:26px">{{ doneSubtitle }}</div>
+        <button onClick="{{ goHome }}" style="border:none;background:#557A60;color:#FBF9F4;padding:14px 30px;border-radius:999px;font:700 14px 'Noto Sans TC'">回到首頁</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:800},&quot;goHome&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onComplete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(summary:object)=&gt;void&quot;}}">
+const PARTNER_NICKS = ['小海豚','夜貓子','向日葵','旅行者42','拿鐵不加糖'];
+const QUESTIONS = [
+  { q:'最近一個月，你有多常覺得莫名心煩？', opts:[
+    {label:'幾乎沒有', score:0}, {label:'偶爾會', score:1}, {label:'蠻常的', score:2}, {label:'幾乎每天', score:3} ]},
+  { q:'遇到突發狀況時，你通常會？', opts:[
+    {label:'冷靜評估再行動', score:0}, {label:'先深呼吸再處理', score:1}, {label:'會慌張一陣子', score:2}, {label:'整個人當機', score:3} ]},
+  { q:'最近睡眠品質如何？', opts:[
+    {label:'很好，一覺到天亮', score:0}, {label:'還可以', score:1}, {label:'常常睡不好', score:2}, {label:'幾乎失眠', score:3} ]},
+  { q:'面對堆積如山的待辦事項，你的感覺是？', opts:[
+    {label:'可以一項項處理', score:0}, {label:'有點壓力但還好', score:1}, {label:'覺得快喘不過氣', score:2}, {label:'完全不知從何下手', score:3} ]},
+  { q:'今天想到明天要做的事，心情是？', opts:[
+    {label:'平常心', score:0}, {label:'有點在意', score:1}, {label:'有點焦慮', score:2}, {label:'非常抗拒', score:3} ]},
+];
+const ENCOURAGEMENTS = ['你已經做得很好了！','辛苦了，記得對自己好一點','我懂那種感覺，你不孤單','加油，我們一起面對！'];
+const SUGGESTIONS = ['去外面散步 10 分鐘','聽一首喜歡的歌放空一下','寫下三件今天值得感恩的事','早點放下手機好好休息'];
+
+class Component extends DCLogic {
+  state = {
+    step: 'matching',
+    partnerNick: PARTNER_NICKS[Math.floor(Math.random()*PARTNER_NICKS.length)],
+    qIndex: 0,
+    userScore: 0,
+    log: [],
+    customEncourage: '',
+    customSuggestion: '',
+    partnerSuggestion: '',
+    friended: false,
+  };
+
+  componentDidMount() {
+    this._t1 = setTimeout(() => this.setState({ step: 'matched' }), 1600);
+  }
+  componentWillUnmount() {
+    clearTimeout(this._t1);
+    clearTimeout(this._t2);
+  }
+
+  startQuiz = () => this.setState({ step: 'quiz' });
+
+  selectOption = (opt) => {
+    const q = QUESTIONS[this.state.qIndex];
+    const partnerOpt = q.opts[Math.floor(Math.random() * q.opts.length)];
+    this.setState(s => ({
+      userScore: s.userScore + opt.score,
+      log: [...s.log,
+        { who:'you', text:`你：${opt.label}` },
+        { who:'partner', text:`${s.partnerNick}：${partnerOpt.label}` },
+      ],
+      step: 'encourage',
+    }));
+  };
+
+  sendEncouragement = (text) => {
+    this.setState(s => ({
+      log: [...s.log, { who:'you-msg', text:`你 → ${s.partnerNick}：${text}` }],
+      customEncourage: '',
+    }), () => {
+      const nextIndex = this.state.qIndex + 1;
+      this._t2 = setTimeout(() => {
+        if (nextIndex >= QUESTIONS.length) {
+          this.setState({ step: 'suggest' });
+        } else {
+          this.setState({ qIndex: nextIndex, step: 'quiz' });
+        }
+      }, 500);
+    });
+  };
+  setCustomEncourage = (v) => this.setState({ customEncourage: v });
+
+  sendSuggestion = (text) => {
+    const partnerSuggestion = SUGGESTIONS[Math.floor(Math.random()*SUGGESTIONS.length)];
+    this.setState(s => ({
+      log: [...s.log, { who:'you-msg', text:`你 → ${s.partnerNick}：建議「${text}」` }],
+      partnerSuggestion,
+      customSuggestion: '',
+      step: 'friendAsk',
+    }));
+  };
+  setCustomSuggestion = (v) => this.setState({ customSuggestion: v });
+
+  acceptFriend = () => {
+    this.setState({ friended: true, step: 'done' });
+    const riskLevel = this.state.userScore >= 11 ? 'high' : this.state.userScore >= 6 ? 'medium' : 'low';
+    this.props.onComplete && this.props.onComplete({
+      partnerNick: this.state.partnerNick,
+      score: this.state.userScore,
+      riskLevel,
+      log: this.state.log,
+      friended: true,
+    });
+  };
+  declineFriend = () => {
+    this.setState({ friended: false, step: 'done' });
+    const riskLevel = this.state.userScore >= 11 ? 'high' : this.state.userScore >= 6 ? 'medium' : 'low';
+    this.props.onComplete && this.props.onComplete({
+      partnerNick: this.state.partnerNick,
+      score: this.state.userScore,
+      riskLevel,
+      log: this.state.log,
+      friended: false,
+    });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const q = QUESTIONS[s.qIndex];
+    const options = q ? q.opts.map(o => ({
+      label: o.label,
+      onSelect: () => this.selectOption(o),
+      style: 'text-align:left;border:1px solid #E6DECF;background:#FFFFFF;color:#423D37;padding:13px 16px;border-radius:14px;font:500 14px \'Noto Sans TC\';cursor:pointer',
+    })) : [];
+
+    const encouragementOptions = ENCOURAGEMENTS.map(t => ({ text: t, onSelect: () => this.sendEncouragement(t) }));
+    const suggestionOptions = SUGGESTIONS.map(t => ({ text: t, onSelect: () => this.sendSuggestion(t) }));
+
+    const logEntries = s.log.map(e => ({
+      text: e.text,
+      style: e.who === 'you-msg'
+        ? 'background:#DCE6DB;color:#2E4A34;padding:8px 12px;border-radius:12px;font:500 12px \'Noto Sans TC\';align-self:flex-end;'
+        : 'background:#F0EBE0;color:#5C564C;padding:8px 12px;border-radius:12px;font:400 12px \'Noto Sans TC\';',
+    }));
+
+    const doneTitle = s.friended ? `已加「${s.partnerNick}」為好友！` : '本次紓壓旅程完成！';
+    const doneSubtitle = s.friended
+      ? '你可以在個案首頁的好友列表中看到對方，之後可以繼續互相鼓勵。'
+      : '謝謝你願意花時間互相陪伴，期待下次再遇到新的旅伴。';
+
+    return {
+      partnerNick: s.partnerNick,
+      isMatching: s.step === 'matching', isMatched: s.step === 'matched',
+      isQuiz: s.step === 'quiz', isEncourage: s.step === 'encourage',
+      isSuggest: s.step === 'suggest', isFriendAsk: s.step === 'friendAsk', isDone: s.step === 'done',
+      showLog: s.log.length > 0 && ['quiz','encourage','suggest','friendAsk'].includes(s.step),
+      startQuiz: this.startQuiz,
+      qNum: s.qIndex + 1, qTotal: QUESTIONS.length, qPct: Math.round(((s.qIndex+1)/QUESTIONS.length)*100),
+      question: q ? q.q : '', options,
+      encouragementOptions, customEncourage: s.customEncourage,
+      onCustomEncourageChange: (e) => this.setCustomEncourage(e.target.value),
+      sendCustomEncourage: () => { if (s.customEncourage.trim()) this.sendEncouragement(s.customEncourage.trim()); },
+      logEntries,
+      suggestionOptions, customSuggestion: s.customSuggestion,
+      onCustomSuggestionChange: (e) => this.setCustomSuggestion(e.target.value),
+      sendCustomSuggestion: () => { if (s.customSuggestion.trim()) this.sendSuggestion(s.customSuggestion.trim()); },
+      partnerSuggestion: s.partnerSuggestion,
+      acceptFriend: this.acceptFriend, declineFriend: this.declineFriend,
+      doneTitle, doneSubtitle,
+      goHome: this.props.goHome,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

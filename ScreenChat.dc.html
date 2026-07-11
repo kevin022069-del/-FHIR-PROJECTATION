@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+</helmet>
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px) 90px" data-screen-label="對話與壓力量表">
+
+  <!-- steps -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:30px">
+    <div onClick="{{ goHome }}" style="flex:none;display:flex;align-items:center;gap:6px;color:#7C756B;font:600 13px 'Noto Sans TC';cursor:pointer;white-space:nowrap">‹ 返回首頁</div>
+    <div style="display:flex;gap:clamp(4px,2vw,10px);overflow-x:auto;flex:none;max-width:60%">
+      <sc-for list="{{ steps }}" as="step" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:6px;flex:none">
+          <div style="{{ step.style }}flex:none">{{ step.n }}</div>
+          <div style="font:600 clamp(10px,2.5vw,12px) 'Noto Sans TC';color:{{ step.color }};white-space:nowrap">{{ step.label }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="max-width:640px;margin:0 auto;background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:clamp(20px,5vw,36px)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+      <div style="font:700 20px 'Quicksand';color:#423D37">PSS-10 壓力量表</div>
+      <div style="font:600 13px 'Noto Sans TC';color:#7C756B">題目 {{ qNum }} / 10</div>
+    </div>
+    <div style="height:6px;background:#EDE4D8;border-radius:999px;overflow:hidden;margin-bottom:28px">
+      <div style="height:100%;width:{{ progressPct }}%;background:#557A60;border-radius:999px"></div>
+    </div>
+
+    <sc-if value="{{ !pssScore }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;font:600 18px/1.6 'Noto Sans TC';color:#423D37;margin-bottom:30px;min-height:70px">
+        在過去一個月中，<br>{{ question }}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(56px,1fr));gap:10px;margin-bottom:26px">
+        <sc-for list="{{ options }}" as="opt" hint-placeholder-count="5">
+          <button onClick="{{ opt.onSelect }}" style="{{ opt.style }}">
+            <div style="width:28px;height:28px;margin:0 auto;position:relative">
+              <div style="font:700 22px 'Quicksand';line-height:28px">{{ opt.emoji }}</div>
+              <div style="position:absolute;inset:0;border-radius:50%;background:{{ opt.imgLayer }}"></div>
+            </div>
+            <div style="font:600 12px 'Noto Sans TC';margin-top:6px">{{ opt.label }}</div>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <button onClick="{{ prevPss }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:12px 22px;border-radius:999px;font:600 13px 'Noto Sans TC'">上一題</button>
+        <sc-if value="{{ isLastQuestion }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ submitPss }}" style="{{ submitStyle }}">計算壓力值</button>
+        </sc-if>
+        <sc-if value="{{ !isLastQuestion }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ nextPss }}" style="border:none;background:#557A60;color:#FBF9F4;padding:12px 26px;border-radius:999px;font:600 13px 'Noto Sans TC'">下一題</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pssScore }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:20px 0">
+        <div style="width:110px;height:110px;border-radius:50%;background:{{ resultBg }};display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px">
+          <div style="font:700 30px 'Quicksand';color:#fff">{{ pssScore }}</div>
+          <div style="font:600 11px 'Noto Sans TC';color:#fff">/ 40</div>
+        </div>
+        <div style="font:700 20px 'Quicksand';color:{{ resultTextColor }};margin-bottom:8px">{{ resultLabel }}</div>
+        <div style="font:600 13px 'Noto Sans TC';color:{{ fhirStatusColor }};margin-bottom:10px">{{ fhirStatusText }}</div>
+        <sc-if value="{{ fhirSynced }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#F4F0E7;border:1px solid #E6DECF;border-radius:12px;padding:12px 14px;margin-bottom:20px;text-align:left;font:400 11px/1.6 monospace;color:#5C564C;word-break:break-all">
+            QuestionnaireResponse/{{ fhirQrId }}<br>Observation/{{ fhirObsId }}
+          </div>
+        </sc-if>
+        <sc-if value="{{ !fhirSynced }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-bottom:20px"></div>
+        </sc-if>
+        <button onClick="{{ goNext }}" style="border:none;background:#557A60;color:#FBF9F4;padding:14px 30px;border-radius:999px;font:700 14px 'Noto Sans TC'">下一步：每日任務 ›</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- floating chat FAB -->
+  <div style="position:absolute;right:clamp(14px,4vw,28px);bottom:clamp(14px,4vw,28px);z-index:50;max-width:calc(100vw - 28px)">
+    <sc-if value="{{ !chatOpen }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ toggleChat }}" style="width:60px;height:60px;border-radius:50%;border:none;background:linear-gradient(135deg,#88AE8E,#557A60);color:#FBF9F4;font:700 22px 'Quicksand';box-shadow:0 10px 26px rgba(85,122,96,.4);display:flex;align-items:center;justify-content:center">
+        <span style="width:20px;height:16px;border-radius:8px 8px 8px 2px;background:#FBF9F4"></span>
+      </button>
+    </sc-if>
+    <sc-if value="{{ chatOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="width:min(330px,calc(100vw - 28px));max-height:min(460px,70vh);background:#FBF9F4;border:1px solid #E6DECF;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#557A60;color:#FBF9F4">
+          <div style="font:700 14px 'Quicksand'">AI 陪伴對話 · 靈光</div>
+          <button onClick="{{ toggleChat }}" style="border:none;background:transparent;color:#FBF9F4;font:700 16px 'Noto Sans TC'">✕</button>
+        </div>
+        <div class="mh-scroll" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:min(280px,45vh)">
+          <sc-for list="{{ chatMessages }}" as="msg" hint-placeholder-count="2">
+            <div style="{{ msg.style }}">{{ msg.text }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px;border-top:1px solid #E6DECF">
+          <input value="{{ chatDraft }}" onInput="{{ onDraftChange }}" onKeyDown="{{ onKeyDown }}" placeholder="想對靈光說些什麼..." style="flex:1;border:1px solid #E6DECF;border-radius:999px;padding:10px 14px;font:400 13px 'Noto Sans TC';outline:none"/>
+          <button onClick="{{ sendChat }}" style="border:none;background:#557A60;color:#FBF9F4;width:38px;height:38px;border-radius:50%;font:700 15px 'Noto Sans TC'">➤</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:900}}">
+const PSS10 = [
+  '你有多常因為突發事件而感到不安？',
+  '你有多常感覺無法掌控生活中重要的事情？',
+  '你有多常感到緊張與壓力大？',
+  '你有多常有信心能處理個人問題？',
+  '你有多常感覺事情正朝你希望的方向發展？',
+  '你有多常發現自己無法應付所有該做的事？',
+  '你有多常能夠控制生活中令人惱怒的事？',
+  '你有多常感覺自己掌握全局？',
+  '你有多常因為超出掌控的事而生氣？',
+  '你有多常感覺困難堆積如山，無法克服？',
+];
+const OPTS = [
+  {label:'從不', emoji:'🙂', slug:'never'},
+  {label:'很少', emoji:'😌', slug:'rarely'},
+  {label:'有時', emoji:'😐', slug:'sometimes'},
+  {label:'常常', emoji:'😟', slug:'often'},
+  {label:'幾乎總是', emoji:'😣', slug:'always'},
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const idx = p.pssIndex;
+    const current = p.pssAnswers[idx];
+
+    const options = OPTS.map((o, i) => ({
+      label: `${o.label}\n${i}分`, emoji: o.emoji,
+      imgLayer: `url('./img/pss-${o.slug}.png') center/cover no-repeat`,
+      onSelect: () => p.selectPss(i),
+      style: `border:${current===i?'2px solid #557A60':'1px solid #E6DECF'};background:${current===i?'#DCE6DB':'#FBF9F4'};color:#423D37;border-radius:16px;padding:14px 6px;text-align:center;`
+    }));
+
+    const stepDefs = [
+      {label:'聊天', done:true}, {label:'量表', done: !p.pssScore, current: !p.pssScore},
+      {label:'總結', done:false}, {label:'結算', done:false},
+    ];
+    const steps = stepDefs.map((s,i) => ({
+      n: i+1, label: s.label,
+      color: p.pssScore ? '#7C756B' : (s.current || i<2 ? '#557A60' : '#C9C2B4'),
+      style: `width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px 'Noto Sans TC';color:#fff;background:${i<2?'#557A60':'#C9C2B4'}`
+    }));
+
+    const category = p.pssCategory;
+    const resultBg = category === 'high' ? '#E07070' : category === 'medium' ? '#F4A261' : '#6ECBAF';
+    const resultLabel = category === 'high' ? '高壓力' : category === 'medium' ? '中等壓力' : '低壓力，狀態穩定';
+
+    const fhirStatusText = p.fhirStatus === 'syncing'
+      ? '同步中… 正在寫入 FHIR 伺服器（QuestionnaireResponse / Observation）'
+      : p.fhirStatus === 'synced'
+      ? `✓ 已同步至 HAPI FHIR R4 公開測試伺服器（${p.fhirSyncedAt}）`
+      : p.fhirStatus === 'error'
+      ? `⚠ FHIR 同步失敗，僅保存於本機（${p.fhirError || '網路異常'}）`
+      : '量表已完成';
+    const fhirStatusColor = p.fhirStatus === 'synced' ? '#557A60' : p.fhirStatus === 'error' ? '#B5543C' : '#7C756B';
+    const fhirSynced = p.fhirStatus === 'synced';
+
+    const chatMessages = p.chatMessages.map(m => ({
+      text: m.text,
+      style: m.from === 'ai'
+        ? 'background:#EDE8DE;color:#423D37;padding:10px 14px;border-radius:14px 14px 14px 4px;font:400 13px/1.5 \'Noto Sans TC\';align-self:flex-start;max-width:85%;'
+        : 'background:#557A60;color:#FBF9F4;padding:10px 14px;border-radius:14px 14px 4px 14px;font:400 13px/1.5 \'Noto Sans TC\';align-self:flex-end;max-width:85%;'
+    }));
+
+    return {
+      qNum: idx+1, progressPct: Math.round(((idx+1)/10)*100),
+      question: PSS10[idx], options,
+      isLastQuestion: idx === 9,
+      submitStyle: `border:none;background:${p.pssAnswers.every(a=>a!==null)?'#557A60':'#C9C2B4'};color:#FBF9F4;padding:12px 26px;border-radius:999px;font:600 13px 'Noto Sans TC'`,
+      prevPss: p.prevPss, nextPss: p.nextPss, submitPss: p.submitPss,
+      pssScore: p.pssScore, resultBg, resultLabel, resultTextColor: resultBg,
+      fhirStatusText, fhirStatusColor, fhirSynced, fhirQrId: p.fhirQrId, fhirObsId: p.fhirObsId,
+      goNext: p.goNext,
+      steps,
+      chatOpen: p.chatOpen, toggleChat: p.toggleChat, chatMessages,
+      chatDraft: p.chatDraft, onDraftChange: (e) => p.setDraft(e.target.value),
+      onKeyDown: (e) => { if (e.key === 'Enter') p.sendChat(); },
+      sendChat: p.sendChat,
+      goHome: p.goHome,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

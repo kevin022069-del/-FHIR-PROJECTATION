@@ -1,0 +1,894 @@
+================================================================================
+心靈修練（MindHarbor）心魔管理系統 — 完整架構、細節、使用情境與技術規格說明
+================================================================================
+文件產生日期：2026-07-11
+文件性質：本文件依專案目前程式碼實際內容整理而成，非憑空推測。若與 README.md /
+          CLAUDE.md 的描述有出入，會在文中標註「※注意」並說明實際狀況。
+
+
+================================================================================
+一、專案定位與一句話總結
+================================================================================
+這是一個「純靜態前端」的心理健康 / 壓力管理教育型網站原型（FHIR 醫療互通標準
+基礎實作競賽作品）。使用者每天透過「AI 陪伴對話 → PSS-10 知覺壓力量表 →
+每日修練任務 → 反思總結 → 結果結算（心魔指數 / 靈力點數）」的遊戲化流程，
+達到自我壓力覺察與紓壓的效果；同時後端資料以 FHIR R4 資源格式建模並可選擇
+串接真實 HAPI FHIR 測試伺服器，展示醫療資料互通能力。系統另外提供「心理師端」
+與「管理員端」兩個角色介面，模擬真實心理諮商機構的後台管理與高風險個案通報
+流程。
+
+專案沒有任何建置流程（no build step）、沒有 npm、沒有框架（無 React / Vue），
+純粹以原生 HTML + CSS + JavaScript（ES Module）撰寫，可直接以瀏覽器開啟
+file:// 路徑執行，或用任何靜態 HTTP Server 啟動。
+
+
+================================================================================
+二、技術規格總覽
+================================================================================
+1. 前端技術
+   - HTML5、CSS3（自訂設計系統，無 CSS 框架如 Bootstrap/Tailwind）
+   - 原生 JavaScript，`js/` 目錄下模組使用 ES Module 語法（import/export）
+     * 例外：`js/chatWidget.js` 是 IIFE（立即執行函式），並非 ES Module，
+       設計為以一般 `<script>` 標籤載入，因為它要在非 module 環境下
+       直接讀取先前腳本掛在 window/global 的函式（getSession、getUserById、chat）。
+   - 無任何前端框架、無 bundler（Webpack/Vite 等）、無 TypeScript、無 npm
+     套件管理（package.json 不存在於本專案根目錄）。
+   - 字型：Google Fonts（Inter、Quicksand、Noto Sans TC）透過 CDN 載入。
+   - 圖示：
+     * Font Awesome 6.5.2（透過 cdnjs CDN）用於 login.html 及 client/
+       practitioner/admin 各頁面。
+     * Lucide Icons（unpkg CDN）僅用於 counseling-platform.html 行銷頁。
+   - 動畫函式庫：AOS（Animate On Scroll，透過 CDN）僅用於
+     counseling-platform.html。
+
+2. 資料儲存
+   - 瀏覽器 localStorage 作為唯一持久化層（無真正後端資料庫、無伺服器端
+     程式）。使用 5 個 localStorage key：
+       mhs_users     使用者帳號資料（含 demo 帳號、心魔/靈力數值）
+       mhs_session   目前登入狀態（使用 localStorage 而非 sessionStorage，
+                     原因是 file:// 協定下跨頁面導航會讓 sessionStorage
+                     失效，故刻意選用 localStorage 使 session 可跨頁存續）
+       mhs_daily     每日任務/量表/總結進度（依 userId → 日期 key 巢狀存放）
+       mhs_fhir      FHIR 資源模擬資料庫（依 resourceType 分組的陣列）
+       mhs_settings  全域設定（useFhirMode、fhirBaseUrl、theme）
+   - 另有獨立 key：
+       mhs_theme          深色/淺色主題（auth.js 的 initTheme/toggleTheme 使用）
+       gemini_api_key     Gemini API 金鑰（見下方「AI 金鑰載入鏈」）
+
+3. 標準與互通性
+   - FHIR R4（Fast Healthcare Interoperability Resources）
+   - 支援兩種執行模式，於 js/fhirClient.js 中依 settings.useFhirMode 切換：
+       Mock 模式（預設）：所有 CRUD 直接讀寫 localStorage（js/data.js）
+       HAPI 模式：呼叫公開測試伺服器 https://hapi.fhir.org/baseR4（或使用者
+                  自訂 fhirBaseUrl），並在每次遠端呼叫後把結果快取回本機
+                  localStorage
+   - 涉及的 FHIR 資源型別（共 10 種，於 initData() 中初始化空陣列）：
+       Patient, CarePlan, Task, Questionnaire, QuestionnaireResponse,
+       Observation, RiskAssessment, Flag, Appointment, Practitioner
+     實際被程式碼寫入使用的型別：Patient、CarePlan、Task、
+     QuestionnaireResponse、Observation、RiskAssessment、Flag、Appointment。
+     Questionnaire、Practitioner 兩型別目前僅保留空陣列，程式中未見對應的
+     建立/寫入邏輯（心理師帳號目前是存放在 mhs_users，而非 FHIR
+     Practitioner 資源）。
+
+4. AI / LLM 串接
+   - 模型：Gemini 2.0 Flash（`gemini-2.0-flash`）
+   - API：Google Generative Language REST API
+     （https://generativelanguage.googleapis.com/v1beta/models）
+   - 三種用途：
+       a. 多輪陪伴對話（callGeminiMultiTurn）— 人設「靈光」，溫柔陪伴語氣，
+          偵測到使用者提及輕生/極度痛苦時會引導撥打 1925/1995/1980。
+       b. 風險評估（assessRisk）— 依對話摘要 + PSS-10 分數，要求 Gemini
+          回傳純 JSON 格式的 {riskLevel, rationale, signals}。
+       c. 個人化總結問題產生（generateSummaryQuestions）— 依當日壓力分數與
+          任務完成度，生成 1-2 題引導反思問題（含選項）。
+       d. 額外的問候語生成（getGreeting，可依心魔指數客製化開場白，目前
+          未見被任何頁面實際呼叫使用，屬預留功能）。
+   - Mock Fallback：若沒有偵測到合法金鑰（需以 "AIza" 開頭），或呼叫失敗，
+     一律自動退回寫死的模擬回覆（mockChat / mockRisk / mockSummaryQuestions），
+     確保 demo 不需要真實金鑰也能完整跑完全部流程。
+
+5. 第三方雲端服務
+   - Firebase Realtime Database（僅用來透過 REST API 撈取一組 Gemini 金鑰，
+     並未使用 Firebase SDK，也未用於帳號系統或其他資料）。
+     資料庫網址寫死在 js/firebase-config.js 中：
+       https://heart-212ad-default-rtdb.firebaseio.com
+     讀取路徑：/geminiKey.json（規則要求該欄位為公開可讀、不可寫）。
+     若使用者已手動在設定頁輸入過金鑰（localStorage 已有值），會跳過此次
+     Firebase 抓取。抓取失敗時靜默失敗（不影響其他功能）。
+     ※ 這是目前程式碼中會連上外部網路服務的唯一機制之一（另一個是
+     HAPI FHIR 與 Gemini API 本身）。
+
+6. 版本控制與其他檔案
+   - Git 版控（.git 存在），目前分支 main。
+   - 專案根目錄尚有 `login.backup.html`（舊版登入頁備份，751 行，與現行
+     login.html 功能相近但版面/樣式不同，屬未使用的歷史檔案，並未被任何
+     頁面連結）。
+
+
+================================================================================
+三、完整目錄結構
+================================================================================
+/
+├─ CLAUDE.md                      給 Claude Code 的專案指引文件
+├─ README.md                      專案說明（部分內容與實際程式碼有落差，見七、）
+├─ index.html                     入口頁：讀 session 後導向對應角色首頁
+├─ login.html                     登入 / 註冊頁（含快速登入 demo 按鈕）
+├─ login.backup.html              舊版登入頁備份（未被引用，孤立檔案）
+├─ counseling-platform.html       獨立行銷落地頁「心靈空間」（完全獨立於系統）
+├─ Images/
+│  ├─ 1.png ~ 5.png                登入頁輪播用大圖、dashboard hero 背景圖
+│  └─ Logo.png                     MindHarbor 品牌 Logo
+├─ css/
+│  └─ styles.css                   全站共用設計系統（1314 行，含亮/暗主題變數）
+├─ js/
+│  ├─ data.js                      localStorage CRUD 資料層（唯一真理來源）
+│  ├─ auth.js                      登入/註冊/登出/角色路由/主題切換
+│  ├─ fhirClient.js                FHIR R4 CRUD（mock ↔ HAPI 切換）
+│  ├─ gemini.js                    Gemini API 封裝 + mock fallback
+│  ├─ scales.js                    PSS-10 量表題庫、計分、風險分級
+│  ├─ tasks.js                     男/女性別任務模板
+│  ├─ scoring.js                   心魔指數 / 靈力點數 結算引擎
+│  ├─ chatWidget.js                浮動 AI 陪伴聊天 FAB（IIFE，非模組）
+│  ├─ firebase-config.js           從 Firebase RTDB 撈 Gemini 金鑰
+│  └─ config.js                    DEMO_GEMINI_KEY 常數（demo 用，預設空字串）
+├─ client/                         病患／個案端（角色：patient）
+│  ├─ dashboard.html               今日總覽首頁
+│  ├─ chat.html                    AI 陪伴對話 + PSS-10 壓力量表頁
+│  ├─ tasks.html                   今日修練任務（含個別計時器）
+│  ├─ summary.html                 今日反思總結題（固定題 + AI 生成題）
+│  ├─ results.html                 今日成果結算（心魔/靈力變化、分享功能）
+│  ├─ crisis.html                  高風險求助資源頁（危機介入頁面）
+│  └─ settings.html                個人設定（深色模式、帳號資訊、清除今日資料）
+├─ practitioner/                   心理師端（角色：practitioner）
+│  └─ index.html                   心理師儀表板（高危通知、預約、個案、資源連結）
+└─ admin/                          管理員端（角色：admin）
+   └─ index.html                   系統管理面板（使用者/心理師管理、FHIR 工具）
+
+
+================================================================================
+四、資料流與模組職責細節
+================================================================================
+
+4.1 js/data.js — 唯一資料源頭
+--------------------------------------------------------------------------
+- DB_KEYS 常數定義所有 localStorage key 名稱。
+- initData()：首次載入時若各 key 不存在則寫入預設值，包含 4 組 DEFAULT_USERS
+  demo 帳號（見下方「六、Demo 帳號」）。
+- 使用者 CRUD：getUsers / getUserById / getUserByUsername / saveUser /
+  updateUserStats（用於更新心魔指數與靈力點數）。
+- Session：getSession / setSession / clearSession。setSession 只存
+  {userId, role, name, gender, loginAt}，不存密碼等敏感欄位。
+- 每日資料：getTodayKey()（回傳 YYYY-MM-DD）、getDailyData / getTodayData /
+  saveTodayData（merge 更新，附加 updatedAt 時間戳）/ deleteTodayData
+  （設定頁「清除今日資料」按鈕使用）。
+- FHIR 本機模擬儲存：getFhirStore / saveFhirStore / getFhirResources(type) /
+  saveFhirResource（有 id 則更新、無則新增）/ getFhirResourceById。
+- 設定：getSettings / saveSettings（Object.assign 合併式更新）。
+- Gemini 金鑰存取：getGeminiKey()（優先讀 localStorage，退回
+  DEMO_GEMINI_KEY 常數）／setGeminiKey()。
+- generateId(prefix)：以 `${prefix}_${Date.now()}_${randomBase36}` 產生
+  近似唯一 ID（非嚴謹 UUID，但對本地 demo 已足夠）。
+
+4.2 js/auth.js — 認證與角色路由
+--------------------------------------------------------------------------
+- ROLE_HOME / ROLE_HOME_ROOT：兩份角色→首頁對照表，差異在於相對路徑
+  前綴（是否從根目錄或從 client/ 等子目錄導向）。
+- login(username, password, fromRoot)：帳密比對（明碼比對，無雜湊/加密，
+  屬 demo 等級安全性），成功則 setSession 並回傳導向路徑。
+- quickLogin(role, fromRoot)：demo 快速登入，內部映射
+  patient→帳號patient、practitioner→doctor、admin→admin，密碼固定 1234。
+- register(data)：檢查帳號是否重複，新建 patient 角色使用者，
+  初始 mindDemon=50、spiritPower=0，自動登入並導向 dashboard。
+- logout()：清除 session 並導回登入頁。
+- requireAuth(allowedRoles)：無 session 或角色不在白名單內則導回登入頁。
+- determineLoginPath()：依目前路徑是否位於 client/admin/practitioner
+  子目錄動態決定要導向 `../login.html` 還是 `login.html`。
+- initTheme() / toggleTheme()：讀寫 mhs_theme，並用
+  `document.documentElement.setAttribute('data-theme', ...)` 套用亮/暗主題。
+- bootstrap(requireRoles)：每個受保護頁面的共同進入點，依序執行
+  initData() → initTheme() → requireAuth(requireRoles)，回傳 session 物件
+  （若無權限會直接導頁並回傳 null，呼叫端會 `if (!session) throw ...`）。
+
+4.3 js/fhirClient.js — FHIR R4 CRUD 抽象層
+--------------------------------------------------------------------------
+- usesHapi() / baseUrl()：讀取 settings 決定執行模式與伺服器位址。
+- 通用 REST 輔助函式：hapiPost / hapiGet / hapiPut / hapiSearch（皆使用
+  `application/fhir+json` Content-Type，錯誤時 throw）。
+- 核心 CRUD：createResource / readResource / updateResource /
+  searchResources，內部依 usesHapi() 決定走遠端或走 data.js 本機模擬，
+  且遠端結果一律會回寫快取到本機 FHIR store。
+- searchResources 本機模式支援兩種簡易過濾參數：patient（比對
+  subject.reference 或 patient.reference 是否包含該字串）與 status。
+- 領域專屬輔助函式（把應用邏輯轉換為 FHIR 資源）：
+    upsertPatient(user)                  → Patient
+    createCarePlan(userId, gender, taskIds) → CarePlan（每日修練計畫）
+    createTask(userId, taskData) / completeTask(taskId) → Task
+    saveQuestionnaireResponse(userId, scaleId, answers, totalScore)
+                                          → QuestionnaireResponse
+    saveObservation(userId, code, value, system) → Observation
+                                          （code 例：pss-score、mind-demon、
+                                          spirit-power）
+    createRiskAssessment(userId, riskLevel, rationale) → RiskAssessment
+                                          （probabilityDecimal 依 high/
+                                          medium/low 對應 0.8/0.5/0.2）
+    flagHighRisk(userId, reason)         → Flag（status: active,
+                                          category: high-risk）
+    getActiveFlags()                     → 搜尋所有 status=active 的 Flag
+                                          （心理師/管理員儀表板使用）
+
+4.4 js/gemini.js — AI 對話與判讀封裝
+--------------------------------------------------------------------------
+（詳見上方「二、5. AI/LLM 串接」，此處補充實作細節）
+- isRealKey()：金鑰需以 "AIza" 開頭才視為合法金鑰。
+- chat(history)：無合法金鑰時直接回傳 mockChat；有金鑰但呼叫失敗
+  （try/catch）也會退回 mockChat，確保永不拋出未捕捉例外中斷使用者流程。
+- assessRisk / generateSummaryQuestions：皆要求模型「只回傳純 JSON」，
+  程式端會先用正規表示式移除可能夾帶的 ```json 或 ``` Markdown
+  code fence 再 JSON.parse，解析失敗一律 fallback 到對應 mock 函式。
+- MOCK_CHAT 是一組固定的 6 句繁體中文陪伴語句陣列，依使用者已發送
+  訊息數（userTurns）依序取用，超出陣列長度則固定停在最後一句。
+- getGreeting()：目前程式碼庫中未見任何頁面呼叫此函式（保留但未串接
+  進 UI，屬冗餘/預留 API）。
+- hasApiKey()：目前實作永遠回傳 true（即便沒有金鑰，UI 仍會嘗試呼叫
+  chat()，並靠 chat() 內部的 isRealKey() 判斷走 mock）。
+
+4.5 js/scales.js — PSS-10 知覺壓力量表
+--------------------------------------------------------------------------
+- 10 題，每題 0-4 分（從未~非常頻繁），其中第 4,5,6,7,9,10 題（陣列中
+  reverse:true 的 6 題）為反向計分（4 - 原始分）。
+- calculatePSSScore(answers)：加總反向調整後總分，範圍 0-40。
+- getPSSCategory(score)：三段分級
+    0-13   低壓力（low）  綠色 #6ECBAF
+    14-26  中等壓力（medium）橘色 #F4A261
+    27-40  高壓力（high）  紅色 #E07070
+- PSS_HIGH_THRESHOLD = 27（isHighRisk(score) 判斷是否觸發高風險流程）。
+
+4.6 js/tasks.js — 每日任務模板（依生理性別區分）
+--------------------------------------------------------------------------
+- MALE_TASKS（4 項）：高專注運動/鍛鍊(30分)、冥想放空(20分)、閱讀或學習
+  (30分)、主動連結一位朋友(15分)。
+- FEMALE_TASKS（4 項）：溫熱水澡放鬆(20分)、寫日記/心情記錄(15分)、
+  自我照護儀式(15分)、輕柔伸展或瑜伽(20分)。
+- 每項任務含 id/icon/name/duration/unit/description/tips 欄位。
+- getTasksForGender(gender)：male → MALE_TASKS，其餘一律 → FEMALE_TASKS。
+- initTaskProgress(gender)：為當日建立每項任務的進度物件
+  {taskId, fhirTaskId, completed, completedAt, timerSeconds}。
+
+4.7 js/scoring.js — 心魔指數 / 靈力點數 結算引擎
+--------------------------------------------------------------------------
+- CONSTANTS（遊戲平衡可調參數，全部集中於檔案頂端方便調整）：
+    MIND_DEMON_MAX=100, MIND_DEMON_MIN=0
+    TASK_REDUCTION_BASE=5      每完成 1 項任務，心魔 -5
+    SUMMARY_REDUCTION_PER_Q=3  總結題答案正向（>2分，1-5分制)每題再 -3
+    LOW_STRESS_BONUS=5         PSS-10 ≤13（低壓力）額外 -5
+    SPIRIT_PER_DEMON=2         心魔每減少 1 點 → 靈力 +2
+    ALL_TASKS_BONUS=20         當日任務全數完成 → 額外 +20 靈力
+    SCALE_BONUS=10             有完成壓力量表 → +10 靈力
+    SUMMARY_BONUS=10           完成總結（固定會加，因為走到此步驟必已作答）→ +10 靈力
+    DAILY_INCREASE=3           每日心魔自然回升量（applyDailyIncrease，
+                                供「開新的一天」時使用，目前程式中未見
+                                被任何頁面呼叫，屬預留邏輯）
+- calculateDayResults({currentMindDemon, completedTasks, totalTasks,
+  pssScore, summaryAnswers})：回傳
+  {mindDemonReduction, newMindDemon, spiritEarned, details[]}，
+  details 為給使用者看的逐項加減明細（例如「完成 3 個任務：−15」）。
+- getMindDemonMessage(index)：依心魔指數 5 段（≤20/≤40/≤60/≤80/其餘）
+  回傳對應 emoji 與勉勵文字。
+
+4.8 js/chatWidget.js — 浮動 AI 陪伴 FAB（僅部分頁面使用）
+--------------------------------------------------------------------------
+- IIFE，載入時自動在 document.body 注入一個圓形 FAB 按鈕與聊天面板 DOM，
+  不需要任何 HTML 容器預先存在。
+- 依賴外部（由同頁面較早載入的 script）提供的全域函式：getSession、
+  getUserById、chat（分別來自 data.js 與 gemini.js）。
+- initChat()：等待 window.firebaseKeyReady（若存在）後才顯示開場白，
+  避免金鑰還沒抓到就先用 mock 回覆。
+- 使用場景：dashboard.html、tasks.html、summary.html、results.html、
+  crisis.html 皆有載入此元件（提供「隨時可再聊」的輔助入口）；
+  而 chat.html 本身有自己客製化、更完整的聊天面板實作（chat-panel，
+  非使用 chatWidget.js），兩者 UI 風格不同但都呼叫同一顆 chat() API。
+
+4.9 js/firebase-config.js 與 js/config.js — 金鑰載入鏈
+--------------------------------------------------------------------------
+詳見「五、Gemini API 金鑰解析優先序」。
+
+
+================================================================================
+五、Gemini API 金鑰解析優先序（重要！三層 fallback 鏈）
+================================================================================
+每次頁面載入時，依下列順序決定要使用哪一把 Gemini 金鑰：
+
+  1️⃣ localStorage 的 gemini_api_key
+     由使用者在（歷史上曾經存在的）設定頁手動輸入並呼叫
+     data.js 的 setGeminiKey() 寫入。
+     ※注意：目前 client/settings.html 的實際 HTML/JS 內容中已「找不到」
+     任何 Gemini 金鑰輸入欄位或相關程式碼（已用 grep 確認 0 筆符合）。
+     也就是說，CLAUDE.md 文件所描述的「經由 client/settings.html 手動輸入」
+     這條路徑，在目前版本的程式碼中並未被實作／已被移除，僅剩下方 2、3
+     兩層機制在運作。若要恢復手動輸入功能，需要在 settings.html 補上
+     對應欄位與呼叫 setGeminiKey() 的邏輯。
+
+  2️⃣ Firebase Realtime Database 遠端抓取
+     js/firebase-config.js 頁面載入時立即發出請求到
+     `https://heart-212ad-default-rtdb.firebaseio.com/geminiKey.json`，
+     若回傳合法字串（長度>10）就寫入 localStorage 的 gemini_api_key。
+     此步驟只在 localStorage 尚無金鑰時才會執行（避免覆蓋使用者已設定的值）。
+     window.firebaseKeyReady 是一個 Promise，聊天相關頁面/元件會先
+     await 它，確保介面顯示開場白前金鑰狀態已經確定。
+
+  3️⃣ js/config.js 的 DEMO_GEMINI_KEY 常數
+     檔案內容目前為空字串（`const DEMO_GEMINI_KEY = '';`），註解提醒
+     「不要把金鑰提交到公開 repo」。getGeminiKey() 只有在
+     localStorage 完全沒有值時才會退回讀這個常數（透過
+     `typeof DEMO_GEMINI_KEY !== 'undefined'` 判斷）。
+
+  若三層皆未取得合法（"AIza" 開頭）金鑰，js/gemini.js 的 isRealKey()
+  回傳 false，所有 AI 功能自動切換為寫死的模擬回覆（mock），確保整個
+  五步驟客戶端流程（聊天→量表→任務→總結→結算）在完全離線、無金鑰的
+  狀況下仍可完整跑完，非常適合現場展示競賽評審。
+
+
+================================================================================
+六、使用者角色與 Demo 帳號
+================================================================================
+系統共 3 種角色（role 欄位值）：patient（含男/女兩個 demo 帳號）、
+practitioner、admin。所有 demo 密碼皆為 1234。
+
+| 角色           | 帳號       | 密碼 | 顯示名稱   | 生理性別 | 初始心魔 | 初始靈力 |
+|----------------|-----------|------|-----------|---------|---------|---------|
+| 個案端（男）    | patient   | 1234 | 小明       | male    | 45      | 120     |
+| 個案端（女）    | patient2  | 1234 | 小美       | female  | 38      | 85      |
+| 心理師         | doctor    | 1234 | 陳心理師   | female  | -       | -       |
+| 管理員         | admin     | 1234 | 系統管理員 | male    | -       | -       |
+
+登入方式：
+  a. login.html 手動輸入帳密登入
+  b. login.html 下方「Demo 快速登入」三顆按鈕（客戶端/心理師/管理員）
+     一鍵登入，內部呼叫 quickLogin()
+  c. 使用者亦可透過 login.html 的「Sign Up」自行註冊新帳號（僅能建立
+     patient 角色，需選擇生理性別 male/female 以決定任務模板與 Patient
+     資源的 gender 欄位；密碼需 ≥4 字元；帳號重複會擋下）
+
+
+================================================================================
+七、逐頁功能細節
+================================================================================
+
+7.1 login.html — 登入 / 註冊頁
+--------------------------------------------------------------------------
+- 左右分割版面：左側表單（登入/註冊切換），右側輪播圖（Images/3,5,4.png，
+  每 5.5 秒自動輪播，含左右箭頭與圓點導航，標題/描述文字淡入淡出切換）。
+- 登入表單：帳號、密碼（含顯示/隱藏密碼眼睛圖示按鈕）。
+- 註冊表單：暱稱、生日、生理性別（單選：男/女，UI 用 radio 但以卡片式
+  呈現）、帳號、密碼（≥4字元提示）。
+- 「Sign in with Google/Apple/Facebook」社交登入按鈕：目前僅為展示用
+  UI，點擊只會彈出「Social login is for demo only — coming soon!」提示，
+  並無真實 OAuth 串接。
+- 品牌識別：MindHarbor / Counseling（Logo.png + 文字）。
+- 載入順序：firebase-config.js → config.js → data.js → auth.js（符合
+  CLAUDE.md 規範的載入順序）。
+- 登入/註冊成功後 0.8 秒延遲顯示成功訊息，再導向對應角色首頁
+  （fromRoot=true，走 ROLE_HOME_ROOT 對照表）。
+
+7.2 index.html — 入口路由頁
+--------------------------------------------------------------------------
+- 顯示 Loading 動畫（月亮圖示 + spinner），background 執行 initData()、
+  initTheme()，讀取 session：
+    無 session → 導向 login.html
+    有 session → 依角色導向 client/dashboard.html、
+                 practitioner/index.html 或 admin/index.html
+
+7.3 client/dashboard.html — 個案今日總覽（個案首頁）
+--------------------------------------------------------------------------
+- Navbar：品牌、使用者名稱、深色模式切換、設定、登出。
+- Hero 問候區塊（依時段顯示「早安/午安/晚安」+ 日期，背景使用
+  Images/5.png）。
+- 雙環形量表 SVG（心魔指數 0-100、累積靈力 0-500 為滿環參考值），
+  以 stroke-dasharray/dashoffset 動畫呈現百分比。
+- 心魔狀態訊息卡（呼叫 scoring.js 的 getMindDemonMessage）。
+- 今日進度卡：依當日資料（已完成量表？已完成任務數/總數？已完成總結？）
+  計算完成度百分比進度條；若當日已完成（todayData.completed），按鈕文字
+  變成「查看今日成果」並導向 results.html。
+- FHIR 模式指示燈（綠點=HAPI 已啟用／灰點=本機模擬），文字顯示目前
+  useFhirMode 狀態與 fhirBaseUrl。
+- 三個主要操作按鈕：開始今日旅程（→chat.html）、查看今日任務
+  （→tasks.html）、歷史紀錄（目前僅彈出 alert「歷史紀錄功能即將推出！」，
+  尚未實作真正的歷史資料檢視頁面）。
+- 高風險提示區塊：若 todayData.highRisk 為 true，顯示警示並連結至
+  crisis.html。
+- 載入 chatWidget.js，故本頁亦有浮動 AI 陪伴聊天 FAB。
+
+7.4 client/chat.html — AI 陪伴對話 + PSS-10 壓力量表（核心互動頁）
+--------------------------------------------------------------------------
+本頁是整個每日流程的第一步，同時包含「聊天」與「量表」兩個獨立但同頁
+呈現的功能：
+- 量表區（scale-page，永遠顯示、可整頁捲動）：
+    * PSS-10 十題以 Likert 5 點量表（0=從未 ~ 4=非常頻繁）呈現，
+      每題需選填，未答完點擊「計算壓力值」會 toast 提示錯誤。
+    * 計分後即時顯示分級結果卡（危險=紅/中等=橘/低=綠對應色）。
+    * 呼叫 saveQuestionnaireResponse() 與 saveObservation()
+      （code: pss-score）寫入 FHIR。
+    * 風險評估：若有 Gemini 金鑰且聊天歷程非空，呼叫 AI assessRisk()
+      （傳入使用者對話摘要前 300 字 + PSS 分數）；否則單純依
+      isHighRisk(pssScore) 給 low/high 兩級判斷（無 AI 時無 medium 判定）。
+    * createRiskAssessment() 寫入 FHIR RiskAssessment。
+    * 若判定高風險（PSS≥27 或 AI 判讀為 high）：
+        - 呼叫 flagHighRisk() 建立 Flag 資源（會被心理師/管理員儀表板看到）
+        - saveTodayData 標記 highRisk: true
+        - 2 秒後自動導向 crisis.html（危機介入頁）
+      否則僅 toast「量表完成！」並顯示「下一步 →」按鈕（前往 tasks.html）。
+- 聊天區（浮動 FAB + 側邊聊天面板，非 chatWidget.js，而是本頁獨立實作
+  的 chat-panel）：
+    * FAB 按鈕右下角，未讀 AI 回覆時會顯示紅色驚嘆號徽章。
+    * 若未偵測到合法金鑰，面板內會顯示黃色提示條「尚未設定 Gemini API
+      金鑰」+ 連結到 settings.html（※但如前述，settings.html 目前並無
+      對應輸入欄位，此連結目前實際上到達的頁面無法真正設定金鑰）。
+    * 支援 Enter 送出（Shift+Enter 換行不送出）、打字中動畫（三顆跳動
+      圓點）、送出中禁用輸入按鈕避免重複送出。
+- 底部固定操作列：「完成量表，前往任務 →」（若尚未算出 pssScore 會
+  擋下並提示錯誤）。
+- 進度步驟列（steps）：顯示 聊天→量表(進行中)→總結→結算 四個階段圖示。
+
+7.5 client/tasks.html — 今日修練任務
+--------------------------------------------------------------------------
+- 依使用者生理性別載入對應 4 項任務模板（tasks.js）。
+- 每個任務項目可點擊展開/收合詳細說明區（含描述、小提醒 tips、獨立計時
+  器）；勾選 checkbox 即標記完成，並：
+    * 呼叫 createTask() 建立 FHIR Task（status: requested），再呼叫
+      completeTask() 將其標記為 completed（executionPeriod.end 記錄時間）。
+    * 若計時器正在跑會自動停止。
+    * toast 顯示「"任務名稱" 完成！」。
+- 計時器：每個任務各自獨立的碼表（setInterval 每秒 +1），達到建議時長
+  （duration 分鐘）且尚未完成時，跳出提醒 toast「時間到！記得打勾完成！」
+  但不會自動勾選（需使用者手動確認完成）。
+- 進度統計卡：已完成/總數 比例與進度條。
+- 底部「完成任務，前往總結 →」：若 0 項任務完成會先 confirm() 二次確認
+  才放行到 summary.html。
+- 亦載入 chatWidget.js（浮動陪伴 FAB）。
+
+7.6 client/summary.html — 今日反思總結
+--------------------------------------------------------------------------
+- 3 題固定題（FIXED_QUESTIONS，皆為 5 點量表選項，從「完全沒放鬆/壓力
+  明顯增加/完全無法接受」到最正向選項）：
+    fq1 身心靈放鬆程度
+    fq2 做完任務後壓力感受變化
+    fq3 能否平靜接受目前狀況
+- AI 個人化題（1-2 題，非必答）：頁面載入即非同步呼叫
+  generateSummaryQuestions()，帶入當日 pssScore、已完成任務數/總任務數；
+  無金鑰或呼叫失敗時該區塊直接隱藏（不強迫使用者等待或報錯）。
+- 送出時檢查 3 題固定題是否都已作答（未答會 toast 錯誤並中止）；
+  答案轉換為 1-5 分制（原始 0-4 index +1）後，連同 AI 題答案一起組成
+  陣列，呼叫 saveQuestionnaireResponse()（scaleId: 'daily-summary'，
+  totalScore 傳 null）寫入 FHIR，並存入 todayData.summaryAnswers，
+  最後導向 results.html。
+- 亦載入 chatWidget.js。
+
+7.7 client/results.html — 今日成果結算
+--------------------------------------------------------------------------
+- 讀取當日 todayData（tasks、pssScore、summaryAnswers）與使用者目前
+  mindDemon，呼叫 scoring.js 的 calculateDayResults() 計算：
+    mindDemonReduction（今日心魔減少多少）
+    newMindDemon（結算後心魔，clamp 在 0-100）
+    spiritEarned（今日獲得靈力，含全任務完成加成 +20、完成量表加成 +10、
+    完成總結固定加成 +10）
+    details[]（逐項加減明細列表，UI 逐條顯示）
+- ⚠️ 重要防重複邏輯：只有當 todayData.completed 尚未為 true 時，才會
+  真正呼叫 updateUserStats() 寫回使用者的 mindDemon/spiritPower 累計值，
+  並非同步（Promise.all，不阻塞畫面）補寫兩筆 Observation
+  （mind-demon、spirit-power）到 FHIR。也就是說同一天重新整理此頁面
+  不會被重複結算/重複加值。
+- 頁面呈現：慶祝表情（依完成度變化：全任務完成=星星、部分完成=魔法棒、
+  完全沒完成=嫩芽）、統計清單（完成任務數、PSS分數、心魔減少、獲得靈力）、
+  心魔進度條變化前後對比、靈力獲得明細、「回到首頁」與「分享今日成果」
+  （優先呼叫 navigator.share()，不支援則複製文字到剪貼簿）兩個行動按鈕。
+- 亦載入 chatWidget.js。
+
+7.8 client/crisis.html — 高風險求助資源頁（危機介入）
+--------------------------------------------------------------------------
+- 當 PSS-10 高分或 AI 判讀高風險時，chat.html 會自動導向此頁。
+- 內容包含：
+    * 安撫性標題與說明文字（「你不孤單，有人在這裡」）
+    * 系統已通知心理師的提示框
+    * 三支 24 小時求助專線卡片，皆為 `tel:` 連結可直接撥號：
+        1925 安心專線（24小時免費，情緒支持與危機諮詢）
+        1995 生命線（24小時危機支援）
+        1980 張老師專線（傾聽陪伴、專業輔導）
+    * 「申請預約心理師諮詢」按鈕：呼叫 createResource() 建立 FHIR
+      Appointment（status: proposed，comment 註明「使用者自行申請預約
+      （高危後）」），失敗（HAPI 模式連線異常等）時仍會顯示成功提示
+      （容錯文案「預約申請已記錄（模擬模式）」，避免二次驚嚇使用者）。
+    * 自我照護提示：深呼吸(4-4-4秒法)、走到窗邊或戶外、聯繫信任的人。
+    * 「我現在好一點了，繼續今日任務」按鈕（→tasks.html）及「回到首頁」。
+    * 免責聲明：本系統 AI 僅供輔助參考，非醫療診斷；緊急狀況請撥 119
+      或就近至急診室。
+- 亦載入 chatWidget.js（危機當下仍可繼續與 AI 對話）。
+
+7.9 client/settings.html — 個人設定
+--------------------------------------------------------------------------
+- 深色模式開關（讀寫 mhs_theme + data-theme 屬性）。
+- 帳號資訊唯讀顯示：名稱、帳號、角色、生理性別。
+- 「清除今日資料（重新開始）」按鈕：confirm() 二次確認後呼叫
+  deleteTodayData()，1 秒後導回 dashboard.html。
+- ※注意：本頁 bootstrap 允許三種角色進入（patient/practitioner/admin
+  皆可存取此頁），但目前內容僅有主題/帳號資訊/清除今日資料三個卡片，
+  並未包含 CLAUDE.md/README.md 所描述的「Gemini API 金鑰輸入欄位」與
+  「FHIR 資料模式切換開關」──FHIR 模式切換目前實際上是被移到
+  admin/index.html 的「FHIR 工具」面板中（見 7.11），且僅 admin
+  角色的介面上才看得到切換開關；一般 patient 使用者的設定頁沒有這兩項
+  UI 功能。
+
+7.10 practitioner/index.html — 心理師端儀表板
+--------------------------------------------------------------------------
+- 版面：左側固定 Sidebar（含頭像、姓名、Practitioner 角色標籤、
+  「接單狀態」上下班開關 duty toggle、功能模組導覽、即將推出項目、
+  設定入口）+ 右側 2x2 儀表板網格。
+- 頂部統計列（4 個 mini-stat）：我的個案、高危通知、今日預約、本月服務
+  （目前後三者為寫死 demo 數字：3、28 等，僅「我的個案=4」與「高危通知」
+  數字部分連動 loadFlags() 真實資料）。
+- Panel 1「高危通知」（唯一串接真實資料的面板）：呼叫
+  fhirClient.getActiveFlags() 撈取所有 status=active 的 Flag 資源，
+  逐筆顯示個案 subject reference 與觸發時間；無資料時顯示「目前無高危
+  通知」空狀態。可點擊「重新整理」重新拉取。
+- Panel 2「今日預約」：標示 Badge「Coming Soon」，內容為 3 筆寫死的
+  demo 預約資料（非串接 Appointment FHIR 資源），點擊「新增」/「查看
+  完整預約清單」僅彈出「此功能規劃中」提示。
+- Panel 3「我的個案」：標示 Badge「Coming Soon」，4 筆寫死的 demo
+  個案資料（含姓名、上次諮商時間、PSS-10分數、狀態標籤穩定/需關注），
+  非真實串接使用者資料。
+- Panel 4「資源連結」：5 個純展示用連結卡片（臨床量表資料庫、個案統計
+  報表、督導諮詢系統、治療計劃範本、繼續教育課程），點擊皆彈出
+  「此功能規劃中」提示，無實際頁面。
+- 「接單狀態」開關：純前端視覺切換（綠點亮=上班中/灰點=下班中），
+  不寫入任何持久化資料，重新整理頁面會重置回關閉狀態。
+- 側邊導覽的「統計報表」「督導諮詢」「設定」皆為 Coming Soon 佔位。
+- 結論：本頁除「高危通知」面板外，其餘皆為 UI 佔位/靜態展示，符合
+  CLAUDE.md 所述「Appointment/case detail sections are static
+  placeholders marked Coming Soon」。
+
+7.11 admin/index.html — 管理員面板
+--------------------------------------------------------------------------
+- 版面：深色系側邊導覽（總覽/使用者管理/心理師管理/高危事件/FHIR工具
+  五個主功能 + 數據報表/系統設定兩個 Coming Soon 佔位）+ 右側可切換
+  單一顯示區（switchPanel 控制哪個 panel 顯示 active class）。
+- 頂部統計列（4 個 mini-stat，皆點擊可切換到對應 panel）：使用者人數、
+  心理師人數、今日高危數、FHIR 資源筆數（皆為即時計算的真實資料）。
+- 【總覽 Panel】：4 個並列小面板，各自顯示「最新高危事件」（前4筆）、
+  「使用者列表」（前6筆）、「心理師狀態」（前5筆）、「FHIR 資料模式」
+  （含一個可直接切換 useFhirMode 的開關 + 各 FHIR 資源型別筆數統計，
+  型別涵蓋 Patient/Observation/Flag/Task/QuestionnaireResponse/
+  RiskAssessment 六種）。
+- 【使用者管理 Panel】：表格列出所有 mhs_users 使用者（姓名/帳號/角色
+  徽章/性別/心魔/靈力/查看按鈕）。「查看」目前用瀏覽器原生 alert()
+  彈窗顯示詳細資料（非彈出 Modal UI）。
+- 【心理師管理 Panel】：列出所有 role=practitioner 的帳號，「新增」
+  按鈕會依序跳出 3 個 prompt()（姓名/帳號/密碼）直接建立新心理師帳號
+  （明碼密碼、無驗證流程、寫入 mhs_users），帳號重複會 toast 錯誤擋下；
+  「停用」按鈕目前僅彈出「停用功能規劃中」提示，並未真正停用帳號。
+  下方另有「排班管理」區塊標示 Coming Soon。
+- 【高危事件 Panel】：列出所有 Flag 資源（含已解決與待處理狀態標籤），
+  可「重新整理」重新拉取。
+- 【FHIR 工具 Panel】：
+    * 下拉選單可選 8 種資源型別（Patient/Observation/Flag/Task/
+      QuestionnaireResponse/RiskAssessment/CarePlan/Appointment），
+      點擊「查詢資源」直接呼叫 getFhirResources(type) 並以格式化 JSON
+      （`<pre>` 區塊）完整印出該型別所有本機模擬資源內容與筆數，等於是
+      一個簡易的 FHIR 資源瀏覽器/除錯工具。
+    * 「使用 HAPI FHIR Server」開關：切換 settings.useFhirMode，切換後
+      立即影響全站（包含 client 端）之後所有 FHIR 呼叫是否走遠端
+      hapi.fhir.org。此為全站唯一實際可操作、會持久化寫入 mhs_settings
+      的模式切換開關（前述 client/settings.html 中「應該」要有的同款
+      開關實際上只存在於這裡，且僅 admin 角色看得到）。
+- 結論：管理員面板是全站中「串接真實資料程度最高」的角色介面，使用者
+  管理、心理師新增、高危事件、FHIR 資源查詢皆為真實可操作功能；僅
+  「停用心理師」「排班管理」「數據報表」「系統設定」為佔位功能。
+
+7.12 counseling-platform.html — 獨立行銷落地頁「心靈空間」
+--------------------------------------------------------------------------
+- 完全獨立於整個帳號系統（不載入 data.js / auth.js，也不呼叫任何
+  bootstrap()），純粹是給訪客看的公開行銷頁，用途類似真實診所/機構的
+  官網首頁，其存在目的是展示「若此系統要商轉，對外的品牌形象頁面
+  長什麼樣子」。
+- 使用自己內嵌的 CSS（未引用 css/styles.css）、Lucide Icons、AOS 捲動
+  動畫函式庫，皆透過 CDN 載入。
+- 頁面段落（依序）：
+    導覽列（含漢堡選單，手機版可展開/收合）
+    Hero 主視覺（大標題 + CTA 按鈕：預約諮詢 / 了解服務）
+    信任指標列（獎項認證、隱私保護、服務人數、五星評價、線上諮詢等圖示）
+    services 服務項目（6 張卡片：個人諮商、伴侶諮商、家庭諮商、
+    生涯諮詢、正念紓壓、焦慮處理 等，圖示分別對應）
+    about 關於我們（含機構介紹文字 + 認證徽章）
+    team 專業團隊（4 位心理師卡片，皆為佔位頭像圖示，非真實大頭照）
+    coming-soon 未來功能搶先看（6 項：AI 情緒分析、線上預約系統、
+    即時諮詢聊天、健康追蹤、心理健康知識庫、線上課程 等圖示化預告卡片）
+    blog 心理健康知識庫（3 篇文章卡片，含日期/閱讀時間圖示，佔位圖片）
+    cta 行動呼籲區塊（再次導向預約/來電）
+    footer 頁尾（社群連結圖示：Facebook/Instagram/訊息/信箱、聯絡資訊：
+    電話/信箱/地址/營業時間）
+- 所有「預約」相關按鈕最終導向 login.html（成為系統使用者的唯一入口）。
+- 與主系統唯一的耦合點：連結導向 login.html。其餘完全自成一體，可視為
+  一個可獨立部署的靜態頁面。
+
+
+================================================================================
+八、完整使用者流程（End-to-End Scenario）
+================================================================================
+
+8.1 一般個案（patient）每日正常流程
+--------------------------------------------------------------------------
+1. 造訪 counseling-platform.html（行銷頁，選擇性入口）或直接開啟
+   login.html。
+2. 於 login.html 登入（手動輸入或快速登入 demo 帳號 patient/patient2）。
+3. index.html 判斷角色後導向 client/dashboard.html。
+4. Dashboard 顯示心魔/靈力現況、今日進度、點擊「開始今日旅程」。
+5. 進入 chat.html：
+   a. 可先與「靈光」AI 聊聊今天的心情（或略過）。
+   b. 依序作答 PSS-10 十題，送出後立即得知壓力分級。
+   c. 系統呼叫 AI（若有金鑰）或規則式判斷風險等級。
+      - 若判定高風險 → 2 秒後自動導向 crisis.html（危機頁），
+        使用者可選擇撥打求助專線、申請心理師預約，或確認自己好轉後
+        點擊「繼續今日任務」回到 tasks.html。
+      - 若正常 → 點擊「下一步」前往 tasks.html。
+6. tasks.html：依生理性別看到 4 項每日任務，可展開詳細說明、使用內建
+   計時器倒數/正數計時，完成後打勾（同步寫入 FHIR Task 資源）。
+7. 完成任務後點擊「前往總結」→ summary.html：回答 3 題固定反思題
+   （必答）+ 系統即時用 AI 生成的 1-2 題個人化問題（選答）。
+8. 送出總結 → results.html：
+   系統依「完成任務數、PSS分數、總結答案品質」計算今日心魔減少量與
+   靈力獲得量，更新使用者累計數值，畫面呈現結算明細、可分享成果，
+   或點擊「回到首頁」查看更新後的 Dashboard。
+9. 使用者可隨時透過右下角浮動 FAB（chatWidget.js 或 chat.html 內建
+   面板）再次與 AI 聊天。
+10. 使用者可至設定頁切換深色模式、查看帳號資訊，或清除今日資料重新
+    開始（僅限當日進度，不影響累計心魔/靈力歷史）。
+
+8.2 高風險介入情境
+--------------------------------------------------------------------------
+- 觸發條件：PSS-10 總分 ≥27（isHighRisk），或（若有 Gemini 金鑰）
+  AI 風險評估回傳 riskLevel="high"，兩者符合其一即觸發。
+- 系統動作：
+  a. 建立 FHIR Flag 資源（status: active, category: high-risk），
+     reason 記錄「PSS-10=分數, AI=判讀結果」。
+  b. 當日資料標記 highRisk: true（Dashboard 之後會持續顯示高風險提示
+     直到清除今日資料或跨日）。
+  c. Toast 顯示「偵測到高壓力，即將引導至求助資源頁面...」，2 秒後
+     自動跳轉 crisis.html。
+- 此 Flag 會即時出現在：
+  * practitioner/index.html 的「高危通知」面板（心理師可看到待處理
+    個案）
+  * admin/index.html 的「高危事件」面板與總覽頁統計數字
+- 使用者於 crisis.html 可一鍵撥打三支 24 小時專線（1925/1995/1980），
+  或送出「申請預約心理師諮詢」（建立 FHIR Appointment，status: proposed）。
+
+8.3 心理師（practitioner）使用情境
+--------------------------------------------------------------------------
+1. 以 doctor/1234 登入 → 導向 practitioner/index.html。
+2. 開啟「接單狀態」開關表示上班中（視覺提示，非真正派案邏輯）。
+3. 檢視「高危通知」面板，了解哪些個案（以 Patient reference 顯示）
+   觸發了高風險 Flag，可點「重新整理」拉取最新狀態。
+4. 檢視「今日預約」「我的個案」（目前為示意用固定資料，尚未真正串接
+   個別使用者的即時 PSS 分數與任務完成狀況）。
+5. 點擊「資源連結」區的各項連結目前僅顯示「規劃中」提示，此角色的
+   完整個案管理、預約管理、統計報表功能仍待後續開發。
+
+8.4 管理員（admin）使用情境
+--------------------------------------------------------------------------
+1. 以 admin/1234 登入 → 導向 admin/index.html。
+2. 總覽頁面一眼掌握：使用者人數、心理師人數、今日高危事件數、
+   FHIR 資源總筆數。
+3. 「使用者管理」查看所有已註冊個案（含心魔/靈力數值），可查看單一
+   使用者詳細資料（alert 彈窗）。
+4. 「心理師管理」可直接新增心理師帳號（供該心理師之後用此帳密登入
+   practitioner 端）。
+5. 「高危事件」檢視所有 Flag 記錄，掌握全站風險個案總覽。
+6. 「FHIR 工具」：
+   a. 選擇資源型別並查詢，直接檢視該型別底下所有 FHIR JSON 資源內容
+      （用於除錯/展示資料結構，非給一般管理員的日常操作介面）。
+   b. 切換「使用 HAPI FHIR Server」開關，決定全站（含所有 patient
+      使用者之後的操作）是否改連公開 HAPI FHIR 測試伺服器，而非僅存
+      在本機瀏覽器 localStorage。此切換為全域設定，立即生效。
+
+8.5 訪客（未登入）使用情境
+--------------------------------------------------------------------------
+1. 直接開啟 counseling-platform.html：瀏覽機構介紹、服務項目、團隊、
+   部落格文章、未來功能預告，最終被導向 login.html 進行註冊/登入。
+2. 或直接開啟 index.html / login.html：若瀏覽器已有 mhs_session
+   （之前登入過又沒登出），index.html 會自動略過登入直接導向對應
+   角色首頁；否則進入登入頁。
+
+
+================================================================================
+九、視覺設計系統（css/styles.css）
+================================================================================
+- CSS 自訂變數（CSS Custom Properties）雙主題設計，於 :root 定義
+  淺色主題預設值，並用 [data-theme="dark"] 選擇器覆寫暗色主題數值。
+- 主要色彩 token（淺色主題）：
+    --canvas #F4F0E7（背景米色）  --surface #FBF9F4（卡片底色）
+    --sage #88AE8E / --sage-deep #557A60（主品牌綠，象徵療癒/自然）
+    --sage-mist #DCE6DB（淺綠底）
+    --clay #5D4037 / --clay-soft #9C7E6E（大地色系，次要強調色）
+    --ink #423D37 / --ink-soft #7C756B（文字主色/次要文字色）
+    --line #E6DECF（邊框線色）
+    --demon-1 #C3946F / --demon-2 #9A6B54（「心魔」相關漸層色，暖褐色調
+    象徵需要面對的內在陰影）
+    --spirit-1 #9CC3A0 / --spirit-2 #6FA37C（「靈力」相關漸層色，
+    綠色調象徵能量與成長）
+    --warn #C08A52（警示色）
+- 暗色主題對應色票（--canvas #211F1B、--sage #93B89A 等）在同一份
+  styles.css 中一併定義，整站（除 counseling-platform.html 與
+  login.html 使用各自獨立內嵌樣式外）共用同一套設計 token。
+- 字型：
+    --font-display: Quicksand, Noto Sans TC（標題/數字強調用，
+    圓潤現代感）
+    --font-body: Noto Sans TC（內文用，適合繁體中文閱讀）
+- 圓角規範（--r-xl 28px、--r-lg 22px、--r-md 16px、--r-sm 12px、
+  --r-pill 999px）與導覽列固定高度 --nav-h 64px 統一全站版面感受。
+- 元件庫涵蓋：navbar、card、button（primary/secondary/outline/danger/
+  success）、toggle 開關、progress-bar、toast 通知、alert 提示框、
+  likert-scale 量表選項、step 進度指示器、ring gauge 環形量表、
+  data-table 表格、badge 徽章、fhir-indicator 資料模式指示燈等，
+  供 client/practitioner/admin 三端頁面共用一致視覺語言。
+- login.html 與 counseling-platform.html 因定位為「獨立入口/行銷頁」，
+  並未引用 css/styles.css，而是各自撰寫一套內嵌 `<style>`，因此視覺
+  風格與系統內部頁面略有差異（login.html 為深紫色系登入卡片設計，
+  counseling-platform.html 為另一套行銷風配色）。
+
+
+================================================================================
+十、安全性設計、已知限制與文件落差說明
+================================================================================
+本節整理程式碼實際呈現的安全性作法，以及發現的「文件描述 vs 實際程式碼」
+落差，供後續維護者對照參考，避免誤信舊文件而做出錯誤假設。
+
+10.1 已落實的安全性作法
+--------------------------------------------------------------------------
+- Gemini API 金鑰不寫死於任何會被提交到 Git 的程式碼路徑（config.js
+  的 DEMO_GEMINI_KEY 預設空字串，需維護者自行填入且不應提交有值版本）。
+- AI 對話「原文」不會被寫入 FHIR 資源，僅有衍生的判讀結果
+  （Observation 的 pss-score、mind-demon、spirit-power；RiskAssessment
+  的風險等級與理由）會被持久化，符合資料最小化原則。
+- Session 物件本身不包含密碼欄位。
+- data.js 明確標註 getGeminiKey()/setGeminiKey() 為「唯一官方存取點」
+  （惟目前無 UI 呼叫 setGeminiKey()，見下方落差說明）。
+
+10.2 已知限制（demo/教育用原型層級，非正式醫療系統等級）
+--------------------------------------------------------------------------
+- 使用者密碼以明碼直接比對與儲存於 localStorage 的 mhs_users 中，
+  無雜湊（如 bcrypt）、無鹽值，任何能存取瀏覽器 localStorage 的人
+  皆可讀取全部帳密與其他使用者個資。
+- 無任何伺服器端驗證/授權機制——所有「權限控管」（requireAuth、
+  bootstrap 白名單）僅存在於前端 JavaScript，使用者只要直接編輯
+  localStorage 或跳過頁面路由即可繞過，不適合處理真實敏感醫療資料。
+- 管理員新增心理師帳號使用瀏覽器原生 prompt() 連續彈窗輸入姓名/帳號/
+  密碼，使用體驗與安全性皆非正式產品等級（無輸入驗證、無最小密碼長度
+  檢查）。
+- Firebase Realtime Database 的資料庫網址（heart-212ad-default-
+  rtdb.firebaseio.com）直接寫死於已提交的 js/firebase-config.js
+  原始碼中；雖然規則設計上該節點應為公開唯讀，仍建議日後评估是否要
+  將此網址移出版控或改用環境變數等方式管理。
+- HAPI 模式串接的是 HAPI 官方公開測試伺服器（hapi.fhir.org），資料
+  非私有、會與全世界所有測試該伺服器的人共享同一份公開沙盒資料庫，
+  僅適合展示/教學，不可放入任何真實個資。
+
+10.3 文件 vs 程式碼實際落差（重要，供維護者留意）
+--------------------------------------------------------------------------
+a) CLAUDE.md 描述：「Gemini API key: input via client/settings.html」
+   實際狀況：settings.html 目前完全沒有 Gemini 金鑰輸入相關 HTML 或
+   JS 程式碼（已用關鍵字搜尋確認 0 筆符合）。金鑰目前實務上只能透過
+   （1）直接在瀏覽器 Console 手動呼叫 setGeminiKey()，或（2）
+   Firebase 遠端抓取，或（3）修改 js/config.js 原始碼 三種方式設定，
+   一般使用者介面上並無入口。
+
+b) CLAUDE.md 描述：FHIR 模式切換與金鑰輸入同樣「經由 settings.html」。
+   實際狀況：FHIR 模式（useFhirMode）切換開關實際只出現在
+   admin/index.html 的「FHIR 工具」面板與「總覽」面板中，且僅 admin
+   角色才能看到並操作此開關；client/settings.html 內完全沒有此 UI。
+
+c) README.md 描述：「金鑰儲存在 sessionStorage，關閉瀏覽器後自動清除」
+   「金鑰不會上傳至任何伺服器」。
+   實際狀況：js/data.js 的 getGeminiKey()/setGeminiKey() 明確是讀寫
+   `localStorage`（非 sessionStorage），代表金鑰會持續留存直到使用者
+   手動清除瀏覽器資料，並不會在關閉分頁/瀏覽器後自動消失。另外
+   js/firebase-config.js 會把從 Firebase 撈到的金鑰主動寫入
+   localStorage，這點也與 README 所述「不會上傳至任何伺服器」的精神
+   有出入（金鑰是「從」一個雲端服務下載下來，而非上傳，但整體金鑰
+   管理機制與 README 描述的 sessionStorage-only 方式並不一致）。
+
+d) README.md 目錄結構圖 中列出 js/ 底下只有 7 個檔案，實際上 js/
+   目錄現有 10 個檔案，多出 chatWidget.js、firebase-config.js、
+   config.js 三個 README 撰寫當下尚未存在（或忘記補上）的模組。
+
+e) CLAUDE.md「Gemini API 金鑰載入優先序」第 1 順位所述之
+   client/settings.html 手動輸入入口，如 a) 所述已不存在於目前程式碼，
+   建議未來更新 CLAUDE.md 使其與程式碼同步，或者反過來在
+   settings.html 補回對應功能，兩者擇一使文件與實作一致。
+
+f) FHIR 資源型別 Questionnaire 與 Practitioner 在 initData() 中被
+   初始化為空陣列，但檢視全部程式碼後，並未找到任何實際建立/寫入這
+   兩型別資源的邏輯（PSS-10 題庫是以 JS 常數 PSS10 硬編碼於
+   scales.js，而非以 FHIR Questionnaire 資源表示；心理師帳號資料
+   存放於 mhs_users 而非 FHIR Practitioner 資源）。這兩個型別目前
+   僅為「保留欄位」，尚未實際串接進任何頁面流程。
+
+g) js/gemini.js 的 getGreeting() 函式（可依心魔指數客製化 AI 問候語）
+   與 js/scoring.js 的 applyDailyIncrease()（心魔每日自然回升機制）
+   兩者皆已完整實作，但目前檢視全部 HTML 頁面後未發現任何呼叫端，
+   屬於「已寫好但尚未串接進 UI」的預留功能。
+
+
+================================================================================
+十一、FHIR 資源型別與應用場景對照表（總整理）
+================================================================================
+| FHIR Resource         | 建立時機/呼叫函式                    | 對應應用場景            |
+|-----------------------|--------------------------------------|-------------------------|
+| Patient               | upsertPatient()（程式碼保留，實際觸發點待確認） | 使用者基本資料建模        |
+| CarePlan              | createCarePlan()（保留，未見任何頁面實際呼叫） | 每日修練計畫（設計保留）  |
+| Task                  | createTask() / completeTask()        | tasks.html 任務打勾      |
+| QuestionnaireResponse | saveQuestionnaireResponse()          | chat.html PSS-10 作答、  |
+|                       |                                       | summary.html 總結作答    |
+| Observation           | saveObservation()                    | pss-score、mind-demon、  |
+|                       |                                       | spirit-power 數值紀錄    |
+| RiskAssessment        | createRiskAssessment()                | chat.html 風險判讀結果   |
+| Flag                  | flagHighRisk()                        | 高風險個案通報            |
+| Appointment           | createResource() 直接建構              | crisis.html 申請心理師預約|
+| Questionnaire         | （未實作寫入邏輯，僅保留空陣列）       | —（PSS-10題庫以JS常數表示）|
+| Practitioner          | （未實作寫入邏輯，僅保留空陣列）       | —（心理師帳號存於使用者表）|
+
+備註：createCarePlan() 與 upsertPatient() 兩函式雖存在於 fhirClient.js
+且邏輯完整，但經檢視所有頁面內嵌 script，並未找到實際呼叫這兩個函式的
+程式碼位置，可能是設計階段預留、後續整合尚未完成的功能。
+
+
+================================================================================
+十二、遊戲化機制設計摘要（心魔 / 靈力）
+================================================================================
+- 「心魔指數」（mindDemon，0-100，越低越好）象徵使用者當下的心理負擔，
+  初始值：新註冊使用者 50，demo 帳號 patient=45／patient2=38。
+- 「靈力」（spiritPower，只增不減，象徵累積成長值）初始值：新註冊 0，
+  demo 帳號 patient=120／patient2=85。
+- 每日結算公式（完整版見「4.7 js/scoring.js」）：
+    心魔減少量 = 完成任務數×5
+                + Σ(總結題答案>2分的每題×3，最多每題+3不重複累加)
+                + （若PSS≤13低壓力）額外5
+    靈力獲得量 = 心魔減少量×2
+                + （若全部任務完成）額外20
+                + （若有完成量表）額外10
+                + 完成總結固定+10
+- 此設計讓「完成越多任務、壓力越低、總結回答越正向」的使用者，當天
+  心魔下降越多、靈力累積越快，形成正向遊戲化回饋迴圈，鼓勵每日持續
+  使用。
+
+
+================================================================================
+十三、外部網路依賴總覽（離線可用性評估）
+================================================================================
+下列為程式運行時「可能」發出的對外網路請求，若全部關閉/無網路，
+系統仍可完整運作（皆有 mock/fallback 機制），僅視覺與 AI 互動品質
+會降級：
+  1. Google Fonts CDN（fonts.googleapis.com / fonts.gstatic.com）
+     — 字型載入失敗會退回瀏覽器預設字型，不影響功能。
+  2. Font Awesome CDN（cdnjs.cloudflare.com）
+     — 圖示載入失敗頂多顯示空白方塊，不影響功能。
+  3. Lucide / AOS CDN（僅 counseling-platform.html 使用，unpkg.com）
+     — 同上，僅影響該頁圖示與捲動動畫效果。
+  4. Firebase Realtime Database REST API
+     （heart-212ad-default-rtdb.firebaseio.com）
+     — 失敗會靜默略過，退回 config.js 常數或視為無金鑰。
+  5. Google Generative Language API（Gemini 2.0 Flash）
+     — 失敗（無金鑰/額度用盡/網路中斷）一律退回寫死的 mock 對話與
+       判讀邏輯，核心五步驟流程仍可完整跑完。
+  6. HAPI FHIR 公開測試伺服器（hapi.fhir.org/baseR4）
+     — 僅在管理員手動開啟「使用 HAPI FHIR Server」開關後才會被呼叫；
+       預設（Mock 模式）完全不連外網，所有資料存在本機瀏覽器
+       localStorage。
+
+
+================================================================================
+文件結尾
+================================================================================
+以上內容依 2026-07-11 當下之程式碼（含 login.html、index.html、
+client/*.html 共 7 頁、practitioner/index.html、admin/index.html、
+counseling-platform.html、css/styles.css、js/ 目錄下全部 10 個模組、
+CLAUDE.md、README.md）逐檔閱讀整理而成，力求涵蓋所有可觀察到的架構
+細節、資料流、使用者角色、使用情境與技術規格，並主動標註目前文件與
+程式碼之間的已知落差，供後續開發或報告撰寫參考使用。

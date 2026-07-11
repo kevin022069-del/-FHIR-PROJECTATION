@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+</helmet>
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:url('./img/bg-login.jpg') center/cover no-repeat,#F4F0E7;display:flex;align-items:center;justify-content:center;padding:clamp(20px,6vw,40px) clamp(12px,4vw,24px);font-family:'Noto Sans TC',sans-serif" data-screen-label="登入頁">
+  <div style="width:100%;max-width:420px;background:#FBF9F4;border-radius:28px;border:1px solid #E6DECF;padding:clamp(24px,6vw,44px);box-shadow:0 24px 60px rgba(66,61,55,.08)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+      <div style="width:34px;height:34px;border-radius:10px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60)"></div>
+      <div style="font:700 20px 'Quicksand'">MindHarbor</div>
+    </div>
+
+    <div style="display:flex;gap:4px;background:#EDE4D8;border-radius:12px;padding:4px;margin-bottom:24px">
+      <div onClick="{{ showLogin }}" style="{{ loginTabStyle }}">登入</div>
+      <div onClick="{{ showRegister }}" style="{{ registerTabStyle }}">註冊</div>
+    </div>
+
+    <sc-if value="{{ isLoginMode }}" hint-placeholder-val="{{ true }}">
+      <div style="font:700 24px 'Quicksand';color:#423D37;margin-bottom:6px">歡迎回來</div>
+      <div style="font:400 14px 'Noto Sans TC';color:#7C756B;margin-bottom:28px">選擇 Demo 身份，快速體驗每日修練流程</div>
+
+      <div style="font:600 13px 'Noto Sans TC';color:#7C756B;margin-bottom:10px">選擇生理性別（決定任務模板）</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:26px">
+        <button onClick="{{ selectMale }}" style="{{ maleStyle }}">男性任務組</button>
+        <button onClick="{{ selectFemale }}" style="{{ femaleStyle }}">女性任務組</button>
+      </div>
+
+      <button onClick="{{ doLogin }}" style="width:100%;border:none;background:#557A60;color:#FBF9F4;padding:15px;border-radius:14px;font:700 15px 'Noto Sans TC';margin-bottom:14px">Demo 快速登入（個案端）</button>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:20px 0;color:#C9C2B4;font:500 12px 'Noto Sans TC'">
+        <div style="flex:1;height:1px;background:#E6DECF"></div>其他角色<div style="flex:1;height:1px;background:#E6DECF"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <button onClick="{{ goPractitioner }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:12px;border-radius:12px;font:600 13px 'Noto Sans TC'">心理師登入</button>
+        <button onClick="{{ goAdmin }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:12px;border-radius:12px;font:600 13px 'Noto Sans TC'">管理員登入</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ !isLoginMode }}" hint-placeholder-val="{{ false }}">
+      <div style="font:700 24px 'Quicksand';color:#423D37;margin-bottom:6px">建立帳號</div>
+      <div style="font:400 14px 'Noto Sans TC';color:#7C756B;margin-bottom:22px">加入 MindHarbor，開始你的每日修練</div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:18px">
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">暱稱</div>
+          <input value="{{ regNickname }}" onInput="{{ onNicknameChange }}" placeholder="你想被怎麼稱呼？" style="width:100%;border:1px solid #E6DECF;border-radius:12px;padding:12px 14px;font:400 14px 'Noto Sans TC';outline:none;box-sizing:border-box"/>
+        </div>
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">生日</div>
+          <input value="{{ regBirthday }}" onInput="{{ onBirthdayChange }}" type="date" style="width:100%;border:1px solid #E6DECF;border-radius:12px;padding:12px 14px;font:400 14px 'Noto Sans TC';outline:none;box-sizing:border-box"/>
+        </div>
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">生理性別</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <button onClick="{{ selectMale }}" style="{{ maleStyle }}">男</button>
+            <button onClick="{{ selectFemale }}" style="{{ femaleStyle }}">女</button>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">帳號</div>
+          <input value="{{ regAccount }}" onInput="{{ onAccountChange }}" placeholder="設定登入帳號" style="width:100%;border:1px solid #E6DECF;border-radius:12px;padding:12px 14px;font:400 14px 'Noto Sans TC';outline:none;box-sizing:border-box"/>
+        </div>
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">密碼（至少 4 個字元）</div>
+          <input value="{{ regPassword }}" onInput="{{ onPasswordChange }}" type="password" placeholder="設定密碼" style="width:100%;border:1px solid #E6DECF;border-radius:12px;padding:12px 14px;font:400 14px 'Noto Sans TC';outline:none;box-sizing:border-box"/>
+        </div>
+      </div>
+
+      <sc-if value="{{ regError }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBEAE6;color:#B5543C;font:600 12px 'Noto Sans TC';padding:10px 14px;border-radius:10px;margin-bottom:14px">{{ regError }}</div>
+      </sc-if>
+
+      <button onClick="{{ submitRegister }}" style="width:100%;border:none;background:#557A60;color:#FBF9F4;padding:15px;border-radius:14px;font:700 15px 'Noto Sans TC'">建立帳號並開始</button>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:700,&quot;height&quot;:760},&quot;gender&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;male&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;setGender&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(g:string)=&gt;void&quot;},&quot;doLogin&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;doRegister&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(data:object)=&gt;void&quot;},&quot;startMode&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;goPractitioner&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;goAdmin&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = {
+    mode: this.props.startMode === 'register' ? 'register' : 'login',
+    regNickname: '', regBirthday: '', regAccount: '', regPassword: '', regError: '',
+  };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.startMode !== this.props.startMode && this.props.startMode) {
+      this.setState({ mode: this.props.startMode });
+    }
+  }
+
+  submitRegister = () => {
+    const { regNickname, regAccount, regPassword } = this.state;
+    if (!regNickname.trim()) return this.setState({ regError: '請輸入暱稱' });
+    if (!regAccount.trim()) return this.setState({ regError: '請輸入帳號' });
+    if (regPassword.length < 4) return this.setState({ regError: '密碼至少需要 4 個字元' });
+    this.setState({ regError: '' });
+    this.props.doRegister({ nickname: regNickname.trim(), account: regAccount.trim(), gender: this.props.gender });
+  };
+
+  renderVals() {
+    const g = this.props.gender;
+    const base = 'padding:14px;border-radius:12px;font:600 13px \'Noto Sans TC\';cursor:pointer;';
+    const isLoginMode = this.state.mode === 'login';
+    const tabBase = 'flex:1;text-align:center;padding:10px;border-radius:9px;font:700 13px \'Noto Sans TC\';cursor:pointer;';
+    return {
+      selectMale: () => this.props.setGender('male'),
+      selectFemale: () => this.props.setGender('female'),
+      doLogin: this.props.doLogin,
+      goPractitioner: this.props.goPractitioner,
+      goAdmin: this.props.goAdmin,
+      maleStyle: base + (g === 'male' ? 'border:2px solid #557A60;background:#DCE6DB;color:#2E4A34;' : 'border:1px solid #E6DECF;background:#FBF9F4;color:#7C756B;'),
+      femaleStyle: base + (g === 'female' ? 'border:2px solid #557A60;background:#DCE6DB;color:#2E4A34;' : 'border:1px solid #E6DECF;background:#FBF9F4;color:#7C756B;'),
+      isLoginMode,
+      showLogin: () => this.setState({ mode: 'login' }),
+      showRegister: () => this.setState({ mode: 'register' }),
+      loginTabStyle: tabBase + (isLoginMode ? 'background:#FBF9F4;color:#2E4A34;' : 'background:transparent;color:#7C756B;'),
+      registerTabStyle: tabBase + (!isLoginMode ? 'background:#FBF9F4;color:#2E4A34;' : 'background:transparent;color:#7C756B;'),
+      regNickname: this.state.regNickname, onNicknameChange: (e) => this.setState({ regNickname: e.target.value }),
+      regBirthday: this.state.regBirthday, onBirthdayChange: (e) => this.setState({ regBirthday: e.target.value }),
+      regAccount: this.state.regAccount, onAccountChange: (e) => this.setState({ regAccount: e.target.value }),
+      regPassword: this.state.regPassword, onPasswordChange: (e) => this.setState({ regPassword: e.target.value }),
+      regError: this.state.regError,
+      submitRegister: this.submitRegister,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

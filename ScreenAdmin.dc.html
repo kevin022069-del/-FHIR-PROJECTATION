@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @media (max-width: 820px) {
+      .mh-admin-root { flex-direction: column !important; }
+      .mh-admin-sidebar { width: 100% !important; flex-direction: row !important; align-items: center !important; overflow-x: auto !important; padding: 10px 12px !important; gap: 10px !important; }
+      .mh-admin-sidebar .mh-admin-logo { padding: 0 6px !important; flex: none !important; }
+      .mh-admin-main { padding: 18px !important; }
+    }
+  </style>
+</helmet>
+<div class="mh-admin-root" style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;display:flex;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif" data-screen-label="管理員端 Dashboard">
+
+  <div class="mh-admin-sidebar" style="width:220px;flex:none;background:#2E2A24;padding:24px 16px;display:flex;flex-direction:column;gap:2px">
+    <div class="mh-admin-logo" style="display:flex;align-items:center;gap:10px;padding:6px 10px 20px">
+      <div style="width:30px;height:30px;border-radius:9px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);flex:none"></div>
+      <div style="font:700 16px 'Quicksand';color:#FBF9F4;white-space:nowrap">MindHarbor</div>
+    </div>
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="7">
+      <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap;flex:none">{{ item.label }}</div>
+    </sc-for>
+  </div>
+
+  <div class="mh-admin-main" style="flex:1;min-width:0;padding:clamp(20px,4vw,36px) clamp(16px,4vw,44px);max-width:1600px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:22px">
+      <div style="font:700 clamp(22px,4vw,28px) 'Quicksand';color:#423D37">{{ headerTitle }}</div>
+      <div style="display:flex;align-items:center;gap:8px;font:600 13px 'Noto Sans TC';color:#7C756B;flex:none"><div style="width:26px;height:26px;border-radius:50%;background:url('./img/avatar-admin.png') center/cover no-repeat,#DCE6DB;flex:none"></div>Admin</div>
+    </div>
+
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px">
+        <sc-for list="{{ miniStats }}" as="stat" hint-placeholder-count="4">
+          <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:16px;padding:18px">
+            <div style="font:600 12px 'Noto Sans TC';color:#7C756B">{{ stat.label }}</div>
+            <div style="font:700 26px 'Quicksand';color:#423D37;margin-top:6px">{{ stat.val }}</div>
+            <div style="font:600 11px 'Noto Sans TC';color:#557A60;margin-top:2px">{{ stat.delta }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font:700 16px 'Quicksand'">系統使用趨勢</div>
+            <div style="font:600 12px 'Noto Sans TC';color:#7C756B">近 7 天</div>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:140px;padding-top:10px">
+            <sc-for list="{{ trendBars }}" as="b" hint-placeholder-count="7">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                <div style="width:100%;background:#9CC3A0;border-radius:6px 6px 0 0;height:{{ b.h }}%"></div>
+                <div style="font:500 10px 'Noto Sans TC';color:#9A9385;margin-top:6px">{{ b.day }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="font:700 16px 'Quicksand';margin-bottom:14px">FHIR 資源統計</div>
+          <sc-for list="{{ fhirCounts }}" as="f" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:8px 0;border-bottom:1px solid #F0EBE0;font:500 13px 'Noto Sans TC'">
+              <div style="color:#5C564C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.type }}</div>
+              <div style="color:#423D37;font-weight:700;flex:none;white-space:nowrap">{{ f.count }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:14px">使用者列表</div>
+        <sc-for list="{{ users }}" as="u" hint-placeholder-count="4">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+            <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ u.name }}</div>
+            <div style="font:500 12px 'Noto Sans TC';color:#7C756B">心魔 {{ u.demon }} · 靈力 {{ u.spirit }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isPractitioners }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font:700 16px 'Quicksand'">心理師管理</div>
+          <button onClick="{{ addPractitioner }}" style="border:none;background:#557A60;color:#FBF9F4;padding:9px 16px;border-radius:999px;font:600 12px 'Noto Sans TC'">＋ 新增心理師</button>
+        </div>
+        <sc-for list="{{ practitioners }}" as="pr" hint-placeholder-count="2">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+            <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ pr.name }}</div>
+            <div style="font:500 12px 'Noto Sans TC';color:#7C756B">{{ pr.account }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFlags }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:14px">高危事件</div>
+        <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+            <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ f.patient }}</div>
+            <div style="{{ f.badgeStyle }}">{{ f.status }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFhirTools }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;max-width:900px">
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="font:700 16px 'Quicksand';margin-bottom:14px">查詢 FHIR 資源</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <sc-for list="{{ fhirTypes }}" as="t" hint-placeholder-count="8">
+              <div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div>
+            </sc-for>
+          </div>
+          <div style="font:600 12px 'Noto Sans TC';color:{{ fhirQueryStatusColor }};margin-bottom:10px">{{ fhirQueryStatusText }}</div>
+          <sc-if value="{{ hasFhirEntries }}" hint-placeholder-val="{{ false }}">
+            <div class="mh-scroll" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:#F4F0E7;border-radius:10px;padding:10px">
+              <sc-for list="{{ fhirEntries }}" as="e" hint-placeholder-count="3">
+                <div style="font:400 11px/1.5 monospace;color:#5C564C;word-break:break-all;border-bottom:1px dashed #E6DECF;padding-bottom:6px">
+                  <div style="font-weight:700;color:#423D37">{{ e.title }}</div>
+                  <div>{{ e.subtitle }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <div style="{{ fhirModeDotStyle }}"></div>
+            <div style="font:700 16px 'Quicksand'">FHIR 資料模式</div>
+          </div>
+          <div style="font:400 13px/1.7 'Noto Sans TC';color:#7C756B">{{ fhirModeLabel }}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:16px">數據報表</div>
+        <div style="display:flex;align-items:flex-end;gap:12px;height:140px">
+          <sc-for list="{{ trendBars }}" as="b" hint-placeholder-count="7">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+              <div style="width:100%;background:#557A60;border-radius:6px 6px 0 0;height:{{ b.h }}%"></div>
+              <div style="font:500 10px 'Noto Sans TC';color:#9A9385;margin-top:6px">{{ b.day }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font:400 12px 'Noto Sans TC';color:#7C756B;margin-top:10px">全站每日活躍使用者數</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSystemSettings }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:480px;display:flex;flex-direction:column;gap:16px">
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font:700 14px 'Noto Sans TC';color:#423D37">維護模式</div>
+            <div style="font:400 12px 'Noto Sans TC';color:#7C756B;margin-top:2px">開啟後僅管理員可登入系統</div>
+          </div>
+          <div onClick="{{ toggleMaintenance }}" style="{{ maintTrackStyle }}"><div style="{{ maintDotStyle }}"></div></div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
+const FHIR_TYPES = ['Patient','Observation','QuestionnaireResponse','CarePlan','RiskAssessment','Task','Flag','Appointment'];
+const FHIR_COUNTS = {Patient:892, Observation:3456, QuestionnaireResponse:1248, CarePlan:2345, RiskAssessment:745, Task:1876, Flag:64, Appointment:312};
+const FHIR_BASE = 'https://hapi.fhir.org/baseR4';
+const LIVE_FHIR_TYPES = ['QuestionnaireResponse', 'Observation'];
+
+class Component extends DCLogic {
+  state = { panel: 'overview', selectedFhirType: 'Patient', maintenance: false, liveResults: {} };
+
+  loadLiveType = (type) => {
+    const patientId = this.props.fhirPatientId;
+    if (!patientId || !LIVE_FHIR_TYPES.includes(type)) return;
+    this.setState(s => ({ liveResults: { ...s.liveResults, [type]: { loading: true, error: null } } }));
+    fetch(`${FHIR_BASE}/${type}?subject=Patient/${patientId}&_sort=-_lastUpdated&_count=20`, { headers: { Accept: 'application/fhir+json' } })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(bundle => {
+        const entries = (bundle.entry || []).map(e => e.resource);
+        this.setState(s => ({ liveResults: { ...s.liveResults, [type]: { loading: false, error: null, count: bundle.total ?? entries.length, entries } } }));
+      })
+      .catch(err => {
+        this.setState(s => ({ liveResults: { ...s.liveResults, [type]: { loading: false, error: (err && err.message) || String(err) } } }));
+      });
+  };
+
+  renderVals() {
+    const active = 'padding:11px 12px;border-radius:12px;font:700 13px \'Noto Sans TC\';color:#FBF9F4;background:#557A60;margin-bottom:2px;cursor:pointer;';
+    const inactive = 'padding:11px 12px;border-radius:12px;font:500 13px \'Noto Sans TC\';color:#B8B2A4;margin-bottom:2px;cursor:pointer;';
+    const items = [
+      {label:'總覽', key:'overview'}, {label:'使用者管理', key:'users'}, {label:'心理師管理', key:'practitioners'},
+      {label:'高危事件', key:'flags'}, {label:'FHIR 工具', key:'fhirtools'}, {label:'數據報表', key:'reports'}, {label:'系統設定', key:'settings'},
+    ];
+    const navItems = items.map(it => ({ label: it.label, onClick: () => this.setState({ panel: it.key }), style: this.state.panel === it.key ? active : inactive }));
+    const titles = { overview:'管理員面板', users:'使用者管理', practitioners:'心理師管理', flags:'高危事件', fhirtools:'FHIR 工具', reports:'數據報表', settings:'系統設定' };
+
+    const trendBars = [22,38,30,55,48,62,45].map((h,i) => ({h, day:['07/05','07/06','07/07','07/08','07/09','07/10','07/11'][i]}));
+    const fhirTypes = FHIR_TYPES.map(t => ({
+      label: t, onClick: () => { this.setState({ selectedFhirType: t }); this.loadLiveType(t); },
+      style: `padding:7px 12px;border-radius:999px;font:600 11px 'Noto Sans TC';cursor:pointer;background:${this.state.selectedFhirType===t?'#557A60':'#EDE4D8'};color:${this.state.selectedFhirType===t?'#FBF9F4':'#5C564C'}`,
+    }));
+
+    const selectedType = this.state.selectedFhirType;
+    const isLiveType = LIVE_FHIR_TYPES.includes(selectedType);
+    const patientId = this.props.fhirPatientId;
+    const live = this.state.liveResults[selectedType];
+    let fhirQueryStatusText, fhirQueryStatusColor, fhirEntries = [];
+    if (!isLiveType) {
+      fhirQueryStatusText = `${FHIR_COUNTS[selectedType]} 筆 ${selectedType} 資源（示範資料，尚未串接真實伺服器）`;
+      fhirQueryStatusColor = '#9A9385';
+    } else if (!patientId) {
+      fhirQueryStatusText = '尚無真實資料：請先在個案端完成一次 PSS-10 壓力量表';
+      fhirQueryStatusColor = '#9A9385';
+    } else if (!live || live.loading) {
+      fhirQueryStatusText = '查詢中…';
+      fhirQueryStatusColor = '#7C756B';
+    } else if (live.error) {
+      fhirQueryStatusText = `查詢失敗：${live.error}`;
+      fhirQueryStatusColor = '#B5543C';
+    } else {
+      fhirQueryStatusText = `${live.count} 筆 ${selectedType} 資源（來自 HAPI FHIR R4 公開測試伺服器，即時查詢）`;
+      fhirQueryStatusColor = '#557A60';
+      fhirEntries = live.entries.map(r => r.resourceType === 'QuestionnaireResponse'
+        ? { title: `QuestionnaireResponse/${r.id}`, subtitle: `authored: ${r.authored || '-'}` }
+        : { title: `Observation/${r.id}`, subtitle: `${(r.code && (r.code.text || (r.code.coding && r.code.coding[0] && r.code.coding[0].display))) || ''}: ${r.valueInteger ?? '-'}　effective: ${r.effectiveDateTime || '-'}` });
+    }
+
+    return {
+      navItems, headerTitle: titles[this.state.panel],
+      isOverview: this.state.panel==='overview', isUsers: this.state.panel==='users',
+      isPractitioners: this.state.panel==='practitioners', isFlags: this.state.panel==='flags',
+      isFhirTools: this.state.panel==='fhirtools', isReports: this.state.panel==='reports', isSystemSettings: this.state.panel==='settings',
+      miniStats: [
+        {label:'Users', val:'1,248', delta:'↑12.5%'}, {label:'Patients', val:'892', delta:'↑8.3%'},
+        {label:'Practitioners', val:'156', delta:'↑4.8%'}, {label:'FHIR 資源', val:'12,540', delta:'↑23.1%'},
+      ],
+      trendBars,
+      fhirCounts: [
+        {type:'Patient', count:'892'}, {type:'Observation', count:'3,456'}, {type:'QuestionnaireResponse', count:'1,248'},
+        {type:'CarePlan', count:'2,345'}, {type:'RiskAssessment', count:'745'},
+      ],
+      users: [
+        {name:'小明 (patient)', demon:45, spirit:120}, {name:'小美 (patient2)', demon:38, spirit:85},
+        {name:'王先生', demon:52, spirit:60}, {name:'林小姐', demon:29, spirit:210},
+      ],
+      practitioners: [ {name:'陳心理師', account:'doctor'}, {name:'林心理師', account:'lin.doc'} ],
+      addPractitioner: () => this.setState(s => ({ practitionersVer: (s.practitionersVer||0)+1 })),
+      flags: [
+        {patient:'個案 #小明', status:'待處理', badgeStyle:'background:#FBEAE6;color:#B5543C;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
+        {patient:'個案 #小美', status:'已解決', badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
+      ],
+      fhirTypes,
+      selectedFhirType: selectedType,
+      fhirQueryStatusText, fhirQueryStatusColor, fhirEntries, hasFhirEntries: fhirEntries.length > 0,
+      fhirModeLabel: patientId
+        ? `已與 HAPI FHIR R4 公開測試伺服器同步 — Patient/${patientId}`
+        : '尚未同步：個案端完成一次 PSS-10 壓力量表後，系統會自動建立真實 FHIR 資源（Patient / QuestionnaireResponse / Observation），並可在左側查詢。',
+      fhirModeDotStyle: `width:12px;height:12px;border-radius:50%;background:${patientId ? '#557A60' : '#C9C2B4'}`,
+      toggleMaintenance: () => this.setState(s => ({ maintenance: !s.maintenance })),
+      maintTrackStyle: `width:40px;height:22px;border-radius:999px;background:${this.state.maintenance?'#B5543C':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.maintenance?'flex-end':'flex-start'}`,
+      maintDotStyle: 'width:18px;height:18px;border-radius:50%;background:#FBF9F4',
+    };
+  }
+}
+
+</script>
+</body>
+</html>

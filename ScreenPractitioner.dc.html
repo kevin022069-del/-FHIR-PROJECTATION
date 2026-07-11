@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @media (max-width: 820px) {
+      .mh-prac-root { flex-direction: column !important; }
+      .mh-prac-sidebar { width: 100% !important; flex-direction: row !important; align-items: center !important; overflow-x: auto !important; border-right: none !important; border-bottom: 1px solid #E6DECF !important; padding: 10px 12px !important; gap: 10px !important; }
+      .mh-prac-sidebar .mh-prac-profile { padding: 0 6px !important; flex: none !important; }
+      .mh-prac-sidebar .mh-prac-duty { margin-bottom: 0 !important; flex: none !important; }
+      .mh-prac-sidebar .mh-prac-logout { margin-top: 0 !important; margin-left: auto !important; border-top: none !important; flex: none !important; padding: 0 0 0 10px !important; }
+      .mh-prac-main { padding: 18px !important; }
+    }
+  </style>
+</helmet>
+<div class="mh-prac-root" style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;display:flex;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif" data-screen-label="心理師端 Dashboard">
+
+  <div class="mh-prac-sidebar" style="width:230px;flex:none;background:#FBF9F4;border-right:1px solid #E6DECF;padding:24px 16px;display:flex;flex-direction:column;gap:2px">
+    <div class="mh-prac-profile" style="display:flex;align-items:center;gap:10px;padding:6px 10px 20px">
+      <div style="width:38px;height:38px;border-radius:50%;background:url('./img/avatar-practitioner.png') center/cover no-repeat,#DCE6DB;flex:none"></div>
+      <div style="white-space:nowrap">
+        <div style="font:700 14px 'Noto Sans TC';color:#423D37">陳心理師</div>
+        <div style="font:500 11px 'Noto Sans TC';color:#7C756B">Practitioner</div>
+      </div>
+    </div>
+    <div class="mh-prac-duty" style="display:flex;align-items:center;justify-content:space-between;gap:10px;background:#DCE6DB;border-radius:12px;padding:10px 12px;margin-bottom:18px;white-space:nowrap">
+      <div style="font:600 12px 'Noto Sans TC';color:#2E4A34">接單狀態</div>
+      <div onClick="{{ toggleDuty }}" style="{{ dutyTrackStyle }}"><div style="{{ dutyDotStyle }}"></div></div>
+    </div>
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+      <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap;flex:none">{{ item.label }}</div>
+    </sc-for>
+    <div class="mh-prac-logout" onClick="{{ goLogout }}" style="margin-top:auto;display:flex;align-items:center;gap:8px;padding:12px 10px;border-top:1px solid #E6DECF;cursor:pointer;color:#B5543C;font:600 13px 'Noto Sans TC';white-space:nowrap">
+      <div style="position:relative;width:16px;height:14px;flex:none">
+        <div style="position:absolute;left:0;top:0;width:9px;height:14px;border:2px solid #B5543C;border-right:none;border-radius:3px 0 0 3px;box-sizing:border-box"></div>
+        <div style="position:absolute;left:7px;top:6px;width:8px;height:2px;background:#B5543C"></div>
+        <div style="position:absolute;left:11px;top:2px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #B5543C"></div>
+      </div>
+      登出
+    </div>
+  </div>
+
+  <div class="mh-prac-main" style="flex:1;min-width:0;padding:clamp(20px,4vw,36px) clamp(16px,4vw,44px);max-width:1600px">
+    <div style="font:700 clamp(22px,4vw,28px) 'Quicksand';color:#423D37;margin-bottom:22px">{{ headerTitle }}</div>
+
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px">
+        <sc-for list="{{ miniStats }}" as="stat" hint-placeholder-count="4">
+          <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:16px;padding:18px">
+            <div style="font:600 12px 'Noto Sans TC';color:#7C756B">{{ stat.label }}</div>
+            <div style="font:700 26px 'Quicksand';color:#423D37;margin-top:6px">{{ stat.val }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div style="font:700 16px 'Quicksand'">高危通知</div>
+            <button onClick="{{ refreshFlags }}" style="border:none;background:transparent;color:#557A60;font:600 12px 'Noto Sans TC'">重新整理 ↻</button>
+          </div>
+          <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font:600 13px 'Noto Sans TC';color:#423D37;line-height:1.4">{{ f.patient }}</div>
+                <div style="font:400 11px 'Noto Sans TC';color:#7C756B;line-height:1.4">{{ f.time }}</div>
+              </div>
+              <div style="background:#FBEAE6;color:#B5543C;font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px">高危</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div style="font:700 16px 'Quicksand'">今日預約</div>
+          </div>
+          <sc-for list="{{ appts }}" as="a" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE0;font:400 13px 'Noto Sans TC'">
+              <div style="color:#423D37;font-weight:600">{{ a.name }}</div>
+              <div style="color:#7C756B">{{ a.time }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div style="font:700 16px 'Quicksand'">我的個案</div>
+          </div>
+          <sc-for list="{{ cases }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0EBE0">
+              <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ c.name }}</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="font:600 11px 'Noto Sans TC';color:#557A60">靈力 {{ c.spiritPower }}</div>
+                <div style="{{ c.badgeStyle }}">{{ c.status }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="font:700 16px 'Quicksand';margin-bottom:14px">資源連結</div>
+          <sc-for list="{{ resources }}" as="r" hint-placeholder-count="5">
+            <div style="padding:10px 0;border-bottom:1px solid #F0EBE0;font:500 13px 'Noto Sans TC';color:#5C564C">{{ r }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFlagsPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font:700 16px 'Quicksand'">高危通知</div>
+          <button onClick="{{ refreshFlags }}" style="border:none;background:transparent;color:#557A60;font:600 12px 'Noto Sans TC'">重新整理 ↻</button>
+        </div>
+        <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #F0EBE0">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font:600 14px 'Noto Sans TC';color:#423D37;line-height:1.4">{{ f.patient }}</div>
+              <div style="font:400 12px 'Noto Sans TC';color:#7C756B;line-height:1.4">{{ f.time }}</div>
+            </div>
+            <div style="background:#FBEAE6;color:#B5543C;font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px">高危</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isApptPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:14px">今日預約</div>
+        <sc-for list="{{ appts }}" as="a" hint-placeholder-count="3">
+          <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F0EBE0;font:400 14px 'Noto Sans TC'">
+            <div style="color:#423D37;font-weight:600">{{ a.name }}</div>
+            <div style="color:#7C756B">{{ a.time }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCasesPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:14px">我的個案</div>
+        <sc-for list="{{ cases }}" as="c" hint-placeholder-count="4">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #F0EBE0">
+            <div style="font:600 14px 'Noto Sans TC';color:#423D37">{{ c.name }}</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font:600 12px 'Noto Sans TC';color:#557A60">靈力 {{ c.spiritPower }}</div>
+              <div style="{{ c.badgeStyle }}">{{ c.status }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStatsPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
+        <div style="font:700 16px 'Quicksand';margin-bottom:16px">統計報表</div>
+        <div style="display:flex;align-items:flex-end;gap:12px;height:140px">
+          <sc-for list="{{ statBars }}" as="b" hint-placeholder-count="7">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+              <div style="width:100%;background:#9CC3A0;border-radius:6px 6px 0 0;height:{{ b.h }}%"></div>
+              <div style="font:500 10px 'Noto Sans TC';color:#9A9385;margin-top:6px">{{ b.day }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font:400 12px 'Noto Sans TC';color:#7C756B;margin-top:10px">近 7 天服務個案數</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSettingsPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:480px;display:flex;flex-direction:column;gap:16px">
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font:700 14px 'Noto Sans TC';color:#423D37">高危案件通知提醒</div>
+            <div style="font:400 12px 'Noto Sans TC';color:#7C756B;margin-top:2px">有新的高危個案時即時提醒</div>
+          </div>
+          <div onClick="{{ toggleAlert }}" style="{{ alertTrackStyle }}"><div style="{{ alertDotStyle }}"></div></div>
+        </div>
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
+          <div style="font:700 14px 'Noto Sans TC';color:#423D37;margin-bottom:8px">帳號資訊</div>
+          <div style="font:400 13px 'Noto Sans TC';color:#5C564C">陳心理師 · Practitioner</div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isPairingPanel }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px;max-width:640px">
+        <sc-if value="{{ !pairingGroups.length }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#FBF9F4;border:1px dashed #E6DECF;border-radius:16px;padding:24px;text-align:center;font:400 13px 'Noto Sans TC';color:#7C756B">
+            目前尚無紓壓配對紀錄
+          </div>
+        </sc-if>
+        <sc-for list="{{ pairingGroups }}" as="g" hint-placeholder-count="2">
+          <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font:700 14px 'Noto Sans TC';color:#423D37">{{ g.id }} · {{ g.userNick }} × {{ g.partnerNick }}</div>
+                <div style="font:400 11px 'Noto Sans TC';color:#7C756B;margin-top:4px">壓力分數 {{ g.score }} / 15 · {{ g.time }}</div>
+              </div>
+              <div style="{{ g.badgeStyle }}">{{ g.riskLabel }}</div>
+            </div>
+            <div onClick="{{ g.onToggle }}" style="margin-top:12px;font:600 12px 'Noto Sans TC';color:#557A60;cursor:pointer">{{ g.toggleLabel }}</div>
+            <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ false }}">
+              <div class="mh-scroll" style="margin-top:10px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:#F4F0E7;border-radius:12px;padding:12px">
+                <sc-for list="{{ g.log }}" as="entry" hint-placeholder-count="3">
+                  <div style="font:400 12px 'Noto Sans TC';color:#5C564C">{{ entry.text }}</div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
+class Component extends DCLogic {
+  state = { onDuty: true, flagsVer: 0, panel: 'overview', alertOn: true, expandedGroup: null };
+  renderVals() {
+    const active = 'padding:11px 12px;border-radius:12px;font:700 13px \'Noto Sans TC\';color:#2E4A34;background:#DCE6DB;margin-bottom:2px;cursor:pointer;';
+    const inactive = 'padding:11px 12px;border-radius:12px;font:500 13px \'Noto Sans TC\';color:#7C756B;margin-bottom:2px;cursor:pointer;';
+    const items = [
+      {label:'總覽', key:'overview'}, {label:'高危通知', key:'flags'}, {label:'今日預約', key:'appt'},
+      {label:'我的個案', key:'cases'}, {label:'紓壓配對紀錄', key:'pairing'}, {label:'統計報表', key:'stats'}, {label:'設定', key:'settings'},
+    ];
+    const navItems = items.map(it => ({ label: it.label, onClick: () => this.setState({ panel: it.key }), style: this.state.panel === it.key ? active : inactive }));
+    const titles = { overview:'心理師儀表板', flags:'高危通知', appt:'今日預約', cases:'我的個案', pairing:'紓壓配對紀錄', stats:'統計報表', settings:'設定' };
+
+    const riskInfo = { high:{label:'高危',bg:'#FBEAE6',fg:'#B5543C'}, medium:{label:'中度',bg:'#FBF0DC',fg:'#B5843A'}, low:{label:'低度',bg:'#DCE6DB',fg:'#2E4A34'} };
+    const pairingGroups = (this.props.pairingGroups || []).map(g => {
+      const ri = riskInfo[g.riskLevel] || riskInfo.low;
+      const expanded = this.state.expandedGroup === g.id;
+      return {
+        ...g, riskLabel: ri.label,
+        badgeStyle: `background:${ri.bg};color:${ri.fg};font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px;flex:none`,
+        expanded, toggleLabel: expanded ? '收合對話紀錄 ▴' : '查看匿名對話紀錄 ▾',
+        onToggle: () => this.setState(s => ({ expandedGroup: s.expandedGroup === g.id ? null : g.id })),
+      };
+    });
+
+    return {
+      goLogout: this.props.goLogout,
+      navItems, headerTitle: titles[this.state.panel],
+      isOverview: this.state.panel==='overview', isFlagsPanel: this.state.panel==='flags',
+      isApptPanel: this.state.panel==='appt', isCasesPanel: this.state.panel==='cases',
+      isPairingPanel: this.state.panel==='pairing', pairingGroups,
+      isStatsPanel: this.state.panel==='stats', isSettingsPanel: this.state.panel==='settings',
+      dutyTrackStyle: `width:36px;height:20px;border-radius:999px;background:${this.state.onDuty?'#557A60':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.onDuty?'flex-end':'flex-start'}`,
+      dutyDotStyle: 'width:16px;height:16px;border-radius:50%;background:#FBF9F4',
+      toggleDuty: () => this.setState(s => ({ onDuty: !s.onDuty })),
+      miniStats: [
+        {label:'我的個案', val:'4'}, {label:'高危通知', val:String(2 + (this.props.extraFlags||[]).length)}, {label:'今日預約', val:'3'}, {label:'本月服務', val:'28'},
+      ],
+      flags: [
+        ...(this.props.extraFlags || []),
+        {patient:'個案 #小明 (patient)', time:'今日 09:42'},
+        {patient:'個案 #小美 (patient2)', time:'昨日 21:10'},
+      ],
+      refreshFlags: () => this.setState(s => ({ flagsVer: s.flagsVer + 1 })),
+      appts: [
+        {name:'王小美', time:'14:00'}, {name:'李大同', time:'15:30'}, {name:'張心怡', time:'17:00'},
+      ],
+      cases: [
+        {name: this.props.patientName || '承言', status:'穩定', spiritPower: this.props.patientSpiritPower ?? 0, badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
+        {name:'小美', status:'需關注', spiritPower: 85, badgeStyle:'background:#FBEAE6;color:#B5543C;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
+        {name:'林先生', status:'穩定', spiritPower: 210, badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
+        {name:'陳小姐', status:'穩定', spiritPower: 340, badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
+      ],
+      resources: ['臨床量表資料庫','個案統計報表','督導諮詢系統','治療計劃範本','繼續教育課程'],
+      statBars: [3,5,4,6,5,7,4].map((h,i) => ({ h: h*12, day:['07/05','07/06','07/07','07/08','07/09','07/10','今日'][i] })),
+      toggleAlert: () => this.setState(s => ({ alertOn: !s.alertOn })),
+      alertTrackStyle: `width:40px;height:22px;border-radius:999px;background:${this.state.alertOn?'#557A60':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.alertOn?'flex-end':'flex-start'}`,
+      alertDotStyle: 'width:18px;height:18px;border-radius:50%;background:#FBF9F4',
+    };
+  }
+}
+
+</script>
+</body>
+</html>

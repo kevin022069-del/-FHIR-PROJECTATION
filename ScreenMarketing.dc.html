@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @keyframes mh-float-a{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes mh-float-b{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @media (max-width: 860px) {
+      .mh-nav-links { display: none !important; }
+    }
+    @media (max-width: 640px) {
+      .mh-hero-actions { flex-direction: column !important; align-items: stretch !important; }
+      .mh-hero-actions button { width: 100% !important; }
+    }
+  </style>
+</helmet>
+<div ref="{{ rootRef }}" style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:url('./img/bg-marketing.jpg') top center/cover no-repeat,#F4F0E7;color:#423D37;font-family:'Noto Sans TC',sans-serif" data-screen-label="行銷首頁">
+
+  <!-- nav -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,4vw,48px);background:#FBF9F4;border-bottom:1px solid #E6DECF;position:sticky;top:0;z-index:10">
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <div style="width:34px;height:34px;border-radius:10px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);flex:none"></div>
+      <div style="font:700 20px 'Quicksand',sans-serif;color:#423D37;white-space:nowrap">MindHarbor</div>
+    </div>
+    <div class="mh-nav-links" style="display:flex;gap:32px;font:500 15px 'Noto Sans TC';white-space:nowrap">
+      <span onClick="{{ scrollToHero }}" style="white-space:nowrap;cursor:pointer">首頁</span>
+      <span onClick="{{ scrollToAbout }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">關於我們</span>
+      <span onClick="{{ scrollToServices }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">如何使用</span>
+      <span onClick="{{ scrollToComingSoon }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">功能介紹</span>
+      <span onClick="{{ scrollToFooter }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">聯絡我們</span>
+    </div>
+    <button onClick="{{ goToRegister }}" style="border:none;background:#557A60;color:#FBF9F4;padding:11px 22px;border-radius:999px;font:600 14px 'Noto Sans TC';white-space:nowrap;flex:none">註冊</button>
+  </div>
+
+  <!-- first screen: hero + trust bar -->
+  <div ref="{{ heroSectionRef }}" style="display:flex;flex-direction:column;min-height:calc(100% - 96px);box-sizing:border-box">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;align-items:center;flex:1;padding:clamp(24px,5vw,48px) clamp(16px,5vw,48px);max-width:1280px;margin:0 auto;box-sizing:border-box;width:100%">
+    <div>
+      <div style="font:700 clamp(28px,5vw,46px)/1.3 'Quicksand',sans-serif;color:#423D37;margin-bottom:22px">今天，<br>也請好好照顧<br>自己的心。</div>
+      <div style="font:400 clamp(15px,2.2vw,17px)/1.8 'Noto Sans TC';color:#7C756B;max-width:440px;margin-bottom:30px">透過 AI 陪伴、每日修練與 FHIR 健康資料，讓每一天都比昨天更靠近理想的自己。</div>
+      <div class="mh-hero-actions" style="display:flex;gap:14px;flex-wrap:wrap">
+        <button onClick="{{ goToLogin }}" style="border:none;background:#557A60;color:#FBF9F4;padding:15px 28px;border-radius:999px;font:600 16px 'Noto Sans TC';white-space:nowrap">開始今日修練</button>
+        <button style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:15px 28px;border-radius:999px;font:600 16px 'Noto Sans TC';white-space:nowrap">觀看介紹 ▸</button>
+      </div>
+      <div style="display:flex;gap:18px;margin-top:34px;font:600 12px 'Noto Sans TC';color:#7C756B;flex-wrap:wrap">
+        <span>FHIR R4</span><span>AI 陪伴</span><span>隱私守護</span>
+      </div>
+    </div>
+    <div style="height:min(320px,42vh);min-height:260px;border-radius:28px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+      <div ref="{{ heroRef }}" style="display:flex;gap:50px;align-items:flex-end">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;animation:mh-float-a 3.4s ease-in-out infinite">
+          <div style="font:700 13px 'Quicksand';color:#B5453A">心魔</div>
+          <div style="position:relative;width:168px;height:168px">
+            <div data-head="devil" style="{{ headStyleDevil }}">
+            <div style="position:absolute;inset:0;background:url('./img/mascot-devil.png') center/cover no-repeat"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;animation:mh-float-b 3.9s ease-in-out infinite .3s">
+          <div style="font:700 13px 'Quicksand';color:#557A60">靈力</div>
+          <div style="position:relative;width:168px;height:189px">
+            <div data-head="angel" style="{{ headStyleAngel }}">
+            <div style="position:absolute;inset:0;background:url('./img/mascot-angel.png') center/cover no-repeat"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- trust bar -->
+  <div style="display:flex;justify-content:center;gap:clamp(16px,3vw,32px);padding:20px clamp(16px,4vw,48px);background:#FBF9F4;border-top:1px solid #E6DECF;font:600 12.5px 'Noto Sans TC';color:#7C756B;flex-wrap:wrap;box-sizing:border-box">
+    <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconBadge }}"></span>競賽認證作品</span>
+    <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconLock }}"></span>資料本機儲存</span>
+    <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconPeople }}"></span>服務 1,200+ 人次</span>
+    <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconRating }}"></span>4.8 使用者評價</span>
+    <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconChat }}"></span>線上諮詢</span>
+  </div>
+  </div>
+
+  <!-- services -->
+  <div ref="{{ servicesRef }}" style="padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:48px">
+      <div style="font:700 clamp(24px,4vw,32px) 'Quicksand';color:#423D37">我們提供的服務</div>
+      <div style="color:#7C756B;margin-top:10px">從個人到家庭，量身打造的心理支持方案</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px">
+      <sc-for list="{{ services }}" as="svc" hint-placeholder-count="6">
+        <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:22px;padding:28px">
+          <div style="width:46px;height:46px;border-radius:14px;background:#DCE6DB;margin-bottom:16px"></div>
+          <div style="font:700 17px 'Quicksand';margin-bottom:8px">{{ svc.title }}</div>
+          <div style="font:400 14px/1.7 'Noto Sans TC';color:#7C756B">{{ svc.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- about -->
+  <div ref="{{ aboutRef }}" style="background:#DCE6DB;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px)">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:50px;align-items:center">
+      <div style="height:min(280px,40vh);min-height:200px;border-radius:24px;background:url('./img/about-illustration.png') center/cover no-repeat,linear-gradient(160deg,#EAF1E7,#D6E3D4);position:relative;overflow:hidden">
+        <div style="position:absolute;left:-30px;bottom:-40px;width:180px;height:180px;border-radius:50%;background:#BFDCC1;opacity:.7"></div>
+        <div style="position:absolute;right:-20px;top:-30px;width:140px;height:140px;border-radius:50%;background:#9CC3A0;opacity:.5"></div>
+        <div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F4EFE6,#DCE6DB)"></div>
+      </div>
+      <div>
+        <div style="font:700 30px 'Quicksand';margin-bottom:16px">關於 MindHarbor</div>
+        <div style="font:400 15px/1.9 'Noto Sans TC';color:#42403A">我們結合 AI 陪伴與 FHIR 醫療互通標準，打造每日可持續的心理健康練習，並由專業心理師團隊提供後盾，讓紓壓成為一件可以被陪伴、被記錄、被看見的事。</div>
+        <div style="display:flex;gap:14px;margin-top:20px">
+          <div style="background:#FBF9F4;padding:8px 16px;border-radius:999px;font:600 12px 'Noto Sans TC'">合法立案機構</div>
+          <div style="background:#FBF9F4;padding:8px 16px;border-radius:999px;font:600 12px 'Noto Sans TC'">FHIR R4 相容</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- team -->
+  <div style="padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:48px">
+      <div style="font:700 clamp(24px,4vw,32px) 'Quicksand'">專業團隊</div>
+      <div style="color:#7C756B;margin-top:10px">陪伴你走過每一段旅程</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:22px">
+      <sc-for list="{{ team }}" as="member" hint-placeholder-count="4">
+        <div style="text-align:center">
+          <div style="width:100%;aspect-ratio:1;border-radius:20px;background:{{ member.photoLayer }}{{ member.bg }};margin-bottom:12px;position:relative;overflow:hidden"></div>
+          <div style="font:700 15px 'Quicksand'">{{ member.name }}</div>
+          <div style="font:400 13px 'Noto Sans TC';color:#7C756B">{{ member.role }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- coming soon -->
+  <div ref="{{ comingSoonRef }}" style="background:#FBF9F4;border-top:1px solid #E6DECF;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px)">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="text-align:center;font:700 clamp(22px,4vw,30px) 'Quicksand';margin-bottom:40px">未來功能搶先看</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">
+        <sc-for list="{{ upcoming }}" as="u" hint-placeholder-count="6">
+          <div style="border:1px dashed #C9C2B4;border-radius:18px;padding:20px;display:flex;gap:14px;align-items:center">
+            <div style="width:38px;height:38px;border-radius:10px;background:#DCE6DB;flex:none"></div>
+            <div style="font:600 14px 'Noto Sans TC'">{{ u }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- cta -->
+  <div style="background:linear-gradient(135deg,#557A60,#7C9473);padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);text-align:center;color:#FBF9F4">
+    <div style="font:700 clamp(22px,4vw,30px) 'Quicksand';margin-bottom:14px">準備好照顧自己的心了嗎？</div>
+    <div style="font:400 15px 'Noto Sans TC';opacity:.9;margin-bottom:26px">立即開始你的第一次每日修練</div>
+    <button onClick="{{ goToLogin }}" style="border:none;background:#FBF9F4;color:#557A60;padding:15px 32px;border-radius:999px;font:700 16px 'Noto Sans TC';white-space:nowrap">開始今日修練</button>
+  </div>
+
+  <!-- footer -->
+  <div ref="{{ footerRef }}" style="background:#2E2A24;color:#C9C2B4;padding:clamp(32px,6vw,50px) clamp(16px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;font:400 13px 'Noto Sans TC'">
+    <div>
+      <div style="font:700 18px 'Quicksand';color:#FBF9F4;margin-bottom:10px">MindHarbor</div>
+      <div style="line-height:1.8">用 AI 陪伴與每日修練，陪你把心照顧好。</div>
+    </div>
+    <div>
+      <div style="font:700 13px 'Noto Sans TC';color:#FBF9F4;margin-bottom:10px">聯絡資訊</div>
+      <div style="line-height:2">電話：02-1234-5678<br>信箱：hello@mindharbor.tw<br>營業時間：週一至週五 09:00–18:00</div>
+    </div>
+    <div>
+      <div style="font:700 13px 'Noto Sans TC';color:#FBF9F4;margin-bottom:10px">社群</div>
+      <div style="line-height:2">Facebook · Instagram · Line</div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  heroRef = React.createRef();
+  rootRef = React.createRef();
+  heroSectionRef = React.createRef();
+  servicesRef = React.createRef();
+  aboutRef = React.createRef();
+  comingSoonRef = React.createRef();
+  footerRef = React.createRef();
+
+  scrollToSection(ref) {
+    const root = this.rootRef.current;
+    const target = ref.current;
+    if (!root || !target) return;
+    const top = target.offsetTop - 78;
+    root.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }
+  state = {
+    headRotation: { devil: 0, angel: 0 },
+  };
+
+  componentDidMount() {
+    this._onMove = (e) => {
+      const host = this.heroRef.current;
+      if (!host) return;
+      const heads = host.querySelectorAll('[data-head]');
+      const nextRot = {};
+      heads.forEach(el => {
+        const key = el.getAttribute('data-head');
+        const rect = el.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        const dx = e.clientX - cx, dy = e.clientY - cy;
+        const maxDeg = 12;
+        const deg = Math.max(-maxDeg, Math.min(maxDeg, (dx / 300) * maxDeg));
+        nextRot[key] = deg;
+      });
+
+      this.setState({
+        headRotation: { ...this.state.headRotation, ...nextRot },
+      });
+    };
+    window.addEventListener('mousemove', this._onMove);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('mousemove', this._onMove);
+  }
+
+  renderVals() {
+    return {
+      goToLogin: this.props.goToLogin,
+      goToRegister: this.props.goToRegister,
+      heroRef: this.heroRef,
+      rootRef: this.rootRef,
+      heroSectionRef: this.heroSectionRef,
+      servicesRef: this.servicesRef,
+      aboutRef: this.aboutRef,
+      comingSoonRef: this.comingSoonRef,
+      footerRef: this.footerRef,
+      scrollToHero: () => this.scrollToSection(this.heroSectionRef),
+      scrollToAbout: () => this.scrollToSection(this.aboutRef),
+      scrollToServices: () => this.scrollToSection(this.servicesRef),
+      scrollToComingSoon: () => this.scrollToSection(this.comingSoonRef),
+      scrollToFooter: () => this.scrollToSection(this.footerRef),
+      headStyleDevil: `position:absolute;inset:0;transform:rotate(${this.state.headRotation.devil}deg);transform-origin:50% 100%;transition:transform .15s ease-out`,
+      headStyleAngel: `position:absolute;inset:0;transform:rotate(${this.state.headRotation.angel}deg);transform-origin:50% 100%;transition:transform .15s ease-out`,
+      iconBadge: 'width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F0CA7A,#C99A3E);display:inline-block',
+      iconLock: 'width:13px;height:13px;border-radius:4px;background:#7C9473;display:inline-block',
+      iconPeople: 'width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#D19A76,#9A6B54);display:inline-block',
+      iconRating: 'width:14px;height:14px;transform:rotate(45deg);background:radial-gradient(circle at 35% 30%,#F0CA7A,#C99A3E);display:inline-block',
+      iconChat: 'width:15px;height:12px;border-radius:6px 6px 6px 2px;background:#557A60;display:inline-block',
+      services: [
+        {title:'個人諮商', desc:'一對一深度晤談，處理焦慮、憂鬱與生活壓力議題。'},
+        {title:'伴侶諮商', desc:'改善溝通模式，重建關係中的信任與親密感。'},
+        {title:'家庭諮商', desc:'陪伴家庭成員一起面對衝突，找回和諧互動。'},
+        {title:'生涯諮詢', desc:'釐清職涯方向，做出更符合自己的選擇。'},
+        {title:'正念紓壓', desc:'透過正念練習，提升覺察力並降低壓力反應。'},
+        {title:'焦慮處理', desc:'學習具體技巧，緩解焦慮對日常生活的影響。'},
+      ],
+      team: [
+        {name:'陳心理師', role:'臨床心理師 · 15年經驗', bg:'#DCE6DB', face:'#88AE8E'},
+        {name:'林心理師', role:'諮商心理師 · 伴侶諮商', bg:'#F4E4D6', face:'#D19A76'},
+        {name:'黃心理師', role:'諮商心理師 · 兒少專長', bg:'#E4DCF0', face:'#A688B0'},
+        {name:'吳心理師', role:'臨床心理師 · 職涯諮詢', bg:'#DDE7EF', face:'#8FA9C4'},
+      ].map((m, i) => ({ ...m, photoLayer: `url('./img/avatar-team-${i + 1}.png') center/cover no-repeat,` })),
+      upcoming: ['AI 情緒分析','線上預約系統','即時諮詢聊天','健康追蹤','心理健康知識庫','線上課程'],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

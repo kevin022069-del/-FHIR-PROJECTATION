@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px) 90px" data-screen-label="每日任務">
+  <div style="max-width:900px;margin:0 auto">
+    <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:6px;color:#7C756B;font:600 13px 'Noto Sans TC';cursor:pointer;margin-bottom:16px;width:fit-content;white-space:nowrap">‹ 返回首頁</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+      <div style="font:700 26px 'Quicksand';color:#423D37">今日修練任務</div>
+      <div style="font:600 13px 'Noto Sans TC';color:#7C756B">{{ done }}/{{ total }} 已完成</div>
+    </div>
+    <div style="height:6px;background:#EDE4D8;border-radius:999px;overflow:hidden;margin-bottom:28px">
+      <div style="height:100%;width:{{ pct }}%;background:#557A60;border-radius:999px"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:30px">
+      <sc-for list="{{ taskCards }}" as="t" hint-placeholder-count="4">
+        <div style="{{ t.cardStyle }}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="width:40px;height:40px;border-radius:12px;background:{{ t.iconBg }}"></div>
+            <div onClick="{{ t.onToggle }}" style="{{ t.checkStyle }}">{{ t.checkMark }}</div>
+          </div>
+          <div style="font:700 16px 'Quicksand';color:#423D37;margin-top:14px">{{ t.name }}</div>
+          <div style="font:500 12px 'Noto Sans TC';color:#7C756B;margin-top:2px">{{ t.duration }} {{ t.unit }} · {{ t.tag }}</div>
+          <div style="font:400 13px/1.6 'Noto Sans TC';color:#5C564C;margin-top:10px">{{ t.desc }}</div>
+          <div style="font:400 12px 'Noto Sans TC';color:#9A9385;margin-top:6px;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:#D6C68F;flex:none"></span>{{ t.tips }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px">
+            <div style="font:700 15px 'Quicksand';color:#557A60">{{ t.timerLabel }}</div>
+            <button onClick="{{ t.onTimer }}" style="{{ t.timerBtnStyle }}">{{ t.timerBtnLabel }}</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="text-align:center">
+      <button onClick="{{ goNext }}" style="border:none;background:#557A60;color:#FBF9F4;padding:15px 34px;border-radius:999px;font:700 15px 'Noto Sans TC'">完成任務，前往總結 ›</button>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:800}}">
+function fmtTime(sec) {
+  const m = Math.floor(sec/60).toString().padStart(2,'0');
+  const s = (sec%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+const COLORS = ['#DCE6DB','#F4E4D6','#FBE1DC','#E4DCF0'];
+
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const taskCards = p.tasks.map((t, i) => ({
+      name: t.name, duration: t.duration, unit: t.unit, tag: t.tag, desc: t.desc, tips: t.tips,
+      iconBg: COLORS[i % COLORS.length],
+      cardStyle: `background:#FBF9F4;border:1px solid ${t.completed ? '#9CC3A0' : '#E6DECF'};border-radius:20px;padding:22px;`,
+      checkMark: t.completed ? '✓' : '',
+      checkStyle: `width:26px;height:26px;border-radius:8px;border:2px solid ${t.completed?'#557A60':'#C9C2B4'};background:${t.completed?'#557A60':'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;font:700 14px sans-serif;cursor:pointer;`,
+      onToggle: () => p.toggleTask(t.id),
+      timerLabel: fmtTime(t.timerSeconds),
+      timerBtnLabel: t.completed ? '已完成' : (t.running ? '暫停' : '開始'),
+      timerBtnStyle: `border:none;padding:8px 18px;border-radius:999px;font:600 12px 'Noto Sans TC';color:#fff;background:${t.completed?'#B7C9BA':(t.running?'#C3946F':'#557A60')};cursor:${t.completed?'default':'pointer'};`,
+      onTimer: () => { if (!t.completed) p.toggleTimer(t.id); },
+    }));
+    const done = p.done, total = p.total;
+    return {
+      taskCards, done, total, pct: Math.round((done/total)*100),
+      goNext: p.goNext, goHome: p.goHome,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

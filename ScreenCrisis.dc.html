@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+</helmet>
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:url('./img/bg-crisis.jpg') center/cover no-repeat,#FBF4F1;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px);display:flex;justify-content:center" data-screen-label="危機介入頁">
+  <div style="max-width:600px;width:100%">
+    <div style="text-align:center;margin-bottom:30px">
+      <div style="width:56px;height:56px;margin:0 auto 14px;position:relative;border-radius:50%;overflow:hidden;background:url('./img/icon-crisis.png') center/cover no-repeat,transparent">
+        <div style="position:absolute;left:6px;top:8px;width:22px;height:32px;border-radius:50% 50% 50% 0;background:#E8B7A9;transform:rotate(-45deg)"></div>
+        <div style="position:absolute;right:6px;top:8px;width:22px;height:32px;border-radius:50% 50% 0 50%;background:#E8B7A9;transform:rotate(45deg)"></div>
+      </div>
+      <div style="font:700 26px 'Quicksand';color:#423D37;margin-bottom:8px">你不孤單，有人在這裡</div>
+      <div style="font:400 14px/1.7 'Noto Sans TC';color:#7C756B">我們偵測到你目前的壓力狀態較高，系統已通知你的心理師關注你的狀況。</div>
+    </div>
+
+    <div style="background:#FBF9F4;border:1px solid #E8B7A9;border-radius:18px;padding:16px 20px;margin-bottom:26px;font:600 13px 'Noto Sans TC';color:#B5543C;text-align:center">
+      ✓ 已通知心理師團隊，將盡快與你聯繫
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:26px">
+      <sc-for list="{{ hotlines }}" as="h" hint-placeholder-count="3">
+        <a href="{{ h.tel }}" style="text-decoration:none;display:flex;justify-content:space-between;align-items:center;background:#FBF9F4;border:1px solid #E6DECF;border-radius:16px;padding:18px 20px">
+          <div>
+            <div style="font:700 16px 'Quicksand';color:#423D37">{{ h.name }}</div>
+            <div style="font:400 12px 'Noto Sans TC';color:#7C756B">{{ h.desc }}</div>
+          </div>
+          <div style="font:700 20px 'Quicksand';color:#B5543C">{{ h.number }}</div>
+        </a>
+      </sc-for>
+    </div>
+
+    <button style="width:100%;border:none;background:#557A60;color:#FBF9F4;padding:15px;border-radius:999px;font:700 14px 'Noto Sans TC';margin-bottom:14px;box-sizing:border-box">申請預約心理師諮詢</button>
+
+    <div style="background:#F4EFEA;border-radius:16px;padding:18px 20px;margin-bottom:26px">
+      <div style="font:700 13px 'Noto Sans TC';color:#423D37;margin-bottom:8px">自我照護提示</div>
+      <div style="font:400 13px/1.8 'Noto Sans TC';color:#5C564C">• 深呼吸（4 秒吸、4 秒停、4 秒吐）<br>• 走到窗邊或戶外透透氣<br>• 聯繫一位你信任的人</div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px">
+      <button onClick="{{ goTasks }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:12px 22px;border-radius:999px;font:600 13px 'Noto Sans TC'">我好一點了，繼續今日任務</button>
+      <button onClick="{{ goHome }}" style="border:none;background:#7C756B;color:#FBF9F4;padding:12px 22px;border-radius:999px;font:600 13px 'Noto Sans TC'">回到首頁</button>
+    </div>
+
+    <div style="text-align:center;font:400 11px 'Noto Sans TC';color:#9A9385">本系統 AI 僅供輔助參考，非醫療診斷；緊急狀況請撥打 119 或就近至急診室。</div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      hotlines: [
+        {name:'1925 安心專線', desc:'24小時免費，情緒支持與危機諮詢', number:'1925', tel:'tel:1925'},
+        {name:'1995 生命線', desc:'24小時危機支援', number:'1995', tel:'tel:1995'},
+        {name:'1980 張老師專線', desc:'傾聽陪伴、專業輔導', number:'1980', tel:'tel:1980'},
+      ],
+      goTasks: this.props.goTasks, goHome: this.props.goHome,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
