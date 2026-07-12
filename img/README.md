@@ -21,7 +21,6 @@
 ## 插畫 / 物件
 | 檔名 | 用途 | 建議尺寸 |
 |---|---|---|
-| `hero-illustration.png` | 行銷首頁 Hero 區塊插畫底圖（心魔/靈力互動角色會疊在上面） | 橫式，約 4:3 |
 | `about-illustration.png` | 行銷首頁「關於我們」插畫 | 橫式，約 4:3 |
 | `icon-crisis.png` | 危機介入頁頂部圖示 | 正方形 |
 | `icon-celebration.png` | 今日結果頁慶祝圖示 | 正方形 |
@@ -83,6 +82,18 @@
 | `badge-growth.png` | Growth 心魔下降 50% |
 
 正方形，會裁切成圓形置中顯示。
+
+## 未來功能搶先看圖示（行銷首頁「未來功能搶先看」小方塊）
+| 檔名 | 對應項目 |
+|---|---|
+| `icon-upcoming-ai-analysis.png` | AI 情緒分析 |
+| `icon-upcoming-booking.png` | 線上預約系統 |
+| `icon-upcoming-chat.png` | 即時諮詢聊天 |
+| `icon-upcoming-health-tracking.png` | 健康追蹤 |
+| `icon-upcoming-knowledge-base.png` | 心理健康知識庫 |
+| `icon-upcoming-courses.png` | 線上課程 |
+
+38×38 小圖示，沒放圖檔會維持原本純色方塊。Prompt 見 `head.md`。
 
 ## 沒有開放自訂的地方
 以下維持 CSS 純繪製，沒有做圖片替換（避免破壞資料可讀性或功能性小圖示）：

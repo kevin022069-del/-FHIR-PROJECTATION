@@ -9,8 +9,11 @@
 <x-dc>
 <helmet>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @keyframes mh-page-enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  </style>
 </helmet>
-<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px) 90px;display:flex;justify-content:center" data-screen-label="今日總結">
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:#F4F0E7;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px) 90px;display:flex;justify-content:center;animation:mh-page-enter .5s cubic-bezier(.22,1,.36,1) both" data-screen-label="今日總結">
   <div style="max-width:640px;width:100%;background:#FBF9F4;border:1px solid #E6DECF;border-radius:24px;padding:clamp(20px,5vw,40px)">
     <div style="font:700 24px 'Quicksand';color:#423D37;margin-bottom:6px">今日反思總結</div>
     <div style="font:400 14px 'Noto Sans TC';color:#7C756B;margin-bottom:30px">花一點時間，回顧今天的自己</div>

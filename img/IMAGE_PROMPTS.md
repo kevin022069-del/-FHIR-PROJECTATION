@@ -47,11 +47,6 @@ extremely subtle, low-contrast abstract texture background, very soft cream and 
 
 ## 插畫 / 物件
 
-**`hero-illustration.png`**（橫式，約 4:3，中下留白給互動角色疊圖）
-```
-soft dreamy gradient backdrop resembling a cozy evening sky or calm room interior, warm cream to pale mint gradient (#EDE8DE to #DCE6DB), flat minimal illustration, plenty of empty space in the center-bottom area for character illustrations to be placed on top, no characters, no text
-```
-
 **`about-illustration.png`**（橫式，約 4:3）
 ```
 flat vector illustration of a warm, welcoming counseling room or a person meditating peacefully by a window, soft mint green and cream palette, minimal line-free flat design, cozy and safe atmosphere, rounded organic shapes, no text, no visible face detail

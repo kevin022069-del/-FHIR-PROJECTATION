@@ -34,7 +34,7 @@
     <dc-import name="ScreenMarketing" hint-size="100%,100%" go-to-login="{{ goTo_login }}" go-to-register="{{ goToRegister }}"></dc-import>
   </sc-if>
   <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
-    <dc-import name="ScreenLogin" hint-size="100%,100%" gender="{{ gender }}" set-gender="{{ setGender }}" do-login="{{ doLogin }}" do-register="{{ doRegister }}" start-mode="{{ authMode }}" go-practitioner="{{ goTo_practitioner }}" go-admin="{{ goTo_admin }}"></dc-import>
+    <dc-import name="ScreenLogin" hint-size="100%,100%" gender="{{ gender }}" set-gender="{{ setGender }}" do-login="{{ doLogin }}" do-register="{{ doRegister }}" start-mode="{{ authMode }}" go-practitioner="{{ goTo_practitioner }}" go-admin="{{ goTo_admin }}" go-home="{{ goTo_marketing }}"></dc-import>
   </sc-if>
   <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
     <dc-import name="ScreenDashboard" hint-size="100%,100%"
@@ -246,7 +246,7 @@ class Component extends DCLogic {
   state = {
     screen: 'marketing',
     gender: 'male',
-    name: '承言',
+    name: '蕭游',
     mindDemon: 32,
     spiritPower: 582,
     pssAnswers: Array(10).fill(null),
@@ -331,7 +331,7 @@ class Component extends DCLogic {
     const isFemale = this.state.gender === 'female';
     this.setState({
       screen: 'dashboard',
-      name: isFemale ? '小美' : '承言',
+      name: isFemale ? '小美' : '蕭游',
       mindDemon: isFemale ? 38 : 32,
       spiritPower: isFemale ? 85 : 582,
       tasks: (isFemale ? FEMALE_TASKS : MALE_TASKS).map(t => ({...t, completed:false, timerSeconds:0, running:false})),
@@ -388,12 +388,23 @@ class Component extends DCLogic {
     this.syncPssToFhir(pssAnswers, total, category);
   };
 
+  // Called from ScreenPairing.reportProgress(), which may fire more than
+  // once per session (as soon as the quiz's risk score is known, and again
+  // if the user finishes the optional add-friend step) so a high-risk
+  // signal is never lost just because the user stops before reaching the
+  // end of the flow. We upsert by sessionId instead of always pushing a new
+  // group, and only ever add the "已通報" flag once per session.
   onPairingComplete = (summary) => {
     this.setState(s => {
-      const groupId = `G-${s.pairingGroups.length + 1}`;
+      const existingIdx = s.pairingGroups.findIndex(g => g.sessionId === summary.sessionId);
+      const groupId = existingIdx >= 0 ? s.pairingGroups[existingIdx].id : `G-${s.pairingGroups.length + 1}`;
       const newGroup = {
         id: groupId,
-        userNick: `你（${s.name}）`,
+        sessionId: summary.sessionId,
+        // Kept genuinely anonymous — the patient is told "全程匿名，不會顯示
+        // 任何真實帳號資訊" and the practitioner panel labels this a "匿名對話
+        // 紀錄", so no real display name should ever end up here.
+        userNick: '匿名旅伴',
         partnerNick: summary.partnerNick,
         score: summary.score,
         riskLevel: summary.riskLevel,
@@ -401,13 +412,19 @@ class Component extends DCLogic {
         friended: summary.friended,
         time: '剛剛',
       };
-      const newFriends = summary.friended ? [...s.friends, { nick: summary.partnerNick, since: '剛剛', online: true, lastActive: '剛剛在線' }] : s.friends;
+      const pairingGroups = existingIdx >= 0
+        ? s.pairingGroups.map((g, i) => i === existingIdx ? newGroup : g)
+        : [...s.pairingGroups, newGroup];
+      const newFriends = summary.final && summary.friended
+        ? [...s.friends, { nick: summary.partnerNick, since: '剛剛', online: true, lastActive: '剛剛在線' }]
+        : s.friends;
       const isHigh = summary.riskLevel === 'high';
-      const newFlags = isHigh
-        ? [...s.notifiedFlags, { patient: `匿名配對 ${groupId}（紓壓配對偵測）`, time: '剛剛' }]
+      const alreadyFlagged = s.notifiedFlags.some(f => f.sessionId === summary.sessionId);
+      const newFlags = isHigh && !alreadyFlagged
+        ? [...s.notifiedFlags, { sessionId: summary.sessionId, patient: `匿名配對 ${groupId}（紓壓配對偵測）`, time: '剛剛' }]
         : s.notifiedFlags;
       return {
-        pairingGroups: [...s.pairingGroups, newGroup],
+        pairingGroups,
         friends: newFriends,
         notifiedFlags: newFlags,
       };

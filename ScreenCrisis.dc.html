@@ -9,8 +9,11 @@
 <x-dc>
 <helmet>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @keyframes mh-page-enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  </style>
 </helmet>
-<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:url('./img/bg-crisis.jpg') center/cover no-repeat,#FBF4F1;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px);display:flex;justify-content:center" data-screen-label="危機介入頁">
+<div style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:url('./img/bg-crisis.jpg') center/cover no-repeat,#FBF4F1;font-family:'Noto Sans TC',sans-serif;padding:clamp(20px,5vw,40px) clamp(12px,4vw,24px);display:flex;justify-content:center;animation:mh-page-enter .5s cubic-bezier(.22,1,.36,1) both" data-screen-label="危機介入頁">
   <div style="max-width:600px;width:100%">
     <div style="text-align:center;margin-bottom:30px">
       <div style="width:56px;height:56px;margin:0 auto 14px;position:relative;border-radius:50%;overflow:hidden;background:url('./img/icon-crisis.png') center/cover no-repeat,transparent">
