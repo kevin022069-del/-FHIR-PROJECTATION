@@ -1,0 +1,218 @@
+[
+  {
+    "name": "拿鐵咖啡",
+    "cost": 40,
+    "color": "#D19A76",
+    "slug": "latte"
+  },
+  {
+    "name": "手作餅乾",
+    "cost": 25,
+    "color": "#E8C766",
+    "slug": "cookie"
+  },
+  {
+    "name": "水果茶",
+    "cost": 30,
+    "color": "#9CC3A0",
+    "slug": "fruit-tea"
+  },
+  {
+    "name": "健康零食盒",
+    "cost": 60,
+    "color": "#A688B0",
+    "slug": "snack-box"
+  },
+  {
+    "name": "電影兌換券",
+    "cost": 150,
+    "color": "#8FA9C4",
+    "slug": "movie-ticket"
+  },
+  {
+    "name": "紓壓小夜燈",
+    "cost": 90,
+    "color": "#C9A6D6",
+    "slug": "night-light"
+  },
+  {
+    "name": "熱可可",
+    "cost": 35,
+    "color": "#C3946F",
+    "slug": "hot-cocoa"
+  },
+  {
+    "name": "手沖濾掛咖啡",
+    "cost": 45,
+    "color": "#B08968",
+    "slug": "drip-coffee"
+  },
+  {
+    "name": "香草瑪德蓮",
+    "cost": 28,
+    "color": "#E8D6A0",
+    "slug": "madeleine"
+  },
+  {
+    "name": "蜂蜜檸檬水",
+    "cost": 22,
+    "color": "#E8C766",
+    "slug": "honey-lemon"
+  },
+  {
+    "name": "抹茶拿鐵",
+    "cost": 42,
+    "color": "#9CAF88",
+    "slug": "matcha-latte"
+  },
+  {
+    "name": "綜合堅果包",
+    "cost": 32,
+    "color": "#C9A66B",
+    "slug": "mixed-nuts"
+  },
+  {
+    "name": "紓壓香氛蠟燭",
+    "cost": 85,
+    "color": "#C9A6D6",
+    "slug": "candle"
+  },
+  {
+    "name": "精油滾珠瓶",
+    "cost": 70,
+    "color": "#A688B0",
+    "slug": "essential-oil"
+  },
+  {
+    "name": "眼罩枕頭組",
+    "cost": 95,
+    "color": "#8FA9C4",
+    "slug": "eye-mask"
+  },
+  {
+    "name": "音樂串流兌換券",
+    "cost": 120,
+    "color": "#557A60",
+    "slug": "music-voucher"
+  },
+  {
+    "name": "有聲書一個月",
+    "cost": 110,
+    "color": "#7C9473",
+    "slug": "audiobook"
+  },
+  {
+    "name": "桌遊兌換券",
+    "cost": 160,
+    "color": "#C99A3E",
+    "slug": "boardgame"
+  },
+  {
+    "name": "咖啡廳折價券",
+    "cost": 50,
+    "color": "#9A6B54",
+    "slug": "cafe-coupon"
+  },
+  {
+    "name": "按摩院體驗券",
+    "cost": 200,
+    "color": "#B5543C",
+    "slug": "massage"
+  },
+  {
+    "name": "瑜珈墊",
+    "cost": 140,
+    "color": "#6ECBAF",
+    "slug": "yoga-mat"
+  },
+  {
+    "name": "紓壓球",
+    "cost": 18,
+    "color": "#E07070",
+    "slug": "stress-ball"
+  },
+  {
+    "name": "手寫日記本",
+    "cost": 38,
+    "color": "#D19A76",
+    "slug": "journal"
+  },
+  {
+    "name": "療癒系桌曆",
+    "cost": 26,
+    "color": "#F4A261",
+    "slug": "calendar"
+  },
+  {
+    "name": "香氛護手霜",
+    "cost": 33,
+    "color": "#E8B7A9",
+    "slug": "hand-cream"
+  },
+  {
+    "name": "泡澡鹽",
+    "cost": 40,
+    "color": "#8FA9C4",
+    "slug": "bath-salt"
+  },
+  {
+    "name": "花草茶包組",
+    "cost": 36,
+    "color": "#9CC3A0",
+    "slug": "herbal-tea"
+  },
+  {
+    "name": "拼圖 1000 片",
+    "cost": 68,
+    "color": "#C9A6D6",
+    "slug": "puzzle"
+  },
+  {
+    "name": "迷你盆栽",
+    "cost": 55,
+    "color": "#6FA37C",
+    "slug": "mini-plant"
+  },
+  {
+    "name": "手工皂",
+    "cost": 30,
+    "color": "#E8C766",
+    "slug": "handmade-soap"
+  },
+  {
+    "name": "個人化保溫杯",
+    "cost": 75,
+    "color": "#557A60",
+    "slug": "tumbler"
+  },
+  {
+    "name": "電影院爆米花套餐",
+    "cost": 58,
+    "color": "#C99A3E",
+    "slug": "popcorn-set"
+  },
+  {
+    "name": "演唱會抽選券",
+    "cost": 300,
+    "color": "#B5453A",
+    "slug": "concert-ticket"
+  },
+  {
+    "name": "露營用品折價券",
+    "cost": 130,
+    "color": "#7C9473",
+    "slug": "camping-coupon"
+  },
+  {
+    "name": "寵物咖啡廳體驗",
+    "cost": 90,
+    "color": "#9A6B54",
+    "slug": "pet-cafe"
+  },
+  {
+    "name": "手作陶藝課程",
+    "cost": 180,
+    "color": "#C3946F",
+    "slug": "pottery-class"
+  }
+]

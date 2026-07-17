@@ -1,0 +1,368 @@
+[
+  {
+    "id": "GRP-seed-1",
+    "name": "深夜emo互助會",
+    "visibility": "public",
+    "creatorNick": "夜貓子",
+    "members": [
+      {
+        "nick": "夜貓子",
+        "joinedAt": "3 天前"
+      },
+      {
+        "nick": "拿鐵不加糖",
+        "joinedAt": "2 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-1-1",
+        "senderNick": "夜貓子",
+        "text": "今天又失眠了...",
+        "time": "23:10",
+        "isMe": false
+      },
+      {
+        "id": "seed-1-2",
+        "senderNick": "拿鐵不加糖",
+        "text": "我也是，要不要聊聊？",
+        "time": "23:12",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "3 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-2",
+    "name": "考生紓壓小隊",
+    "visibility": "public",
+    "creatorNick": "旅行者42",
+    "members": [
+      {
+        "nick": "旅行者42",
+        "joinedAt": "1 週前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-2-1",
+        "senderNick": "旅行者42",
+        "text": "模擬考又考差了，有點喘不過氣",
+        "time": "20:40",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "1 週前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-3",
+    "name": "上班族喘息角落",
+    "visibility": "public",
+    "creatorNick": "慢半拍",
+    "members": [
+      {
+        "nick": "慢半拍",
+        "joinedAt": "6 天前"
+      },
+      {
+        "nick": "早餐店老闆",
+        "joinedAt": "5 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-3-1",
+        "senderNick": "慢半拍",
+        "text": "今天開會又被電了",
+        "time": "09:15",
+        "isMe": false
+      },
+      {
+        "id": "seed-3-2",
+        "senderNick": "早餐店老闆",
+        "text": "辛苦了，我幫你加油",
+        "time": "09:17",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "6 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-4",
+    "name": "新手爸媽互助會",
+    "visibility": "public",
+    "creatorNick": "溫柔巨人",
+    "members": [
+      {
+        "nick": "溫柔巨人",
+        "joinedAt": "2 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-4-1",
+        "senderNick": "溫柔巨人",
+        "text": "寶寶終於睡著了，好累但好值得",
+        "time": "22:30",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "2 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-5",
+    "name": "減肥路上不孤單",
+    "visibility": "public",
+    "creatorNick": "慢跑者",
+    "members": [
+      {
+        "nick": "慢跑者",
+        "joinedAt": "4 天前"
+      },
+      {
+        "nick": "種花的人",
+        "joinedAt": "3 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-5-1",
+        "senderNick": "慢跑者",
+        "text": "今天又忍不住吃宵夜了",
+        "time": "21:00",
+        "isMe": false
+      },
+      {
+        "id": "seed-5-2",
+        "senderNick": "種花的人",
+        "text": "沒關係，明天繼續加油",
+        "time": "21:05",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "4 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-6",
+    "name": "失眠俱樂部",
+    "visibility": "public",
+    "creatorNick": "深夜食堂",
+    "members": [
+      {
+        "nick": "深夜食堂",
+        "joinedAt": "1 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-6-1",
+        "senderNick": "深夜食堂",
+        "text": "凌晨三點還醒著",
+        "time": "03:00",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "1 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-7",
+    "name": "考證照戰友團",
+    "visibility": "public",
+    "creatorNick": "讀書會員",
+    "members": [
+      {
+        "nick": "讀書會員",
+        "joinedAt": "5 天前"
+      },
+      {
+        "nick": "小樹苗",
+        "joinedAt": "4 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-7-1",
+        "senderNick": "讀書會員",
+        "text": "模擬題又錯一堆",
+        "time": "20:00",
+        "isMe": false
+      },
+      {
+        "id": "seed-7-2",
+        "senderNick": "小樹苗",
+        "text": "我們一起加油拿到證照",
+        "time": "20:03",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "5 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-8",
+    "name": "單身心事分享圈",
+    "visibility": "public",
+    "creatorNick": "迷路的魚",
+    "members": [
+      {
+        "nick": "迷路的魚",
+        "joinedAt": "3 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-8-1",
+        "senderNick": "迷路的魚",
+        "text": "今天又是一個人吃飯",
+        "time": "12:30",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "3 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-9",
+    "name": "職場新人求生記",
+    "visibility": "public",
+    "creatorNick": "晴天娃娃",
+    "members": [
+      {
+        "nick": "晴天娃娃",
+        "joinedAt": "2 天前"
+      },
+      {
+        "nick": "手沖咖啡師",
+        "joinedAt": "1 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-9-1",
+        "senderNick": "晴天娃娃",
+        "text": "主管交代的事我都做不好",
+        "time": "17:40",
+        "isMe": false
+      },
+      {
+        "id": "seed-9-2",
+        "senderNick": "手沖咖啡師",
+        "text": "每個人都是這樣過來的",
+        "time": "17:45",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "2 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-10",
+    "name": "寵物療癒小隊",
+    "visibility": "public",
+    "creatorNick": "貓咪先生",
+    "members": [
+      {
+        "nick": "貓咪先生",
+        "joinedAt": "6 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-10-1",
+        "senderNick": "貓咪先生",
+        "text": "看貓咪打滾心情就變好了",
+        "time": "19:20",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "6 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-11",
+    "name": "慢性病陪伴會",
+    "visibility": "public",
+    "creatorNick": "淡定小姐",
+    "members": [
+      {
+        "nick": "淡定小姐",
+        "joinedAt": "1 週前"
+      },
+      {
+        "nick": "星空觀測員",
+        "joinedAt": "6 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-11-1",
+        "senderNick": "淡定小姐",
+        "text": "回診等好久，心情有點低落",
+        "time": "14:10",
+        "isMe": false
+      },
+      {
+        "id": "seed-11-2",
+        "senderNick": "星空觀測員",
+        "text": "辛苦了，你已經很努力照顧自己了",
+        "time": "14:15",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "1 週前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  },
+  {
+    "id": "GRP-seed-12",
+    "name": "深夜寫作陪伴團",
+    "visibility": "public",
+    "creatorNick": "拾荒詩人",
+    "members": [
+      {
+        "nick": "拾荒詩人",
+        "joinedAt": "4 天前"
+      }
+    ],
+    "messages": [
+      {
+        "id": "seed-12-1",
+        "senderNick": "拾荒詩人",
+        "text": "靈感枯竭中，但還是想寫點什麼",
+        "time": "23:50",
+        "isMe": false
+      }
+    ],
+    "riskFlag": false,
+    "createdAt": "4 天前",
+    "fhirCareTeamId": null,
+    "fhirCareTeamStatus": "idle"
+  }
+]

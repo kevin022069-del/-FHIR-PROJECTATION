@@ -15,6 +15,7 @@
       .mh-admin-root { flex-direction: column !important; }
       .mh-admin-sidebar { width: 100% !important; flex-direction: row !important; align-items: center !important; overflow-x: auto !important; padding: 10px 12px !important; gap: 10px !important; }
       .mh-admin-sidebar .mh-admin-logo { padding: 0 6px !important; flex: none !important; }
+      .mh-admin-sidebar .mh-admin-logout { margin-top: 0 !important; margin-left: auto !important; border-top: none !important; flex: none !important; padding: 0 0 0 10px !important; }
       .mh-admin-main { padding: 18px !important; }
     }
   </style>
@@ -29,6 +30,14 @@
     <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="7">
       <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap;flex:none">{{ item.label }}</div>
     </sc-for>
+    <div class="mh-admin-logout" onClick="{{ goLogout }}" style="margin-top:auto;display:flex;align-items:center;gap:8px;padding:12px 10px;border-top:1px solid #423D37;cursor:pointer;color:#E2917D;font:600 13px 'Noto Sans TC';white-space:nowrap">
+      <div style="position:relative;width:16px;height:14px;flex:none">
+        <div style="position:absolute;left:0;top:0;width:9px;height:14px;border:2px solid #E2917D;border-right:none;border-radius:3px 0 0 3px;box-sizing:border-box"></div>
+        <div style="position:absolute;left:7px;top:6px;width:8px;height:2px;background:#E2917D"></div>
+        <div style="position:absolute;left:11px;top:2px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid #E2917D"></div>
+      </div>
+      登出
+    </div>
   </div>
 
   <div class="mh-admin-main" style="flex:1;min-width:0;padding:clamp(20px,4vw,36px) clamp(16px,4vw,44px);max-width:1600px">
@@ -78,12 +87,14 @@
     <sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}">
       <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
         <div style="font:700 16px 'Quicksand';margin-bottom:14px">使用者列表</div>
-        <sc-for list="{{ users }}" as="u" hint-placeholder-count="4">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
-            <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ u.name }}</div>
-            <div style="font:500 12px 'Noto Sans TC';color:#7C756B">心魔 {{ u.demon }} · 靈力 {{ u.spirit }}</div>
-          </div>
-        </sc-for>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto">
+          <sc-for list="{{ users }}" as="u" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+              <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ u.name }}</div>
+              <div style="font:500 12px 'Noto Sans TC';color:#7C756B">心魔 {{ u.demon }} · 靈力 {{ u.spirit }}</div>
+            </div>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
 
@@ -93,24 +104,28 @@
           <div style="font:700 16px 'Quicksand'">心理師管理</div>
           <button onClick="{{ addPractitioner }}" style="border:none;background:#557A60;color:#FBF9F4;padding:9px 16px;border-radius:999px;font:600 12px 'Noto Sans TC'">＋ 新增心理師</button>
         </div>
-        <sc-for list="{{ practitioners }}" as="pr" hint-placeholder-count="2">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
-            <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ pr.name }}</div>
-            <div style="font:500 12px 'Noto Sans TC';color:#7C756B">{{ pr.account }}</div>
-          </div>
-        </sc-for>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto">
+          <sc-for list="{{ practitioners }}" as="pr" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+              <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ pr.name }}</div>
+              <div style="font:500 12px 'Noto Sans TC';color:#7C756B">{{ pr.account }}</div>
+            </div>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
 
     <sc-if value="{{ isFlags }}" hint-placeholder-val="{{ false }}">
       <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
         <div style="font:700 16px 'Quicksand';margin-bottom:14px">高危事件</div>
-        <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
-            <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ f.patient }}</div>
-            <div style="{{ f.badgeStyle }}">{{ f.status }}</div>
-          </div>
-        </sc-for>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto">
+          <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+              <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ f.patient }}</div>
+              <div style="{{ f.badgeStyle }}">{{ f.status }}</div>
+            </div>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
 
@@ -176,10 +191,30 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
-const FHIR_TYPES = ['Patient','Observation','QuestionnaireResponse','CarePlan','RiskAssessment','Task','Flag','Appointment'];
-const FHIR_COUNTS = {Patient:892, Observation:3456, QuestionnaireResponse:1248, CarePlan:2345, RiskAssessment:745, Task:1876, Flag:64, Appointment:312};
+const FHIR_TYPES = ['Patient','Observation','QuestionnaireResponse','CarePlan','RiskAssessment','Task','Flag','CareTeam','Communication','Appointment'];
+const FHIR_COUNTS = {Patient:892, Observation:3456, QuestionnaireResponse:1248, CarePlan:2345, RiskAssessment:745, Task:1876, Flag:64, CareTeam:58, Communication:2140, Appointment:312};
 const FHIR_BASE = 'https://hapi.fhir.org/baseR4';
-const LIVE_FHIR_TYPES = ['QuestionnaireResponse', 'Observation'];
+const LIVE_FHIR_TYPES = ['QuestionnaireResponse', 'Observation', 'Task', 'Flag', 'CareTeam', 'Communication'];
+// Task's beneficiary reference (`for`) is only reachable in R4 via the
+// `patient` search parameter — it has no generic `subject` parameter like
+// the other resource types here, so the search param name has to vary.
+const SEARCH_PARAM_BY_TYPE = { Task: 'patient' };
+
+// See data/*.json — build-index.js inlines them as window.__MOCK_DATA so
+// this keeps working when index.html is opened via file:// with no server.
+function mockData(name, fallback) {
+  if (typeof window !== 'undefined' && window.__MOCK_DATA && window.__MOCK_DATA[name]) return window.__MOCK_DATA[name];
+  return fallback;
+}
+const USERS = mockData('admin-users', [
+  {name:'小明 (patient)', demon:45, spirit:120}, {name:'小美 (patient2)', demon:38, spirit:85},
+]);
+const PRACTITIONERS = mockData('admin-practitioners', [
+  {name:'陳心理師', account:'doctor'}, {name:'林心理師', account:'lin.doc'},
+]);
+const ADMIN_FLAGS = mockData('admin-flags', [
+  {patient:'個案 #小明', status:'待處理'}, {patient:'個案 #小美', status:'已解決'},
+]);
 
 class Component extends DCLogic {
   state = { panel: 'overview', selectedFhirType: 'Patient', maintenance: false, liveResults: {} };
@@ -188,7 +223,8 @@ class Component extends DCLogic {
     const patientId = this.props.fhirPatientId;
     if (!patientId || !LIVE_FHIR_TYPES.includes(type)) return;
     this.setState(s => ({ liveResults: { ...s.liveResults, [type]: { loading: true, error: null } } }));
-    fetch(`${FHIR_BASE}/${type}?subject=Patient/${patientId}&_sort=-_lastUpdated&_count=20`, { headers: { Accept: 'application/fhir+json' } })
+    const searchParam = SEARCH_PARAM_BY_TYPE[type] || 'subject';
+    fetch(`${FHIR_BASE}/${type}?${searchParam}=Patient/${patientId}&_sort=-_lastUpdated&_count=20`, { headers: { Accept: 'application/fhir+json' } })
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(bundle => {
         const entries = (bundle.entry || []).map(e => e.resource);
@@ -235,13 +271,20 @@ class Component extends DCLogic {
     } else {
       fhirQueryStatusText = `${live.count} 筆 ${selectedType} 資源（來自 HAPI FHIR R4 公開測試伺服器，即時查詢）`;
       fhirQueryStatusColor = '#557A60';
-      fhirEntries = live.entries.map(r => r.resourceType === 'QuestionnaireResponse'
-        ? { title: `QuestionnaireResponse/${r.id}`, subtitle: `authored: ${r.authored || '-'}` }
-        : { title: `Observation/${r.id}`, subtitle: `${(r.code && (r.code.text || (r.code.coding && r.code.coding[0] && r.code.coding[0].display))) || ''}: ${r.valueInteger ?? '-'}　effective: ${r.effectiveDateTime || '-'}` });
+      fhirEntries = live.entries.map(r => {
+        if (r.resourceType === 'QuestionnaireResponse') return { title: `QuestionnaireResponse/${r.id}`, subtitle: `authored: ${r.authored || '-'}` };
+        if (r.resourceType === 'Observation') return { title: `Observation/${r.id}`, subtitle: `${(r.code && (r.code.text || (r.code.coding && r.code.coding[0] && r.code.coding[0].display))) || ''}: ${r.valueInteger ?? '-'}　effective: ${r.effectiveDateTime || '-'}` };
+        if (r.resourceType === 'Task') return { title: `Task/${r.id}`, subtitle: `${(r.code && r.code.text) || ''}　status: ${r.status || '-'}` };
+        if (r.resourceType === 'Flag') return { title: `Flag/${r.id}`, subtitle: `${(r.code && r.code.text) || ''}　status: ${r.status || '-'}` };
+        if (r.resourceType === 'CareTeam') return { title: `CareTeam/${r.id}`, subtitle: `${r.name || ''}　participants: ${(r.participant || []).length}` };
+        if (r.resourceType === 'Communication') return { title: `Communication/${r.id}`, subtitle: `${(r.payload && r.payload[0] && r.payload[0].contentString) || ''}　sent: ${r.sent || '-'}` };
+        return { title: `${r.resourceType}/${r.id}`, subtitle: '' };
+      });
     }
 
     return {
       navItems, headerTitle: titles[this.state.panel],
+      goLogout: this.props.goLogout,
       isOverview: this.state.panel==='overview', isUsers: this.state.panel==='users',
       isPractitioners: this.state.panel==='practitioners', isFlags: this.state.panel==='flags',
       isFhirTools: this.state.panel==='fhirtools', isReports: this.state.panel==='reports', isSystemSettings: this.state.panel==='settings',
@@ -254,16 +297,15 @@ class Component extends DCLogic {
         {type:'Patient', count:'892'}, {type:'Observation', count:'3,456'}, {type:'QuestionnaireResponse', count:'1,248'},
         {type:'CarePlan', count:'2,345'}, {type:'RiskAssessment', count:'745'},
       ],
-      users: [
-        {name:'小明 (patient)', demon:45, spirit:120}, {name:'小美 (patient2)', demon:38, spirit:85},
-        {name:'王先生', demon:52, spirit:60}, {name:'林小姐', demon:29, spirit:210},
-      ],
-      practitioners: [ {name:'陳心理師', account:'doctor'}, {name:'林心理師', account:'lin.doc'} ],
+      users: USERS,
+      practitioners: PRACTITIONERS,
       addPractitioner: () => this.setState(s => ({ practitionersVer: (s.practitionersVer||0)+1 })),
-      flags: [
-        {patient:'個案 #小明', status:'待處理', badgeStyle:'background:#FBEAE6;color:#B5543C;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
-        {patient:'個案 #小美', status:'已解決', badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
-      ],
+      flags: ADMIN_FLAGS.map(f => ({
+        ...f,
+        badgeStyle: f.status === '待處理'
+          ? 'background:#FBEAE6;color:#B5543C;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'
+          : 'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px',
+      })),
       fhirTypes,
       selectedFhirType: selectedType,
       fhirQueryStatusText, fhirQueryStatusColor, fhirEntries, hasFhirEntries: fhirEntries.length > 0,

@@ -3,11 +3,14 @@
 // without needing a local server. The dc-runtime (support.js) normally
 // fetches sibling components with fetch(), which browsers block for
 // file:// pages; pre-registering them as in-memory Blobs skips that fetch.
+// The demo/mock data under data/*.json gets the same treatment: it's
+// inlined as window.__MOCK_DATA so screens don't need to fetch() it either.
 const fs = require("fs");
 const path = require("path");
 
 const dir = __dirname;
 const rootFile = "MindHarbor.dc.html";
+const dataDir = path.join(dir, "data");
 
 const screenNames = fs
   .readdirSync(dir)
@@ -42,10 +45,23 @@ const bundleScript = `<script>
 })();
 </script>`;
 
+const mockDataNames = fs
+  .readdirSync(dataDir)
+  .filter((f) => f.endsWith(".json"))
+  .map((f) => f.replace(/\.json$/, ""));
+
+const mockData = {};
+mockDataNames.forEach((name) => {
+  mockData[name] = JSON.parse(fs.readFileSync(path.join(dataDir, name + ".json"), "utf8"));
+});
+
+const mockDataJson = JSON.stringify(mockData).replace(/<\//g, "<\\/");
+const mockDataScript = `<script>window.__MOCK_DATA = ${mockDataJson};</script>`;
+
 const rootContent = fs.readFileSync(path.join(dir, rootFile), "utf8");
 const out = rootContent.replace(
   '<script src="./support.js"></script>',
-  bundleScript + '\n<script src="./support.js"></script>'
+  mockDataScript + "\n" + bundleScript + '\n<script src="./support.js"></script>'
 );
 
 if (out === rootContent) {
@@ -54,3 +70,4 @@ if (out === rootContent) {
 
 fs.writeFileSync(path.join(dir, "index.html"), out, "utf8");
 console.log("Wrote index.html with " + entries.length + " bundled screens:", screenNames.join(", "));
+console.log("Inlined " + mockDataNames.length + " mock data files:", mockDataNames.join(", "));

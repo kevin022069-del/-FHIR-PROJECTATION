@@ -40,7 +40,10 @@
       </sc-for>
     </div>
 
-    <button style="width:100%;border:none;background:#557A60;color:#FBF9F4;padding:15px;border-radius:999px;font:700 14px 'Noto Sans TC';margin-bottom:14px;box-sizing:border-box">申請預約心理師諮詢</button>
+    <button onClick="{{ requestAppointment }}" disabled="{{ appointmentRequested }}" style="{{ appointmentButtonStyle }}">{{ appointmentButtonLabel }}</button>
+    <sc-if value="{{ appointmentRequested }}">
+      <div style="text-align:center;font:600 12px 'Noto Sans TC';color:#557A60;margin:-6px 0 14px">已收到你的申請，心理師會盡快與你聯繫安排諮詢時間</div>
+    </sc-if>
 
     <div style="background:#F4EFEA;border-radius:16px;padding:18px 20px;margin-bottom:26px">
       <div style="font:700 13px 'Noto Sans TC';color:#423D37;margin-bottom:8px">自我照護提示</div>
@@ -59,13 +62,27 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:900}}">
 class Component extends DCLogic {
+  state = {
+    appointmentRequested: false,
+  };
+
+  requestAppointment = () => {
+    if (this.state.appointmentRequested) return;
+    this.setState({ appointmentRequested: true });
+  };
+
   renderVals() {
+    const requested = this.state.appointmentRequested;
     return {
       hotlines: [
         {name:'1925 安心專線', desc:'24小時免費，情緒支持與危機諮詢', number:'1925', tel:'tel:1925'},
         {name:'1995 生命線', desc:'24小時危機支援', number:'1995', tel:'tel:1995'},
         {name:'1980 張老師專線', desc:'傾聽陪伴、專業輔導', number:'1980', tel:'tel:1980'},
       ],
+      appointmentRequested: requested,
+      requestAppointment: this.requestAppointment,
+      appointmentButtonLabel: requested ? '已送出申請' : '申請預約心理師諮詢',
+      appointmentButtonStyle: `width:100%;border:none;background:${requested ? '#9A9385' : '#557A60'};color:#FBF9F4;padding:15px;border-radius:999px;font:700 14px 'Noto Sans TC';margin-bottom:14px;box-sizing:border-box;cursor:${requested ? 'default' : 'pointer'}`,
       goTasks: this.props.goTasks, goHome: this.props.goHome,
     };
   }

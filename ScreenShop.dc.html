@@ -49,31 +49,71 @@
   </div>
 </div>
 
+<!-- Redeem success toast: a sibling of the animated screen root (not a
+     descendant) so its position:fixed is truly viewport-relative — an
+     ancestor with an active `transform` (like the root's page-enter
+     animation, held via fill-mode:both) would otherwise turn position:fixed
+     into a de-facto position:absolute relative to that ancestor. -->
+<sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ toastStyle }}">
+    <div style="width:26px;height:26px;border-radius:50%;flex:none;background:url('./img/icon-celebration.png') center/cover no-repeat,radial-gradient(circle at 35% 30%,#F0CA7A,#C99A3E)"></div>
+    <div style="font:600 13px 'Noto Sans TC'">兌換成功！{{ toastName }} <span style="opacity:.85">-{{ toastCost }} 靈力</span></div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:800}}">
-const ITEMS = [
+// See data/shop-items.json — build-index.js inlines it as window.__MOCK_DATA
+// so this keeps working when index.html is opened via file:// with no server.
+function mockData(name, fallback) {
+  if (typeof window !== 'undefined' && window.__MOCK_DATA && window.__MOCK_DATA[name]) return window.__MOCK_DATA[name];
+  return fallback;
+}
+const ITEMS = mockData('shop-items', [
   { name:'拿鐵咖啡', cost:40, color:'#D19A76', slug:'latte' },
   { name:'手作餅乾', cost:25, color:'#E8C766', slug:'cookie' },
-  { name:'水果茶', cost:30, color:'#9CC3A0', slug:'fruit-tea' },
-  { name:'健康零食盒', cost:60, color:'#A688B0', slug:'snack-box' },
-  { name:'電影兌換券', cost:150, color:'#8FA9C4', slug:'movie-ticket' },
-  { name:'紓壓小夜燈', cost:90, color:'#C9A6D6', slug:'night-light' },
-];
+]);
 
 class Component extends DCLogic {
+  state = { toast: null, toastShow: false };
+
+  componentWillUnmount() {
+    clearTimeout(this._toastHideTimer);
+    clearTimeout(this._toastUnmountTimer);
+  }
+
+  // Mount the toast, wait a frame so the enter transition actually animates
+  // (instead of snapping straight to the "shown" state), hold briefly, then
+  // fade out and unmount so it doesn't linger as an invisible click-blocker.
+  showRedeemToast(item) {
+    clearTimeout(this._toastHideTimer);
+    clearTimeout(this._toastUnmountTimer);
+    this.setState({ toast: item, toastShow: false });
+    requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ toastShow: true })));
+    this._toastHideTimer = setTimeout(() => this.setState({ toastShow: false }), 1800);
+    this._toastUnmountTimer = setTimeout(() => this.setState({ toast: null }), 1800 + 300);
+  }
+
   renderVals() {
     const p = this.props;
+    const s = this.state;
     const items = ITEMS.map(it => {
       const enough = p.spiritPower >= it.cost;
       return {
         ...it,
         photoLayer: `url('./img/shop-${it.slug}.png') center/cover no-repeat,`,
-        onRedeem: () => { if (enough) p.onRedeem(it); },
+        onRedeem: () => { if (enough) { p.onRedeem(it); this.showRedeemToast(it); } },
         btnLabel: enough ? '兌換' : '靈力不足',
         btnStyle: `width:100%;border:none;padding:9px;border-radius:999px;font:600 12px 'Noto Sans TC';color:#FBF9F4;background:${enough ? '#557A60' : '#C9C2B4'};cursor:${enough ? 'pointer' : 'default'}`,
       };
     });
-    return { items, spiritPower: p.spiritPower, history: p.history || [], goHome: p.goHome };
+    return {
+      items, spiritPower: p.spiritPower, history: p.history || [], goHome: p.goHome,
+      toastVisible: !!s.toast,
+      toastName: s.toast ? s.toast.name : '',
+      toastCost: s.toast ? s.toast.cost : 0,
+      toastStyle: `position:fixed;left:50%;top:24px;z-index:9999;display:flex;align-items:center;gap:10px;background:#2E4A34;color:#FBF9F4;padding:12px 20px;border-radius:999px;box-shadow:0 14px 32px rgba(0,0,0,.2);white-space:nowrap;pointer-events:none;opacity:${s.toastShow ? 1 : 0};transform:translate(-50%,${s.toastShow ? '0' : '-16px'}) scale(${s.toastShow ? 1 : 0.94});transition:opacity .3s ease,transform .3s cubic-bezier(.22,1,.36,1)`,
+    };
   }
 }
 

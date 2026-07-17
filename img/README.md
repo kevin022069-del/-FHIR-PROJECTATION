@@ -54,10 +54,9 @@
 | `avatar-user.png` | 個案端 Dashboard 左下角「自己」的頭像 |
 | `avatar-practitioner.png` | 心理師端側邊欄頭像 |
 | `avatar-admin.png` | 管理員端右上角頭像 |
-| `avatar-friend-1.png` | 好友「小海豚」頭像 |
-| `avatar-friend-2.png` | 好友「向日葵」頭像 |
+| `avatar-friend-1.png` ~ `avatar-friend-12.png` | 好友頭像，依 `data/friends.json` 清單順序對應第 1~12 位好友（目前依序為：小海豚、向日葵、夜貓子、拿鐵不加糖、旅行者42、薄荷茶、微光、溫柔的風、深呼吸練習生、慢慢走、小雨滴、拾光者） |
 
-正方形照片，會裁切成圓形置中顯示。
+正方形照片，會裁切成圓形置中顯示。每個好友都有專屬編號的頭像檔（不再只有 2 張循環使用），12 張已全部生成完成。若之後 `data/friends.json` 新增更多好友，需要對應補上 `avatar-friend-13.png`…等檔案。
 
 ## 靈力商城商品圖
 | 檔名 | 商品 |
@@ -74,14 +73,24 @@
 ## 成就徽章圖
 | 檔名 | 徽章 |
 |---|---|
-| `badge-calm.png` | Calm 保持平靜 |
-| `badge-focus.png` | Focus 專注當下 |
-| `badge-courage.png` | Courage 勇於面對 |
-| `badge-reflection.png` | Reflection 深度反思 |
-| `badge-consistency.png` | Consistency 連續 7 天 |
-| `badge-growth.png` | Growth 心魔下降 50% |
+| `badge-calm.png` | Calm 完成今日簽到 |
+| `badge-focus.png` | Focus 完成第一項任務 |
+| `badge-courage.png` | Courage 完成壓力量表評估 |
+| `badge-reflection.png` | Reflection 完成每日總結 |
+| `badge-consistency.png` | Consistency 連續 7 天修練 |
+| `badge-growth.png` | Growth 心魔降至 40 以下 |
+| `badge-day-complete.png` | Day Complete 完成一整天旅程 |
+| `badge-task-master.png` | Task Master 一日內完成所有任務 |
+| `badge-inner-peace.png` | Inner Peace 心魔降至 20 以下 |
+| `badge-spirit-spark.png` | Spirit Spark 靈力達 100 |
+| `badge-spirit-adept.png` | Spirit Adept 靈力達 300 |
+| `badge-spirit-master.png` | Spirit Master 靈力達 500 |
+| `badge-low-stress.png` | Low Stress 壓力量表達成低壓力 |
+| `badge-steady-mind.png` | Steady Mind 曾勇敢尋求危機支援 |
+| `badge-companion.png` | Companion 認識第一位旅伴 |
+| `badge-social-butterfly.png` | Social Butterfly 好友數達 3 人 |
 
-正方形，會裁切成圓形置中顯示。
+正方形，會裁切成圓形置中顯示。16 枚圖示已全部生成完成。
 
 ## 未來功能搶先看圖示（行銷首頁「未來功能搶先看」小方塊）
 | 檔名 | 對應項目 |

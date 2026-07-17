@@ -38,6 +38,7 @@
             <div style="font:700 15px 'Quicksand';color:#557A60">{{ t.timerLabel }}</div>
             <button onClick="{{ t.onTimer }}" style="{{ t.timerBtnStyle }}">{{ t.timerBtnLabel }}</button>
           </div>
+          <div style="font:400 11px 'Noto Sans TC';color:{{ t.fhirColor }};margin-top:8px">{{ t.fhirLabel }}</div>
         </div>
       </sc-for>
     </div>
@@ -71,6 +72,11 @@ class Component extends DCLogic {
       timerBtnLabel: t.completed ? '已完成' : (t.running ? '暫停' : '開始'),
       timerBtnStyle: `border:none;padding:8px 18px;border-radius:999px;font:600 12px 'Noto Sans TC';color:#fff;background:${t.completed?'#B7C9BA':(t.running?'#C3946F':'#557A60')};cursor:${t.completed?'default':'pointer'};`,
       onTimer: () => { if (!t.completed) p.toggleTimer(t.id); },
+      fhirLabel: t.fhirStatus === 'synced' ? `✓ 已寫入 FHIR Task/${t.fhirTaskId}`
+        : t.fhirStatus === 'syncing' ? '同步 FHIR 中…'
+        : t.fhirStatus === 'error' ? 'FHIR 同步失敗，僅保存於本機'
+        : '',
+      fhirColor: t.fhirStatus === 'synced' ? '#557A60' : t.fhirStatus === 'error' ? '#B5543C' : '#9A9385',
     }));
     const done = p.done, total = p.total;
     return {

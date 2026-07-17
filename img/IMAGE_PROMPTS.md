@@ -109,12 +109,14 @@ flat vector portrait avatar of a friendly counselor, simple rounded face shape, 
 
 ---
 
-## 頭像（`avatar-user.png`、`avatar-practitioner.png`、`avatar-admin.png`、`avatar-friend-1.png`、`avatar-friend-2.png`）
+## 頭像（`avatar-user.png`、`avatar-practitioner.png`、`avatar-admin.png`、`avatar-friend-1.png` ~ `avatar-friend-12.png`）
 
 沿用上面「插畫頭像風格」或「真人照片風格」皆可，正方形、會裁切成圓形顯示。若要跟 好友/陌生人 的匿名感區隔，好友頭像可以刻意做得更卡通化一點：
 ```
 flat vector avatar icon, abstract friendly character silhouette, warm tan and brown tones (#D19A76, #9A6B54), simple rounded shapes, circular composition, minimal and cute, flat illustration, no outlines
 ```
+
+好友頭像現在是每人一張專屬編號檔（`avatar-friend-1.png` ~ `avatar-friend-12.png`，對應 `data/friends.json` 第 1~12 位好友），不再是只有 2 張循環使用，12 張已全部生成完成，每張都換了不同色調做出區隔。原始逐張 prompt 存檔於專案根目錄的 `rank.md` / `friend.md`。
 
 ---
 
@@ -175,6 +177,8 @@ flat vector circular badge icon representing "7-day consistency streak", small c
 ```
 flat vector circular badge icon representing "growth", small sprouting plant or upward arrow motif, sage green tones (#557A60), minimal flat design, centered composition
 ```
+
+勳章規模擴充後新增的另外 10 枚（`badge-day-complete.png`、`badge-task-master.png`、`badge-inner-peace.png`、`badge-spirit-spark.png`、`badge-spirit-adept.png`、`badge-spirit-master.png`、`badge-low-stress.png`、`badge-steady-mind.png`、`badge-companion.png`、`badge-social-butterfly.png`）圖片已生成完成，16 枚圖示全數到齊。原始 prompt 存檔於專案根目錄的 `rank.md`。
 
 ---
 

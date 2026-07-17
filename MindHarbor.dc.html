@@ -18,10 +18,39 @@
     ::selection{background:#DCE6DB}
     button{font-family:inherit;cursor:pointer}
     input,textarea{font-family:inherit}
+    .mh-scroll{scrollbar-width:thin;scrollbar-color:#C9C2B4 transparent}
     .mh-scroll::-webkit-scrollbar{width:6px}
+    .mh-scroll::-webkit-scrollbar-track{background:transparent}
     .mh-scroll::-webkit-scrollbar-thumb{background:#DCE6DB;border-radius:4px}
+    .mh-scroll::-webkit-scrollbar-thumb:hover{background:#C9C2B4}
     @keyframes mh-pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
     @keyframes mh-spin{to{transform:rotate(360deg)}}
+    /* Below 640px the floating icon column (friends/pairing/shop/groups/
+       companion) turns into a fixed bottom tab bar instead of stacking
+       vertically in the corner — position:fixed lifts it out of the
+       .mh-fab-wrap flex column, so the companion chat panel (the wrap's
+       other child) keeps floating in the corner unaffected. */
+    @media (max-width: 640px) {
+      .mh-fab-cluster {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-around !important;
+        gap: 6px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        background: #FBF9F4 !important;
+        border-top: 1px solid #E6DECF !important;
+        padding: 8px clamp(8px,3vw,16px) !important;
+        box-shadow: 0 -4px 16px rgba(0,0,0,.08) !important;
+        box-sizing: border-box !important;
+      }
+      .mh-fab-btn { width: 46px !important; height: 46px !important; box-shadow: none !important; }
+      .mh-fab-wrap { bottom: 76px !important; }
+    }
   </style>
 </helmet>
 
@@ -83,34 +112,50 @@
   <sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}">
     <dc-import name="ScreenShop" hint-size="100%,100%" go-home="{{ goTo_dashboard }}" spirit-power="{{ spiritPower }}" history="{{ shopHistory }}" on-redeem="{{ onRedeem }}"></dc-import>
   </sc-if>
+  <sc-if value="{{ isGroups }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="ScreenGroups" hint-size="100%,100%" go-home="{{ goTo_dashboard }}"
+      groups="{{ chatGroups }}" friends="{{ friends }}" my-nick="{{ myGroupNick }}"
+      create-group="{{ createGroup }}" join-group="{{ joinGroup }}" send-message="{{ sendGroupMessage }}">
+    </dc-import>
+  </sc-if>
   <sc-if value="{{ isPractitioner }}" hint-placeholder-val="{{ false }}">
-    <dc-import name="ScreenPractitioner" hint-size="100%,100%" extra-flags="{{ notifiedFlags }}" pairing-groups="{{ pairingGroups }}" patient-name="{{ name }}" patient-spirit-power="{{ spiritPower }}" go-logout="{{ goTo_login }}"></dc-import>
+    <dc-import name="ScreenPractitioner" hint-size="100%,100%" extra-flags="{{ notifiedFlags }}" pairing-groups="{{ pairingGroups }}" chat-groups="{{ chatGroups }}" patient-name="{{ name }}" patient-spirit-power="{{ spiritPower }}" go-logout="{{ goTo_login }}"></dc-import>
   </sc-if>
   <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
-    <dc-import name="ScreenAdmin" hint-size="100%,100%" fhir-patient-id="{{ fhirPatientId }}"></dc-import>
+    <dc-import name="ScreenAdmin" hint-size="100%,100%" fhir-patient-id="{{ fhirPatientId }}" go-logout="{{ goTo_login }}"></dc-import>
   </sc-if>
 
   <sc-if value="{{ showCompanion }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute;right:clamp(12px,3vw,24px);bottom:clamp(12px,3vw,24px);z-index:80;max-width:calc(100vw - 24px);display:flex;flex-direction:column;align-items:flex-end;gap:12px">
+    <div class="mh-fab-wrap" style="position:absolute;right:clamp(12px,3vw,24px);bottom:clamp(12px,3vw,24px);z-index:80;max-width:calc(100vw - 24px);display:flex;flex-direction:column;align-items:flex-end;gap:12px">
+    <!-- icon row lives in its own wrapper so the mobile @media rule can pull
+         just this row out into a fixed bottom tab bar (position:fixed takes
+         it out of this flex column) without touching the chat panel below. -->
+    <div class="mh-fab-cluster" style="display:flex;flex-direction:column;align-items:flex-end;gap:12px">
       <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ openDashboardFriends }}" title="好友列表" style="width:52px;height:52px;border-radius:50%;border:none;background:#9A6B54;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
+        <button class="mh-fab-btn" onClick="{{ openDashboardFriends }}" title="好友列表" style="width:52px;height:52px;border-radius:50%;border:none;background:#9A6B54;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
           <div style="position:relative;width:18px;height:18px">
             <div style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:#FBF9F4"></div>
             <div style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:18px;height:10px;border-radius:9px 9px 0 0;background:#FBF9F4"></div>
           </div>
         </button>
-        <button onClick="{{ goTo_pairing }}" title="紓壓配對" style="width:52px;height:52px;border-radius:50%;border:none;background:#557A60;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
+        <button class="mh-fab-btn" onClick="{{ goTo_pairing }}" title="紓壓配對" style="width:52px;height:52px;border-radius:50%;border:none;background:#557A60;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
           <div style="width:20px;height:15px;border-radius:8px 8px 8px 2px;background:#FBF9F4"></div>
         </button>
-        <button onClick="{{ goTo_shop }}" title="靈力商城" style="width:52px;height:52px;border-radius:50%;border:none;background:#C3946F;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
+        <button class="mh-fab-btn" onClick="{{ goTo_shop }}" title="靈力商城" style="width:52px;height:52px;border-radius:50%;border:none;background:#C3946F;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
           <div style="position:relative;width:20px;height:18px">
             <div style="position:absolute;left:2px;top:0;width:16px;height:6px;border-radius:4px 4px 0 0;border:2px solid #FBF9F4;border-bottom:none;box-sizing:border-box"></div>
             <div style="position:absolute;left:0;top:4px;width:20px;height:14px;border-radius:2px;background:#FBF9F4"></div>
           </div>
         </button>
+        <button class="mh-fab-btn" onClick="{{ goTo_groups }}" title="紓壓群組" style="width:52px;height:52px;border-radius:50%;border:none;background:#8FA9C4;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;flex:none">
+          <div style="position:relative;width:20px;height:16px">
+            <div style="position:absolute;left:0;top:0;width:13px;height:11px;border-radius:6px 6px 6px 1px;background:#FBF9F4"></div>
+            <div style="position:absolute;right:0;bottom:0;width:10px;height:8px;border-radius:5px 5px 0 5px;background:rgba(251,249,244,.7)"></div>
+          </div>
+        </button>
       </sc-if>
       <sc-if value="{{ !companionOpen }}" hint-placeholder-val="{{ true }}">
-        <button onClick="{{ toggleCompanion }}" style="width:52px;height:52px;border-radius:50%;border:none;background:linear-gradient(135deg,#88AE8E,#557A60);box-shadow:0 10px 26px rgba(85,122,96,.4);display:flex;align-items:center;justify-content:center;position:relative;flex:none">
+        <button class="mh-fab-btn" onClick="{{ toggleCompanion }}" style="width:52px;height:52px;border-radius:50%;border:none;background:linear-gradient(135deg,#88AE8E,#557A60);box-shadow:0 10px 26px rgba(85,122,96,.4);display:flex;align-items:center;justify-content:center;position:relative;flex:none">
           <div style="width:26px;height:20px;border-radius:7px;background:#FBF9F4;position:relative">
             <div style="position:absolute;left:5px;top:6px;width:5px;height:5px;border-radius:50%;background:#557A60"></div>
             <div style="position:absolute;right:5px;top:6px;width:5px;height:5px;border-radius:50%;background:#557A60"></div>
@@ -122,25 +167,27 @@
           </sc-if>
         </button>
       </sc-if>
-      <sc-if value="{{ companionOpen }}" hint-placeholder-val="{{ false }}">
-        <div style="width:min(320px,calc(100vw - 24px));max-height:min(420px,70vh);background:#FBF9F4;border:1px solid #E6DECF;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#557A60;color:#FBF9F4">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="font:700 13px 'Quicksand'">AI 陪伴 · 靈光</div>
-            </div>
-            <button onClick="{{ toggleCompanion }}" style="border:none;background:transparent;color:#FBF9F4;font:700 15px 'Noto Sans TC'">✕</button>
+    </div>
+
+    <sc-if value="{{ companionOpen }}" hint-placeholder-val="{{ false }}">
+      <div class="mh-fab-chat" style="width:min(320px,calc(100vw - 24px));max-height:min(420px,70vh);background:#FBF9F4;border:1px solid #E6DECF;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#557A60;color:#FBF9F4">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font:700 13px 'Quicksand'">AI 陪伴 · 靈光</div>
           </div>
-          <div class="mh-scroll" style="flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;max-height:min(250px,45vh)">
-            <sc-for list="{{ companionMessages }}" as="msg" hint-placeholder-count="2">
-              <div style="{{ msg.style }}">{{ msg.text }}</div>
-            </sc-for>
-          </div>
-          <div style="display:flex;gap:8px;padding:10px;border-top:1px solid #E6DECF">
-            <input value="{{ companionDraft }}" onInput="{{ onCompanionDraftChange }}" onKeyDown="{{ onCompanionKeyDown }}" placeholder="說說你現在的感受..." style="flex:1;min-width:0;border:1px solid #E6DECF;border-radius:999px;padding:9px 13px;font:400 13px 'Noto Sans TC';outline:none"/>
-            <button onClick="{{ sendCompanion }}" style="border:none;background:#557A60;color:#FBF9F4;width:36px;height:36px;border-radius:50%;font:700 14px 'Noto Sans TC';flex:none">➤</button>
-          </div>
+          <button onClick="{{ toggleCompanion }}" style="border:none;background:transparent;color:#FBF9F4;font:700 15px 'Noto Sans TC'">✕</button>
         </div>
-      </sc-if>
+        <div class="mh-scroll" style="flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;max-height:min(250px,45vh)">
+          <sc-for list="{{ companionMessages }}" as="msg" hint-placeholder-count="2">
+            <div style="{{ msg.style }}">{{ msg.text }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;padding:10px;border-top:1px solid #E6DECF">
+          <input value="{{ companionDraft }}" onInput="{{ onCompanionDraftChange }}" onKeyDown="{{ onCompanionKeyDown }}" placeholder="說說你現在的感受..." style="flex:1;min-width:0;border:1px solid #E6DECF;border-radius:999px;padding:9px 13px;font:400 13px 'Noto Sans TC';outline:none"/>
+          <button onClick="{{ sendCompanion }}" style="border:none;background:#557A60;color:#FBF9F4;width:36px;height:36px;border-radius:50%;font:700 14px 'Noto Sans TC';flex:none">➤</button>
+        </div>
+      </div>
+    </sc-if>
     </div>
   </sc-if>
 
@@ -176,14 +223,59 @@ const PSS10 = [
   '你有多常感覺困難堆積如山，無法克服？',
 ];
 const REVERSE_IDX = [3,4,6,7]; // 0-indexed questions that are positively phrased -> reverse score
-const MOCK_CHAT = [
+
+// Demo/mock data lives in data/*.json (not hardcoded here) so it's easy to
+// grow independently of the component logic. build-index.js inlines those
+// files as window.__MOCK_DATA when it bundles index.html, so this still
+// works when the app is opened via file:// with no server — mockData()
+// only falls back to the literal below if that inlining didn't happen.
+function mockData(name, fallback) {
+  if (typeof window !== 'undefined' && window.__MOCK_DATA && window.__MOCK_DATA[name]) return window.__MOCK_DATA[name];
+  return fallback;
+}
+
+const MOCK_CHAT = mockData('companion-chat', [
   '嗨，我是靈光 🌙 今天過得如何呢？有什麼想聊的事，我都在這裡陪你。',
   '辛苦了。壓力果然有點大，記得先照顧好自己喔，要不要試著深呼吸一下？',
-  '我聽懂了。你已經很努力了，我們慢慢來，一步一步都算數。',
-  '謝謝你願意說出來，這本身就需要很大的勇氣。',
-  '如果覺得快撐不住，隨時可以撥打 1925 安心專線，會有人陪著你。',
-  '今天先到這裡也沒關係，記得完成今天的修練任務，我會一直在。',
-];
+]);
+
+const GROUP_NICK_POOL = mockData('group-nick-pool', ['靜靜的湖','小蝸牛']);
+const SIMULATED_MEMBER_REPLIES = mockData('group-replies', ['辛苦你了，我懂那種感覺', '一起加油！']);
+// Seed data only — these groups and their members are simulated so the room
+// doesn't feel empty on first visit, same demo-data approach ScreenPairing
+// uses for its partner. No real other users exist in this prototype.
+const SEED_GROUPS = mockData('chat-groups', [
+  {
+    id: 'GRP-seed-1', name: '深夜emo互助會', visibility: 'public', creatorNick: '夜貓子',
+    members: [{ nick: '夜貓子', joinedAt: '3 天前' }],
+    messages: [
+      { id: 'seed-1-1', senderNick: '夜貓子', text: '今天又失眠了...', time: '23:10', isMe: false },
+    ],
+    riskFlag: false, createdAt: '3 天前', fhirCareTeamId: null, fhirCareTeamStatus: 'idle',
+  },
+]);
+
+function buildCareTeamResource(patientId, group) {
+  return {
+    resourceType: 'CareTeam',
+    status: 'active',
+    name: group.name,
+    subject: { reference: `Patient/${patientId}` },
+    participant: group.members.map(m => ({ member: { display: m.nick } })),
+  };
+}
+
+function buildCommunicationResource(patientId, group, text) {
+  return {
+    resourceType: 'Communication',
+    status: 'completed',
+    subject: { reference: `Patient/${patientId}` },
+    sent: new Date().toISOString(),
+    payload: [{ contentString: text }],
+    partOf: group.fhirCareTeamId ? [{ reference: `CareTeam/${group.fhirCareTeamId}` }] : undefined,
+    note: [{ text: `群組：${group.name}` }],
+  };
+}
 
 // Public HAPI FHIR R4 sandbox — no backend of our own; the browser talks to it directly (CORS is open).
 const FHIR_BASE = 'https://hapi.fhir.org/baseR4';
@@ -213,6 +305,47 @@ function buildPssQuestionnaireResponse(patientId, answers, questions) {
       text: questions[i],
       answer: [{ valueInteger: a }],
     })),
+  };
+}
+
+function buildTaskResource(patientId, task) {
+  return {
+    resourceType: 'Task',
+    status: 'completed',
+    intent: 'order',
+    for: { reference: `Patient/${patientId}` },
+    authoredOn: new Date().toISOString(),
+    lastModified: new Date().toISOString(),
+    code: { text: task.name },
+    description: task.desc,
+  };
+}
+
+function buildSummaryQuestionnaireResponse(patientId, stars, freeText) {
+  return {
+    resourceType: 'QuestionnaireResponse',
+    questionnaire: 'http://mindharbor.tw/fhir/Questionnaire/daily-summary',
+    status: 'completed',
+    subject: { reference: `Patient/${patientId}` },
+    authored: new Date().toISOString(),
+    item: [
+      { linkId: 'relax', text: '今天有比較放鬆嗎？', answer: [{ valueInteger: stars.relax }] },
+      { linkId: 'calmer', text: '做完任務後，心情是否比較平靜？', answer: [{ valueInteger: stars.calmer }] },
+      { linkId: 'freeText', text: '今天最讓你有收穫的事情是？', answer: freeText ? [{ valueString: freeText }] : [] },
+    ],
+  };
+}
+
+function buildFlagResource(patientId, reason) {
+  return {
+    resourceType: 'Flag',
+    status: 'active',
+    category: [{
+      coding: [{ system: 'http://terminology.hl7.org/CodeSystem/flag-category', code: 'behavioral', display: 'Behavioral' }],
+    }],
+    code: { text: reason },
+    subject: { reference: `Patient/${patientId}` },
+    period: { start: new Date().toISOString() },
   };
 }
 
@@ -253,7 +386,7 @@ class Component extends DCLogic {
     pssIndex: 0,
     pssScore: null,
     pssCategory: null,
-    tasks: MALE_TASKS.map(t => ({...t, completed:false, timerSeconds:0, running:false})),
+    tasks: MALE_TASKS.map(t => ({...t, completed:false, timerSeconds:0, running:false, fhirStatus:'idle', fhirTaskId:null})),
     summaryStars: {relax:0, calmer:0},
     summaryFreeText: '',
     summaryDone: false,
@@ -269,10 +402,12 @@ class Component extends DCLogic {
     companionAlert: false,
     notifiedFlags: [],
     notifiedThisSession: false,
-    friends: [
+    chatGroups: SEED_GROUPS,
+    myGroupNick: null,
+    friends: mockData('friends', [
       { nick:'小海豚', since:'3 天前', online:true, lastActive:'剛剛在線' },
       { nick:'向日葵', since:'1 週前', online:false, lastActive:'3 小時前活躍' },
-    ],
+    ]),
     pairingGroups: [],
     lastCheckinDate: (typeof localStorage !== 'undefined' && localStorage.getItem('mh_last_checkin')) || null,
     authMode: 'login',
@@ -283,6 +418,9 @@ class Component extends DCLogic {
     fhirQrId: null,
     fhirObsId: null,
     fhirSyncedAt: null,
+    summaryFhirStatus: 'idle', // idle | syncing | synced | error
+    summaryFhirError: null,
+    summaryFhirQrId: null,
     dashboardOpenFriendsSignal: 0,
   };
   openDashboardFriends = () => this.setState(s => ({ dashboardOpenFriendsSignal: s.dashboardOpenFriendsSignal + 1 }));
@@ -324,7 +462,7 @@ class Component extends DCLogic {
       gender: data.gender,
       mindDemon: 50,
       spiritPower: 0,
-      tasks: (isFemale ? FEMALE_TASKS : MALE_TASKS).map(t => ({...t, completed:false, timerSeconds:0, running:false})),
+      tasks: (isFemale ? FEMALE_TASKS : MALE_TASKS).map(t => ({...t, completed:false, timerSeconds:0, running:false, fhirStatus:'idle', fhirTaskId:null})),
     });
   };
   doLogin = () => {
@@ -334,7 +472,7 @@ class Component extends DCLogic {
       name: isFemale ? '小美' : '蕭游',
       mindDemon: isFemale ? 38 : 32,
       spiritPower: isFemale ? 85 : 582,
-      tasks: (isFemale ? FEMALE_TASKS : MALE_TASKS).map(t => ({...t, completed:false, timerSeconds:0, running:false})),
+      tasks: (isFemale ? FEMALE_TASKS : MALE_TASKS).map(t => ({...t, completed:false, timerSeconds:0, running:false, fhirStatus:'idle', fhirTaskId:null})),
     });
   };
 
@@ -348,21 +486,26 @@ class Component extends DCLogic {
   nextPss = () => this.setState(s => ({ pssIndex: Math.min(9, s.pssIndex + 1) }));
   prevPss = () => this.setState(s => ({ pssIndex: Math.max(0, s.pssIndex - 1) }));
 
+  // Shared by every flow that writes to FHIR (PSS-10, task completion, daily
+  // summary, pairing risk flag) so there is only ever one Patient created per
+  // session — later calls just reuse state.fhirPatientId.
+  ensurePatientId = async () => {
+    if (this.state.fhirPatientId) return this.state.fhirPatientId;
+    const demoId = 'mh-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    const patient = await fhirRequest('POST', 'Patient', {
+      resourceType: 'Patient',
+      identifier: [{ system: 'http://mindharbor.tw/fhir/patient-id', value: demoId }],
+      name: [{ text: this.state.name || 'MindHarbor Demo User' }],
+      gender: this.state.gender === 'female' ? 'female' : 'male',
+    });
+    this.setState({ fhirPatientId: patient.id });
+    return patient.id;
+  };
+
   syncPssToFhir = async (answers, total, category) => {
     this.setState({ fhirStatus: 'syncing', fhirError: null });
     try {
-      let patientId = this.state.fhirPatientId;
-      if (!patientId) {
-        const demoId = 'mh-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
-        const patient = await fhirRequest('POST', 'Patient', {
-          resourceType: 'Patient',
-          identifier: [{ system: 'http://mindharbor.tw/fhir/patient-id', value: demoId }],
-          name: [{ text: this.state.name || 'MindHarbor Demo User' }],
-          gender: this.state.gender === 'female' ? 'female' : 'male',
-        });
-        patientId = patient.id;
-        this.setState({ fhirPatientId: patientId });
-      }
+      const patientId = await this.ensurePatientId();
       const qr = await fhirRequest('POST', 'QuestionnaireResponse', buildPssQuestionnaireResponse(patientId, answers, PSS10));
       const obs = await fhirRequest('POST', 'Observation', buildPssObservation(patientId, qr.id, total, category));
       this.setState({
@@ -395,6 +538,9 @@ class Component extends DCLogic {
   // end of the flow. We upsert by sessionId instead of always pushing a new
   // group, and only ever add the "已通報" flag once per session.
   onPairingComplete = (summary) => {
+    const isHigh = summary.riskLevel === 'high';
+    const alreadyFlagged = this.state.notifiedFlags.some(f => f.sessionId === summary.sessionId);
+    const willNotify = isHigh && !alreadyFlagged;
     this.setState(s => {
       const existingIdx = s.pairingGroups.findIndex(g => g.sessionId === summary.sessionId);
       const groupId = existingIdx >= 0 ? s.pairingGroups[existingIdx].id : `G-${s.pairingGroups.length + 1}`;
@@ -418,10 +564,8 @@ class Component extends DCLogic {
       const newFriends = summary.final && summary.friended
         ? [...s.friends, { nick: summary.partnerNick, since: '剛剛', online: true, lastActive: '剛剛在線' }]
         : s.friends;
-      const isHigh = summary.riskLevel === 'high';
-      const alreadyFlagged = s.notifiedFlags.some(f => f.sessionId === summary.sessionId);
-      const newFlags = isHigh && !alreadyFlagged
-        ? [...s.notifiedFlags, { sessionId: summary.sessionId, patient: `匿名配對 ${groupId}（紓壓配對偵測）`, time: '剛剛' }]
+      const newFlags = willNotify
+        ? [...s.notifiedFlags, { sessionId: summary.sessionId, patient: `匿名配對 ${groupId}（紓壓配對偵測）`, time: '剛剛', fhirStatus: 'syncing', fhirFlagId: null }]
         : s.notifiedFlags;
       return {
         pairingGroups,
@@ -429,6 +573,127 @@ class Component extends DCLogic {
         notifiedFlags: newFlags,
       };
     });
+    if (willNotify) this.syncFlagToFhir(summary.sessionId, '紓壓配對高風險通報');
+  };
+
+  syncFlagToFhir = async (sessionId, reason) => {
+    try {
+      const patientId = await this.ensurePatientId();
+      const flag = await fhirRequest('POST', 'Flag', buildFlagResource(patientId, reason));
+      this.setState(s => ({
+        notifiedFlags: s.notifiedFlags.map(f => f.sessionId === sessionId ? {...f, fhirStatus: 'synced', fhirFlagId: flag.id} : f)
+      }));
+    } catch (e) {
+      const msg = (e && e.message) || String(e);
+      this.setState(s => ({
+        notifiedFlags: s.notifiedFlags.map(f => f.sessionId === sessionId ? {...f, fhirStatus: 'error', fhirError: msg} : f)
+      }));
+    }
+  };
+
+  // Kept genuinely anonymous, same as the pairing flow — one nickname is
+  // picked per session and reused across every group so members recognize
+  // "you" from message to message without exposing the real login name.
+  ensureMyGroupNick = () => {
+    if (this.state.myGroupNick) return this.state.myGroupNick;
+    const nick = GROUP_NICK_POOL[Math.floor(Math.random() * GROUP_NICK_POOL.length)];
+    this.setState({ myGroupNick: nick });
+    return nick;
+  };
+
+  createGroup = (name, visibility, inviteNicks) => {
+    const trimmed = (name || '').trim().slice(0, 30);
+    if (!trimmed) return;
+    const myNick = this.ensureMyGroupNick();
+    const members = [
+      { nick: myNick, joinedAt: '剛剛' },
+      ...(inviteNicks || []).map(n => ({ nick: n, joinedAt: '剛剛' })),
+    ];
+    const group = {
+      id: 'GRP-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+      name: trimmed, visibility: visibility === 'private' ? 'private' : 'public',
+      creatorNick: myNick, members, messages: [],
+      riskFlag: false, createdAt: '剛剛',
+      fhirCareTeamId: null, fhirCareTeamStatus: 'idle',
+    };
+    this.setState(s => ({ chatGroups: [group, ...s.chatGroups] }));
+    this.syncCareTeamToFhir(group.id);
+  };
+
+  joinGroup = (id) => {
+    const myNick = this.ensureMyGroupNick();
+    const existingGroup = this.state.chatGroups.find(g => g.id === id);
+    const alreadyMember = !!existingGroup && existingGroup.members.some(m => m.nick === myNick);
+    this.setState(s => ({
+      chatGroups: s.chatGroups.map(g => (g.id === id && !g.members.some(m => m.nick === myNick))
+        ? { ...g, members: [...g.members, { nick: myNick, joinedAt: '剛剛' }] }
+        : g)
+    }));
+    if (!alreadyMember) this.syncCareTeamToFhir(id);
+  };
+
+  syncCareTeamToFhir = async (groupId) => {
+    this.setState(s => ({ chatGroups: s.chatGroups.map(g => g.id === groupId ? {...g, fhirCareTeamStatus: 'syncing'} : g) }));
+    try {
+      const patientId = await this.ensurePatientId();
+      const group = this.state.chatGroups.find(g => g.id === groupId);
+      const careTeam = await fhirRequest('POST', 'CareTeam', buildCareTeamResource(patientId, group));
+      this.setState(s => ({ chatGroups: s.chatGroups.map(g => g.id === groupId ? {...g, fhirCareTeamStatus: 'synced', fhirCareTeamId: careTeam.id} : g) }));
+    } catch (e) {
+      this.setState(s => ({ chatGroups: s.chatGroups.map(g => g.id === groupId ? {...g, fhirCareTeamStatus: 'error'} : g) }));
+    }
+  };
+
+  syncCommunicationToFhir = async (groupId, text) => {
+    try {
+      const patientId = await this.ensurePatientId();
+      const group = this.state.chatGroups.find(g => g.id === groupId);
+      if (group) await fhirRequest('POST', 'Communication', buildCommunicationResource(patientId, group, text));
+    } catch (e) {
+      // Best-effort: the message already shows locally regardless of FHIR
+      // write success, same "local state is truth, FHIR mirrors it" pattern
+      // used everywhere else in the app.
+    }
+  };
+
+  notifyGroupRisk = (groupId) => {
+    const flagKey = `group-${groupId}`;
+    if (this.state.notifiedFlags.some(f => f.sessionId === flagKey)) return;
+    const group = this.state.chatGroups.find(g => g.id === groupId);
+    this.setState(s => ({
+      notifiedFlags: [...s.notifiedFlags, { sessionId: flagKey, patient: `群組「${group ? group.name : groupId}」（群組聊天偵測）`, time: '剛剛', fhirStatus: 'syncing', fhirFlagId: null }],
+    }));
+    this.syncFlagToFhir(flagKey, '群組聊天高風險通報');
+  };
+
+  sendGroupMessage = (groupId, text) => {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return;
+    const myNick = this.ensureMyGroupNick();
+    const time = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+    const risk = this.classifyRisk(trimmed);
+    const isHigh = risk === 'high';
+    this.setState(s => ({
+      chatGroups: s.chatGroups.map(g => g.id === groupId
+        ? { ...g, messages: [...g.messages, { id: 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,6), senderNick: myNick, text: trimmed, time, isMe: true }], riskFlag: g.riskFlag || isHigh }
+        : g),
+    }));
+    this.syncCommunicationToFhir(groupId, trimmed);
+    if (isHigh) this.notifyGroupRisk(groupId);
+
+    const group = this.state.chatGroups.find(g => g.id === groupId);
+    const others = group ? group.members.filter(m => m.nick !== myNick) : [];
+    if (others.length) {
+      const replyFrom = others[Math.floor(Math.random() * others.length)];
+      const replyText = SIMULATED_MEMBER_REPLIES[Math.floor(Math.random() * SIMULATED_MEMBER_REPLIES.length)];
+      setTimeout(() => {
+        this.setState(s => ({
+          chatGroups: s.chatGroups.map(g => g.id === groupId
+            ? { ...g, messages: [...g.messages, { id: 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,6), senderNick: replyFrom.nick, text: replyText, time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }), isMe: false }] }
+            : g),
+        }));
+      }, 900);
+    }
   };
 
   toggleCompanion = () => this.setState(s => ({ companionOpen: !s.companionOpen, companionAlert: false }));
@@ -486,18 +751,48 @@ class Component extends DCLogic {
     });
   };
 
-  toggleTask = (id) => this.setState(s => ({
-    tasks: s.tasks.map(t => t.id === id ? {...t, completed: !t.completed, running: false} : t)
-  }));
+  toggleTask = (id) => {
+    const task = this.state.tasks.find(t => t.id === id);
+    const nowCompleted = !!task && !task.completed;
+    this.setState(s => ({
+      tasks: s.tasks.map(t => t.id === id ? {...t, completed: !t.completed, running: false} : t)
+    }));
+    if (nowCompleted) this.syncTaskToFhir(id);
+  };
   toggleTimer = (id) => this.setState(s => ({
     tasks: s.tasks.map(t => t.id === id ? {...t, running: !t.running} : t)
   }));
+
+  syncTaskToFhir = async (id) => {
+    this.setState(s => ({ tasks: s.tasks.map(t => t.id === id ? {...t, fhirStatus: 'syncing'} : t) }));
+    try {
+      const patientId = await this.ensurePatientId();
+      const task = this.state.tasks.find(t => t.id === id);
+      const created = await fhirRequest('POST', 'Task', buildTaskResource(patientId, task));
+      this.setState(s => ({ tasks: s.tasks.map(t => t.id === id ? {...t, fhirStatus: 'synced', fhirTaskId: created.id} : t) }));
+    } catch (e) {
+      const msg = (e && e.message) || String(e);
+      this.setState(s => ({ tasks: s.tasks.map(t => t.id === id ? {...t, fhirStatus: 'error', fhirError: msg} : t) }));
+    }
+  };
 
   setStar = (key, val) => this.setState(s => ({ summaryStars: {...s.summaryStars, [key]: val} }));
   setFreeText = (v) => this.setState({ summaryFreeText: v });
   submitSummary = () => {
     if (this.state.summaryStars.relax === 0 || this.state.summaryStars.calmer === 0) return;
     this.setState({ summaryDone: true, screen: 'results', dayCompleted: true });
+    this.syncSummaryToFhir();
+  };
+  syncSummaryToFhir = async () => {
+    this.setState({ summaryFhirStatus: 'syncing', summaryFhirError: null });
+    try {
+      const patientId = await this.ensurePatientId();
+      const { summaryStars, summaryFreeText } = this.state;
+      const qr = await fhirRequest('POST', 'QuestionnaireResponse', buildSummaryQuestionnaireResponse(patientId, summaryStars, summaryFreeText));
+      this.setState({ summaryFhirStatus: 'synced', summaryFhirQrId: qr.id });
+    } catch (e) {
+      this.setState({ summaryFhirStatus: 'error', summaryFhirError: (e && e.message) || String(e) });
+    }
   };
 
   renderVals() {
@@ -518,11 +813,18 @@ class Component extends DCLogic {
     const lowStressBonus = s.pssCategory === 'low' ? 5 : 0;
     const reduction = taskReduction + starsBonus + lowStressBonus;
     const spiritEarned = reduction * 2 + (allTasksDone ? 20 : 0) + (s.pssScore !== null ? 10 : 0) + (s.summaryDone ? 10 : 0);
+    const tasksFhirSynced = s.tasks.filter(t => t.completed && t.fhirStatus === 'synced').length;
+    const summaryFhirLabel = s.summaryFhirStatus === 'synced' ? `✓ QuestionnaireResponse/${s.summaryFhirQrId}`
+      : s.summaryFhirStatus === 'syncing' ? '同步中…'
+      : s.summaryFhirStatus === 'error' ? `同步失敗（${s.summaryFhirError || '網路異常'}）`
+      : '—';
     const details = [
       {label: `完成 ${tasksDoneCount} 個任務`, val: `-${taskReduction} 心魔`},
       {label: '總結反思加成', val: `-${starsBonus} 心魔`},
       {label: s.pssCategory === 'low' ? '低壓力加成' : 'PSS-10 完成', val: s.pssCategory === 'low' ? '-5 心魔' : '+10 靈力'},
       {label: allTasksDone ? '全任務完成加成' : '任務未全數完成', val: allTasksDone ? '+20 靈力' : '—'},
+      {label: '任務已寫入 FHIR Task', val: `${tasksFhirSynced}/${tasksDoneCount}`},
+      {label: '總結已寫入 FHIR QuestionnaireResponse', val: summaryFhirLabel},
     ];
 
     const showCompanion = ['dashboard','tasks','summary','results','crisis'].includes(s.screen);
@@ -549,7 +851,7 @@ class Component extends DCLogic {
       notifiedFlags: s.notifiedFlags,
       isMarketing: s.screen === 'marketing', isLogin: s.screen === 'login', isDashboard: s.screen === 'dashboard',
       isChat: s.screen === 'chat', isTasks: s.screen === 'tasks', isSummary: s.screen === 'summary',
-      isResults: s.screen === 'results', isCrisis: s.screen === 'crisis', isPairing: s.screen === 'pairing', isShop: s.screen === 'shop', isPractitioner: s.screen === 'practitioner', isAdmin: s.screen === 'admin',
+      isResults: s.screen === 'results', isCrisis: s.screen === 'crisis', isPairing: s.screen === 'pairing', isShop: s.screen === 'shop', isGroups: s.screen === 'groups', isPractitioner: s.screen === 'practitioner', isAdmin: s.screen === 'admin',
       shopHistory: s.shopHistory, onRedeem: this.onRedeem,
       navBg, navFg,
       goTo_marketing: () => this.goTo('marketing'), goTo_login: () => this.goTo('login'),
@@ -558,10 +860,12 @@ class Component extends DCLogic {
       goTo_dashboard: () => this.goTo('dashboard'), goTo_chat: () => this.goTo('chat'),
       goTo_tasks: () => this.goTo('tasks'), goTo_summary: () => this.goTo('summary'),
       goTo_results: () => this.goTo('results'), goTo_crisis: () => this.goTo('crisis'),
-      goTo_pairing: () => this.goTo('pairing'), goTo_shop: () => this.goTo('shop'),
+      goTo_pairing: () => this.goTo('pairing'), goTo_shop: () => this.goTo('shop'), goTo_groups: () => this.goTo('groups'),
       goTo_practitioner: () => this.goTo('practitioner'), goTo_admin: () => this.goTo('admin'),
       onPairingComplete: this.onPairingComplete,
       friends: s.friends, pairingGroups: s.pairingGroups,
+      chatGroups: s.chatGroups, myGroupNick: s.myGroupNick,
+      createGroup: this.createGroup, joinGroup: this.joinGroup, sendGroupMessage: this.sendGroupMessage,
       checkedInToday: s.lastCheckinDate === this.todayStr(),
       onCheckin: this.doCheckin,
       gender: s.gender, setGender: this.setGender, doLogin: this.doLogin,

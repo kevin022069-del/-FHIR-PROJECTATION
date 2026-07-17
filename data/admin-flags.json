@@ -1,0 +1,50 @@
+[
+  {
+    "patient": "個案 #小明",
+    "status": "待處理"
+  },
+  {
+    "patient": "個案 #小美",
+    "status": "已解決"
+  },
+  {
+    "patient": "個案 #王先生",
+    "status": "待處理"
+  },
+  {
+    "patient": "個案 #林小姐",
+    "status": "已解決"
+  },
+  {
+    "patient": "個案 #陳先生",
+    "status": "待處理"
+  },
+  {
+    "patient": "個案 #張小姐",
+    "status": "已解決"
+  },
+  {
+    "patient": "個案 #李先生",
+    "status": "待處理"
+  },
+  {
+    "patient": "個案 #黃小姐",
+    "status": "已解決"
+  },
+  {
+    "patient": "個案 #吳先生",
+    "status": "待處理"
+  },
+  {
+    "patient": "個案 #劉小姐",
+    "status": "已解決"
+  },
+  {
+    "patient": "個案 #蔡先生",
+    "status": "待處理"
+  },
+  {
+    "patient": "個案 #楊小姐",
+    "status": "已解決"
+  }
+]

@@ -13,24 +13,41 @@
     @keyframes mh-page-enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
     @media (max-width: 820px) {
       .mh-dash-root { flex-direction: column !important; }
-      .mh-dash-sidebar { width: 100% !important; flex-direction: row !important; align-items: center !important; overflow-x: auto !important; border-right: none !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; padding: 10px 12px !important; gap: 10px !important; }
+      .mh-dash-sidebar { width: 100% !important; position: relative !important; z-index: 50 !important; flex-direction: row !important; align-items: center !important; overflow: visible !important; border-right: none !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; padding: 10px 12px !important; gap: 10px !important; }
       .mh-dash-sidebar .mh-dash-logo { padding: 0 6px !important; flex: none !important; }
       .mh-dash-sidebar .mh-dash-profile { margin-top: 0 !important; margin-left: auto !important; border-top: none !important; flex: none !important; padding: 0 0 0 10px !important; }
+      .mh-dash-nav-items { display: none !important; }
+      .mh-dash-nav-toggle { display: flex !important; }
       .mh-dash-main { padding: 18px !important; }
+    }
+    @media (min-width: 821px) {
+      .mh-dash-nav-dropdown { display: none !important; }
     }
   </style>
 </helmet>
-<div class="mh-dash-root" style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;display:flex;background:url('./img/bg-dashboard.jpg') center/cover no-repeat,{{ theme.canvas }};font-family:'Noto Sans TC',sans-serif;transition:background .2s;animation:mh-page-enter .5s cubic-bezier(.22,1,.36,1) both" data-screen-label="個案 Dashboard">
+<div class="mh-dash-root" style="position:absolute;inset:0;overflow:hidden;box-sizing:border-box;display:flex;background:url('./img/bg-dashboard.jpg') center/cover no-repeat,{{ theme.canvas }};font-family:'Noto Sans TC',sans-serif;transition:background .2s;animation:mh-page-enter .5s cubic-bezier(.22,1,.36,1) both" data-screen-label="個案 Dashboard">
 
   <!-- sidebar -->
-  <div class="mh-dash-sidebar" style="width:220px;flex:none;background:{{ theme.surface }};border-right:1px solid {{ theme.border }};padding:24px 16px;display:flex;flex-direction:column;gap:2px;transition:background .2s">
+  <div class="mh-dash-sidebar" style="width:220px;flex:none;overflow-y:auto;background:{{ theme.surface }};border-right:1px solid {{ theme.border }};padding:24px 16px;display:flex;flex-direction:column;gap:2px;transition:background .2s">
     <div class="mh-dash-logo" style="display:flex;align-items:center;gap:10px;padding:6px 10px 22px;flex:none">
       <div style="width:30px;height:30px;border-radius:9px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);flex:none"></div>
       <div style="font:700 17px 'Quicksand';color:{{ theme.text }};white-space:nowrap">MindHarbor</div>
     </div>
-    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
-      <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap;flex:none">{{ item.label }}</div>
-    </sc-for>
+    <!-- Hamburger: only visible ≤820px (see media query above); the vertical
+         nav list below is hidden at that width and replaced by the dropdown
+         further down instead of the old horizontal-scrolling row. -->
+    <button class="mh-dash-nav-toggle" onClick="{{ toggleMobileNav }}" aria-label="開啟選單" style="display:none;width:36px;height:36px;border:1px solid {{ theme.border }};background:{{ theme.surface }};border-radius:10px;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0">
+      <div style="position:relative;width:16px;height:12px">
+        <div style="{{ hamburgerBar1Style }}"></div>
+        <div style="{{ hamburgerBar2Style }}"></div>
+        <div style="{{ hamburgerBar3Style }}"></div>
+      </div>
+    </button>
+    <div class="mh-dash-nav-items" style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
+        <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap;flex:none">{{ item.label }}</div>
+      </sc-for>
+    </div>
     <div class="mh-dash-profile" style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:14px 10px;border-top:1px solid {{ theme.border }}">
       <div style="width:32px;height:32px;border-radius:50%;flex:none;background:url('./img/avatar-user.png') center/cover no-repeat,#DCE6DB"></div>
       <div style="flex:1">
@@ -45,10 +62,17 @@
         </div>
       </div>
     </div>
+    <!-- Mobile-only dropdown: position:absolute so it overlays the page
+         instead of pushing content down; hidden entirely ≥821px via CSS. -->
+    <div class="mh-dash-nav-dropdown" style="{{ mobileDropdownStyle }}">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
+        <div onClick="{{ item.onClick }}" style="{{ item.style }}white-space:nowrap">{{ item.label }}</div>
+      </sc-for>
+    </div>
   </div>
 
   <!-- main -->
-  <div class="mh-dash-main" style="flex:1;min-width:0;padding:clamp(20px,4vw,36px) clamp(16px,4vw,44px);max-width:1600px">
+  <div class="mh-dash-main" style="flex:1;min-width:0;overflow-y:auto;padding:clamp(20px,4vw,36px) clamp(16px,4vw,44px);max-width:1600px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;flex-wrap:wrap;gap:16px">
       <div style="flex:none;min-width:fit-content">
         <div style="font:700 clamp(22px,4vw,30px) 'Quicksand';color:{{ theme.text }};display:flex;align-items:center;gap:10px;white-space:nowrap">{{ headerTitle }}
@@ -174,12 +198,16 @@
     </sc-if>
 
     <sc-if value="{{ isBadges }}" hint-placeholder-val="{{ false }}">
+      <div style="font:700 13px 'Noto Sans TC';color:{{ theme.textSoft }};margin-bottom:16px">已解鎖 {{ badgesUnlockedCount }} / {{ badgesTotalCount }} 枚勳章</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px">
-        <sc-for list="{{ badges }}" as="badge" hint-placeholder-count="6">
-          <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:22px;text-align:center;opacity:{{ badge.opacity }}">
+        <sc-for list="{{ badges }}" as="badge" hint-placeholder-count="16">
+          <div style="position:relative;background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:18px;padding:22px;text-align:center;opacity:{{ badge.opacity }}">
             <div style="width:44px;height:44px;border-radius:50%;margin:0 auto 12px;background:{{ badge.photoLayer }}{{ badge.color }}"></div>
             <div style="font:700 14px 'Quicksand';color:{{ theme.text }}">{{ badge.name }}</div>
             <div style="font:400 11px 'Noto Sans TC';color:{{ theme.textSoft }};margin-top:4px">{{ badge.desc }}</div>
+            <sc-if value="{{ !badge.unlocked }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:10px;right:12px;font:700 10px 'Noto Sans TC';color:{{ theme.textSoft }}">🔒</div>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -206,16 +234,27 @@
     </sc-if>
     <sc-if value="{{ isFriends }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ friends.length }}" hint-placeholder-val="{{ false }}">
-        <div style="display:flex;flex-direction:column;gap:12px;max-width:480px">
-          <sc-for list="{{ friends }}" as="f" hint-placeholder-count="2">
-            <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px">
-              <div style="width:40px;height:40px;border-radius:50%;background:{{ f.avatarLayer }}radial-gradient(circle at 35% 30%,#D19A76,#9A6B54);flex:none"></div>
-              <div>
-                <div style="font:700 14px 'Noto Sans TC';color:{{ theme.text }}">{{ f.nick }}</div>
-                <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }}">透過紓壓配對認識 · {{ f.since }}</div>
-              </div>
+        <div style="max-width:480px">
+          <input value="{{ friendSearch }}" onInput="{{ onFriendSearchChange }}" placeholder="搜尋好友暱稱..." style="width:100%;border:1px solid {{ theme.border }};background:{{ theme.surface }};color:{{ theme.text }};border-radius:999px;padding:11px 18px;font:400 13px 'Noto Sans TC';outline:none;box-sizing:border-box;margin-bottom:14px"/>
+
+          <sc-if value="{{ filteredFriends.length }}" hint-placeholder-val="{{ true }}">
+            <div class="mh-scroll" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-right:4px">
+              <sc-for list="{{ filteredFriends }}" as="f" hint-placeholder-count="2">
+                <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex:none">
+                  <div style="width:40px;height:40px;border-radius:50%;background:{{ f.avatarLayer }}radial-gradient(circle at 35% 30%,#D19A76,#9A6B54);flex:none"></div>
+                  <div>
+                    <div style="font:700 14px 'Noto Sans TC';color:{{ theme.text }}">{{ f.nick }}</div>
+                    <div style="font:400 12px 'Noto Sans TC';color:{{ theme.textSoft }}">透過紓壓配對認識 · {{ f.since }}</div>
+                  </div>
+                </div>
+              </sc-for>
             </div>
-          </sc-for>
+          </sc-if>
+          <sc-if value="{{ !filteredFriends.length }}" hint-placeholder-val="{{ false }}">
+            <div style="background:{{ theme.surface }};border:1px dashed {{ theme.border }};border-radius:16px;padding:26px;text-align:center;font:400 13px 'Noto Sans TC';color:{{ theme.textSoft }}">
+              找不到符合「{{ friendSearch }}」的好友
+            </div>
+          </sc-if>
         </div>
       </sc-if>
       <sc-if value="{{ !friends.length }}" hint-placeholder-val="{{ true }}">
@@ -228,17 +267,31 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
+// Each badge's `test` reads the live props passed into ScreenDashboard so the
+// lock state reflects real progress instead of a fixed demo index.
 const BADGES = [
-  {name:'Calm', desc:'保持平靜', color:'#9CC3A0', slug:'calm'},
-  {name:'Focus', desc:'專注當下', color:'#8FA9C4', slug:'focus'},
-  {name:'Courage', desc:'勇於面對', color:'#A688B0', slug:'courage'},
-  {name:'Reflection', desc:'深度反思', color:'#D19A76', slug:'reflection'},
-  {name:'Consistency', desc:'連續 7 天', color:'#E8B44C', slug:'consistency'},
-  {name:'Growth', desc:'心魔下降 50%', color:'#557A60', slug:'growth'},
+  {name:'Calm', desc:'完成今日簽到', color:'#9CC3A0', slug:'calm', test: p => !!p.checkedInToday},
+  {name:'Focus', desc:'完成第一項任務', color:'#8FA9C4', slug:'focus', test: p => p.tasksDone >= 1},
+  {name:'Courage', desc:'完成壓力量表評估', color:'#A688B0', slug:'courage', test: p => !!p.pssCategory},
+  {name:'Reflection', desc:'完成每日總結', color:'#D19A76', slug:'reflection', test: p => !!p.summaryDone},
+  // No persistent streak counter exists yet in app state; approximated by a
+  // fully-completed check-in day until real streak tracking is added.
+  {name:'Consistency', desc:'連續 7 天修練', color:'#E8B44C', slug:'consistency', test: p => !!p.completed && !!p.checkedInToday},
+  {name:'Growth', desc:'心魔降至 40 以下', color:'#557A60', slug:'growth', test: p => p.mindDemon <= 40},
+  {name:'Day Complete', desc:'完成一整天旅程', color:'#6ECBAF', slug:'day-complete', test: p => !!p.completed},
+  {name:'Task Master', desc:'一日內完成所有任務', color:'#C97B4A', slug:'task-master', test: p => p.tasksTotal > 0 && p.tasksDone === p.tasksTotal},
+  {name:'Inner Peace', desc:'心魔降至 20 以下', color:'#3F5C48', slug:'inner-peace', test: p => p.mindDemon <= 20},
+  {name:'Spirit Spark', desc:'靈力達 100', color:'#F0C868', slug:'spirit-spark', test: p => p.spiritPower >= 100},
+  {name:'Spirit Adept', desc:'靈力達 300', color:'#D9A441', slug:'spirit-adept', test: p => p.spiritPower >= 300},
+  {name:'Spirit Master', desc:'靈力達 500', color:'#A67C27', slug:'spirit-master', test: p => p.spiritPower >= 500},
+  {name:'Low Stress', desc:'壓力量表達成低壓力', color:'#B7D9A8', slug:'low-stress', test: p => p.pssCategory === 'low'},
+  {name:'Steady Mind', desc:'曾勇敢尋求危機支援', color:'#E29C8B', slug:'steady-mind', test: p => !!p.highRisk},
+  {name:'Companion', desc:'認識第一位旅伴', color:'#7FB3D5', slug:'companion', test: p => (p.friends || []).length >= 1},
+  {name:'Social Butterfly', desc:'好友數達 3 人', color:'#6C8FB0', slug:'social-butterfly', test: p => (p.friends || []).length >= 3},
 ];
 
 class Component extends DCLogic {
-  state = { panel: 'overview', darkMode: false };
+  state = { panel: 'overview', darkMode: false, friendSearch: '', mobileNavOpen: false };
 
   componentDidUpdate(prevProps) {
     if (prevProps.openFriendsSignal !== this.props.openFriendsSignal && this.props.openFriendsSignal) {
@@ -264,7 +317,13 @@ class Component extends DCLogic {
       {label:'成就徽章', onClick: () => this.setState({ panel: 'badges' }), key:'badges'},
       {label:'設定中心', onClick: () => this.setState({ panel: 'settings' }), key:'settings'},
     ];
-    const navItems = items.map(it => ({ label: it.label, onClick: it.onClick, style: this.state.panel === it.key ? active : inactive }));
+    // Shared by the desktop list and the mobile dropdown, so picking any
+    // item also closes the dropdown if it happened to be open.
+    const navItems = items.map(it => ({
+      label: it.label,
+      onClick: () => { it.onClick(); this.setState({ mobileNavOpen: false }); },
+      style: this.state.panel === it.key ? active : inactive,
+    }));
 
     const pssLabel = p.pssCategory === 'high' ? '高壓力' : p.pssCategory === 'medium' ? '中壓力' : p.pssCategory === 'low' ? '低壓力' : '尚未評估';
     const scaleCta = p.pssCategory ? '查看結果 ›' : '開始評估 ›';
@@ -279,11 +338,25 @@ class Component extends DCLogic {
       day: ['07/05','07/06','07/07','07/08','07/09','07/10','今日'][i],
     }));
 
-    const badges = BADGES.map((b,i) => ({ ...b, opacity: i < 3 ? 1 : 0.35, photoLayer: `url('./img/badge-${b.slug}.png') center/cover no-repeat,` }));
+    const badges = BADGES.map(b => {
+      const unlocked = b.test(p);
+      return { ...b, unlocked, opacity: unlocked ? 1 : 0.35, photoLayer: `url('./img/badge-${b.slug}.png') center/cover no-repeat,` };
+    });
+    const badgesUnlockedCount = badges.filter(b => b.unlocked).length;
 
     const theme = this.state.darkMode
       ? { canvas:'#211F1B', surface:'#2A2822', border:'#3A362E', text:'#EDE8DE', textSoft:'#B0A99A', track:'#3A362E' }
       : { canvas:'#F4F0E7', surface:'#FBF9F4', border:'#E6DECF', text:'#423D37', textSoft:'#7C756B', track:'#EDE4D8' };
+
+    const mobileNavOpen = this.state.mobileNavOpen;
+    const hbBar = (top, deg, fade) => `position:absolute;left:0;top:${top}px;width:16px;height:2px;border-radius:1px;background:${theme.text};opacity:${fade ? 0 : 1};transform:rotate(${deg}deg);transition:top .2s ease,transform .2s ease,opacity .15s ease`;
+    const hamburgerBar1Style = hbBar(mobileNavOpen ? 5 : 0, mobileNavOpen ? 45 : 0, false);
+    const hamburgerBar2Style = hbBar(5, 0, mobileNavOpen);
+    const hamburgerBar3Style = hbBar(mobileNavOpen ? 5 : 10, mobileNavOpen ? -45 : 0, false);
+    // position:absolute (not fixed) anchored to .mh-dash-sidebar, which the
+    // ≤820px media query makes position:relative — so this overlays the
+    // page below the top bar instead of pushing content down.
+    const mobileDropdownStyle = `position:absolute;top:100%;left:0;right:0;z-index:10;display:flex;flex-direction:column;gap:2px;background:${theme.surface};border-bottom:1px solid ${theme.border};padding:10px 16px 14px;box-shadow:0 16px 28px rgba(0,0,0,.14);opacity:${mobileNavOpen ? 1 : 0};transform:translateY(${mobileNavOpen ? 0 : -10}px) scaleY(${mobileNavOpen ? 1 : 0.96});pointer-events:${mobileNavOpen ? 'auto' : 'none'};transition:opacity .22s ease,transform .22s cubic-bezier(.22,1,.36,1)`;
 
     return {
       theme,
@@ -295,13 +368,24 @@ class Component extends DCLogic {
       pssLabel, scaleCta, tasksLabel, summaryLabel,
       highRisk: p.highRisk,
       navItems,
+      toggleMobileNav: () => this.setState(s => ({ mobileNavOpen: !s.mobileNavOpen })),
+      hamburgerBar1Style, hamburgerBar2Style, hamburgerBar3Style,
+      mobileDropdownStyle,
       headerTitle, headerSubtitle,
       isOverview: this.state.panel === 'overview',
       isGrowth: this.state.panel === 'growth',
       isBadges: this.state.panel === 'badges',
       isSettings: this.state.panel === 'settings',
       isFriends: this.state.panel === 'friends',
+      // One avatar slot per friend (avatar-friend-1.png, -2.png, ...). Missing
+      // files simply fall back to the shared tan gradient below — see
+      // rank.md for the prompts still needed to fill out the set.
       friends: (p.friends || []).map((f, i) => ({ ...f, avatarLayer: `url('./img/avatar-friend-${i + 1}.png') center/cover no-repeat,` })),
+      filteredFriends: (p.friends || [])
+        .map((f, i) => ({ ...f, avatarLayer: `url('./img/avatar-friend-${i + 1}.png') center/cover no-repeat,` }))
+        .filter(f => !this.state.friendSearch.trim() || f.nick.toLowerCase().includes(this.state.friendSearch.trim().toLowerCase())),
+      friendSearch: this.state.friendSearch,
+      onFriendSearchChange: (e) => this.setState({ friendSearch: e.target.value }),
       friendActivity: (p.friends || []).map((f, i) => ({
         nick: f.nick,
         statusText: f.online ? '線上' : (f.lastActive || '離線'),
@@ -314,7 +398,7 @@ class Component extends DCLogic {
       onCheckin: p.onCheckin,
       checkinBtnLabel: p.checkedInToday ? '✓ 已簽到' : '簽到 +5',
       checkinBtnStyle: `border:none;padding:9px 16px;border-radius:999px;font:700 12px 'Noto Sans TC';color:${p.checkedInToday ? theme.textSoft : '#FBF9F4'};background:${p.checkedInToday ? theme.track : '#E8B44C'};cursor:${p.checkedInToday ? 'default' : 'pointer'};white-space:nowrap`,
-      growthBars, badges,
+      growthBars, badges, badgesUnlockedCount, badgesTotalCount: badges.length,
       goChat: p.goChat, goTasks: p.goTasks,
       goResultsOrTasks: p.completed ? p.goResults : (() => {}),
       goCrisis: p.goCrisis, goLogout: p.goLogout,

@@ -16,6 +16,10 @@
     @keyframes mh-float-b{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
     @media (max-width: 860px) {
       .mh-nav-links { display: none !important; }
+      .mh-nav-toggle { display: flex !important; }
+    }
+    @media (min-width: 861px) {
+      .mh-nav-dropdown { display: none !important; }
     }
     @media (max-width: 640px) {
       .mh-hero-actions { flex-direction: column !important; align-items: stretch !important; }
@@ -38,20 +42,39 @@
     </div>
   </sc-if>
 
-  <!-- nav -->
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,4vw,48px);background:#FBF9F4;border-bottom:1px solid #E6DECF;position:sticky;top:0;z-index:10">
-    <div style="display:flex;align-items:center;gap:10px;flex:none">
-      <div style="width:34px;height:34px;border-radius:10px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);flex:none"></div>
-      <div style="font:700 20px 'Quicksand',sans-serif;color:#423D37;white-space:nowrap">MindHarbor</div>
+  <!-- nav: z-index sits below the splash overlay (z-index:50) so the intro
+       animation fully covers the navbar too, but still above normal page
+       content once the splash unmounts. -->
+  <div style="position:sticky;top:0;z-index:40">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(16px,4vw,48px);background:#FBF9F4;border-bottom:1px solid #E6DECF">
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <div style="width:34px;height:34px;border-radius:10px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);flex:none"></div>
+        <div style="font:700 20px 'Quicksand',sans-serif;color:#423D37;white-space:nowrap">MindHarbor</div>
+      </div>
+      <div class="mh-nav-links" style="display:flex;gap:32px;font:500 15px 'Noto Sans TC';white-space:nowrap">
+        <span onClick="{{ scrollToHero }}" style="white-space:nowrap;cursor:pointer">首頁</span>
+        <span onClick="{{ scrollToAbout }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">關於我們</span>
+        <span onClick="{{ scrollToServices }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">如何使用</span>
+        <span onClick="{{ scrollToComingSoon }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">功能介紹</span>
+        <span onClick="{{ scrollToFooter }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">聯絡我們</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ goToRegister }}" style="border:none;background:#557A60;color:#FBF9F4;padding:11px 22px;border-radius:999px;font:600 14px 'Noto Sans TC';white-space:nowrap;flex:none">註冊</button>
+        <button class="mh-nav-toggle" onClick="{{ toggleMobileMenu }}" aria-label="開啟選單" style="display:none;width:38px;height:38px;border:1px solid #E6DECF;background:#FBF9F4;border-radius:10px;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0">
+          <i class="{{ mobileMenuIconClass }}" style="color:#423D37;font-size:16px"></i>
+        </button>
+      </div>
     </div>
-    <div class="mh-nav-links" style="display:flex;gap:32px;font:500 15px 'Noto Sans TC';white-space:nowrap">
-      <span onClick="{{ scrollToHero }}" style="white-space:nowrap;cursor:pointer">首頁</span>
-      <span onClick="{{ scrollToAbout }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">關於我們</span>
-      <span onClick="{{ scrollToServices }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">如何使用</span>
-      <span onClick="{{ scrollToComingSoon }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">功能介紹</span>
-      <span onClick="{{ scrollToFooter }}" style="white-space:nowrap;color:#7C756B;cursor:pointer">聯絡我們</span>
+    <!-- Always mounted (not sc-if) so opacity/transform can transition instead of
+         snapping in/out; position:absolute keeps it out of normal flow so opening
+         it never pushes the page content down or changes page width/height. -->
+    <div class="mh-nav-dropdown" style="{{ mobileMenuStyle }}">
+      <span onClick="{{ scrollToHero }}" style="padding:13px 2px;font:600 15px 'Noto Sans TC';color:#423D37;cursor:pointer;border-bottom:1px solid #F0EBE0">首頁</span>
+      <span onClick="{{ scrollToAbout }}" style="padding:13px 2px;font:500 15px 'Noto Sans TC';color:#7C756B;cursor:pointer;border-bottom:1px solid #F0EBE0">關於我們</span>
+      <span onClick="{{ scrollToServices }}" style="padding:13px 2px;font:500 15px 'Noto Sans TC';color:#7C756B;cursor:pointer;border-bottom:1px solid #F0EBE0">如何使用</span>
+      <span onClick="{{ scrollToComingSoon }}" style="padding:13px 2px;font:500 15px 'Noto Sans TC';color:#7C756B;cursor:pointer;border-bottom:1px solid #F0EBE0">功能介紹</span>
+      <span onClick="{{ scrollToFooter }}" style="padding:13px 2px;font:500 15px 'Noto Sans TC';color:#7C756B;cursor:pointer">聯絡我們</span>
     </div>
-    <button onClick="{{ goToRegister }}" style="border:none;background:#557A60;color:#FBF9F4;padding:11px 22px;border-radius:999px;font:600 14px 'Noto Sans TC';white-space:nowrap;flex:none">註冊</button>
   </div>
 
   <!-- first screen: hero + trust bar -->
@@ -62,17 +85,17 @@
       <div style="font:400 clamp(15px,2.2vw,17px)/1.8 'Noto Sans TC';color:#7C756B;max-width:440px;margin-bottom:30px">透過 AI 陪伴、每日修練與 FHIR 健康資料，讓每一天都比昨天更靠近理想的自己。</div>
       <div class="mh-hero-actions" style="display:flex;gap:14px;flex-wrap:wrap">
         <button onClick="{{ goToLogin }}" style="border:none;background:#557A60;color:#FBF9F4;padding:15px 28px;border-radius:999px;font:600 16px 'Noto Sans TC';white-space:nowrap">開始今日修練</button>
-        <button style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:15px 28px;border-radius:999px;font:600 16px 'Noto Sans TC';white-space:nowrap">觀看介紹 ▸</button>
+        <button onClick="{{ openIntro }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:15px 28px;border-radius:999px;font:600 16px 'Noto Sans TC';white-space:nowrap">觀看介紹 ▸</button>
       </div>
       <div style="display:flex;gap:18px;margin-top:34px;font:600 12px 'Noto Sans TC';color:#7C756B;flex-wrap:wrap">
         <span>FHIR R4</span><span>AI 陪伴</span><span>隱私守護</span>
       </div>
     </div>
     <div style="height:min(480px,54vh);border-radius:28px;background:transparent;display:flex;align-items:center;justify-content:center;position:relative">
-      <div ref="{{ heroRef }}" style="display:flex;gap:50px;align-items:flex-end">
+      <div ref="{{ heroRef }}" style="display:flex;gap:clamp(14px,4vw,50px);align-items:flex-end;max-width:100%">
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px;animation:mh-float-a 3.4s ease-in-out infinite">
           <div style="font:700 13px 'Quicksand';color:#B5453A">心魔</div>
-          <div style="position:relative;width:336px;height:336px">
+          <div style="position:relative;width:clamp(110px,30vw,336px);height:clamp(110px,30vw,336px)">
             <div data-head="devil" style="{{ headStyleDevil }}">
             <div style="position:absolute;inset:0;background:url('./img/mascot-devil.png') center/cover no-repeat"></div>
             </div>
@@ -80,7 +103,7 @@
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:14px;animation:mh-float-b 3.9s ease-in-out infinite .3s">
           <div style="font:700 13px 'Quicksand';color:#557A60">靈力</div>
-          <div style="position:relative;width:336px;height:336px">
+          <div style="position:relative;width:clamp(110px,30vw,336px);height:clamp(110px,30vw,336px)">
             <div data-head="angel" style="{{ headStyleAngel }}">
             <div style="position:absolute;inset:0;background:url('./img/mascot-angel.png') center/cover no-repeat"></div>
             </div>
@@ -91,7 +114,7 @@
   </div>
 
   <!-- trust bar -->
-  <div style="display:flex;justify-content:center;gap:clamp(16px,3vw,32px);padding:20px clamp(16px,4vw,48px);background:#FBF9F4;border-top:1px solid #E6DECF;font:600 12.5px 'Noto Sans TC';color:#7C756B;flex-wrap:wrap;box-sizing:border-box">
+  <div ref="{{ trustBarRef }}" style="{{ trustBarStyle }}">
     <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconBadge }}"></span>競賽認證作品</span>
     <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconLock }}"></span>資料本機儲存</span>
     <span style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex:none"><span style="{{ iconPeople }}"></span>服務 1,200+ 人次</span>
@@ -101,7 +124,7 @@
   </div>
 
   <!-- services -->
-  <div ref="{{ servicesRef }}" style="padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto">
+  <div ref="{{ servicesRef }}" style="{{ servicesStyle }}">
     <div style="text-align:center;margin-bottom:48px">
       <div style="font:700 clamp(24px,4vw,32px) 'Quicksand';color:#423D37">我們提供的服務</div>
       <div style="color:#7C756B;margin-top:10px">從個人到家庭，量身打造的心理支持方案</div>
@@ -120,7 +143,7 @@
   </div>
 
   <!-- about -->
-  <div ref="{{ aboutRef }}" style="background:#DCE6DB;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px)">
+  <div ref="{{ aboutRef }}" style="{{ aboutStyle }}">
     <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:50px;align-items:center">
       <div style="height:min(280px,40vh);min-height:200px;border-radius:24px;background:url('./img/about-illustration.png') center/cover no-repeat,linear-gradient(160deg,#EAF1E7,#D6E3D4);position:relative;overflow:hidden">
       </div>
@@ -136,7 +159,7 @@
   </div>
 
   <!-- team -->
-  <div style="padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto">
+  <div ref="{{ teamRef }}" style="{{ teamStyle }}">
     <div style="text-align:center;margin-bottom:48px">
       <div style="font:700 clamp(24px,4vw,32px) 'Quicksand'">專業團隊</div>
       <div style="color:#7C756B;margin-top:10px">陪伴你走過每一段旅程</div>
@@ -153,7 +176,7 @@
   </div>
 
   <!-- coming soon -->
-  <div ref="{{ comingSoonRef }}" style="background:#FBF9F4;border-top:1px solid #E6DECF;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px)">
+  <div ref="{{ comingSoonRef }}" style="{{ comingSoonStyle }}">
     <div style="max-width:1280px;margin:0 auto">
       <div style="text-align:center;font:700 clamp(22px,4vw,30px) 'Quicksand';margin-bottom:40px">未來功能搶先看</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">
@@ -168,14 +191,14 @@
   </div>
 
   <!-- cta -->
-  <div style="background:linear-gradient(135deg,#557A60,#7C9473);padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);text-align:center;color:#FBF9F4">
+  <div ref="{{ ctaRef }}" style="{{ ctaStyle }}">
     <div style="font:700 clamp(22px,4vw,30px) 'Quicksand';margin-bottom:14px">準備好照顧自己的心了嗎？</div>
     <div style="font:400 15px 'Noto Sans TC';opacity:.9;margin-bottom:26px">立即開始你的第一次每日修練</div>
     <button onClick="{{ goToLogin }}" style="border:none;background:#FBF9F4;color:#557A60;padding:15px 32px;border-radius:999px;font:700 16px 'Noto Sans TC';white-space:nowrap">開始今日修練</button>
   </div>
 
   <!-- footer -->
-  <div ref="{{ footerRef }}" style="background:#2E2A24;color:#C9C2B4;padding:clamp(32px,6vw,50px) clamp(16px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;font:400 13px 'Noto Sans TC'">
+  <div ref="{{ footerRef }}" style="{{ footerStyle }}">
     <div>
       <div style="font:700 18px 'Quicksand';color:#FBF9F4;margin-bottom:10px">MindHarbor</div>
       <div style="line-height:1.8">用 AI 陪伴與每日修練，陪你把心照顧好。</div>
@@ -191,15 +214,61 @@
   </div>
 </div>
 
+<!-- onboarding intro modal: sibling of the animated root div (not a child of
+     it) so position:fixed is relative to the real viewport, not to an
+     ancestor with an active transform (see ScreenShop.dc.html toast for the
+     same fix applied to the same class of bug). -->
+<sc-if value="{{ introOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ introBackdropStyle }}" onClick="{{ closeIntro }}">
+    <div style="{{ introCardStyle }}" onClick="{{ stopPropagation }}">
+      <!-- introCardStyle has overflow:hidden (to clip the image to the rounded
+           corners), so this can't sit partway outside the card like a badge —
+           it would get clipped off. Keep it fully inside the card bounds. -->
+      <div onClick="{{ closeIntro }}" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:#FBF9F4;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 14px 'Noto Sans TC';color:#423D37;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:1">✕</div>
+
+      <!-- full slide image, exported 16:9 from the Gamma deck -->
+      <div style="{{ introImgStyle }}"></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:#FBF9F4">
+        <div style="display:flex;gap:8px">
+          <sc-for list="{{ introDots }}" as="dot" hint-placeholder-count="7">
+            <div onClick="{{ dot.onClick }}" style="{{ dot.style }}"></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;flex:none">
+          <button onClick="{{ introPrev }}" style="{{ introPrevStyle }}">‹ 上一步</button>
+          <button onClick="{{ introNext }}" style="border:none;background:#557A60;color:#FBF9F4;padding:10px 22px;border-radius:999px;font:600 13px 'Noto Sans TC';white-space:nowrap;cursor:pointer">{{ introNextLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:900}}">
+// Exported straight from the Gamma deck (see slides.md) as full 16:9 slide
+// images — each slide already has its own title/body text baked in, so the
+// modal just needs to show the picture, no separate title/desc fields.
+const INTRO_SLIDES = [
+  './img/intro-slide-1.png',
+  './img/intro-slide-2.png',
+  './img/intro-slide-3.png',
+  './img/intro-slide-4.png',
+  './img/intro-slide-5.png',
+  './img/intro-slide-6.png',
+  './img/intro-slide-7.png',
+];
+
 class Component extends DCLogic {
   heroRef = React.createRef();
   rootRef = React.createRef();
   heroSectionRef = React.createRef();
+  trustBarRef = React.createRef();
   servicesRef = React.createRef();
   aboutRef = React.createRef();
+  teamRef = React.createRef();
   comingSoonRef = React.createRef();
+  ctaRef = React.createRef();
   footerRef = React.createRef();
 
   scrollToSection(ref) {
@@ -214,6 +283,12 @@ class Component extends DCLogic {
     splashSlideIn: false,
     splashFadeOut: false,
     splashDone: false,
+    mobileMenuOpen: false,
+    introOpen: false,
+    introStep: 0,
+    // Below-the-fold sections slide up + fade in the first time they scroll
+    // into view (see the IntersectionObserver set up in componentDidMount).
+    revealed: { trustBar: false, services: false, about: false, team: false, comingSoon: false, cta: false, footer: false },
   };
 
   componentDidMount() {
@@ -249,18 +324,70 @@ class Component extends DCLogic {
       });
     };
     window.addEventListener('mousemove', this._onMove);
+
+    this._onKeyDown = (e) => {
+      if (!this.state.introOpen) return;
+      if (e.key === 'Escape') this.closeIntro();
+      else if (e.key === 'ArrowRight') this.introNext();
+      else if (e.key === 'ArrowLeft') this.introPrev();
+    };
+    window.addEventListener('keydown', this._onKeyDown);
+
+    // Scroll-reveal: the page itself scrolls inside rootRef (not window), so
+    // the observer's root has to be that div or intersections never fire.
+    // Each section reveals once then unobserves itself (no re-hide on scroll-up).
+    const sectionsByKey = [
+      ['trustBar', this.trustBarRef],
+      ['services', this.servicesRef],
+      ['about', this.aboutRef],
+      ['team', this.teamRef],
+      ['comingSoon', this.comingSoonRef],
+      ['cta', this.ctaRef],
+      ['footer', this.footerRef],
+    ];
+    const keyByElement = new Map(sectionsByKey.filter(([, ref]) => ref.current).map(([key, ref]) => [ref.current, key]));
+    this._revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const key = keyByElement.get(entry.target);
+        if (!key) return;
+        this.setState((prev) => ({ revealed: { ...prev.revealed, [key]: true } }));
+        this._revealObserver.unobserve(entry.target);
+      });
+    }, { root: this.rootRef.current, threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    keyByElement.forEach((key, el) => this._revealObserver.observe(el));
   }
   componentWillUnmount() {
     window.removeEventListener('mousemove', this._onMove);
+    window.removeEventListener('keydown', this._onKeyDown);
     cancelAnimationFrame(this._splashRAF);
     clearTimeout(this._splashFadeTimer);
     clearTimeout(this._splashDoneTimer);
+    if (this._revealObserver) this._revealObserver.disconnect();
   }
+
+  openIntro = () => this.setState({ introOpen: true, introStep: 0 });
+  closeIntro = () => this.setState({ introOpen: false });
+  stopPropagation = (e) => e.stopPropagation();
+  introPrev = () => this.setState(s => ({ introStep: Math.max(0, s.introStep - 1) }));
+  introNext = () => {
+    if (this.state.introStep === INTRO_SLIDES.length - 1) { this.props.goToLogin(); return; }
+    this.setState(s => ({ introStep: Math.min(INTRO_SLIDES.length - 1, s.introStep + 1) }));
+  };
 
   renderVals() {
     const s = this.state;
+    // Bottom-to-top slide-in + fade for whichever section this key belongs to.
+    const revealStyle = (key) => `opacity:${s.revealed[key] ? 1 : 0};transform:translateY(${s.revealed[key] ? 0 : 36}px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)`;
     return {
       splashDone: s.splashDone,
+      trustBarStyle: `display:flex;justify-content:center;gap:clamp(16px,3vw,32px);padding:20px clamp(16px,4vw,48px);background:#FBF9F4;border-top:1px solid #E6DECF;font:600 12.5px 'Noto Sans TC';color:#7C756B;flex-wrap:wrap;box-sizing:border-box;${revealStyle('trustBar')}`,
+      servicesStyle: `padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto;${revealStyle('services')}`,
+      aboutStyle: `background:#DCE6DB;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);${revealStyle('about')}`,
+      teamStyle: `padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto;${revealStyle('team')}`,
+      comingSoonStyle: `background:#FBF9F4;border-top:1px solid #E6DECF;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);${revealStyle('comingSoon')}`,
+      ctaStyle: `background:linear-gradient(135deg,#557A60,#7C9473);padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);text-align:center;color:#FBF9F4;${revealStyle('cta')}`,
+      footerStyle: `background:#2E2A24;color:#C9C2B4;padding:clamp(32px,6vw,50px) clamp(16px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;font:400 13px 'Noto Sans TC';${revealStyle('footer')}`,
       splashOverlayStyle: `position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#DCE6DB;opacity:${s.splashFadeOut ? 0 : 1};transform:scale(${s.splashFadeOut ? 2 : 1});transition:opacity .5s ease,transform .5s ease;pointer-events:${s.splashFadeOut ? 'none' : 'auto'}`,
       splashLogoIconStyle: `width:64px;height:64px;border-radius:18px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);transform:translateY(${s.splashSlideIn ? 0 : 60}px);opacity:${s.splashSlideIn ? 1 : 0};transition:transform .8s cubic-bezier(.22,1,.36,1),opacity .8s ease`,
       splashLogoTextStyle: `display:flex;flex-direction:column;align-items:center;margin-top:14px;transform:translateY(${s.splashSlideIn ? 0 : 60}px);opacity:${s.splashSlideIn ? 1 : 0};transition:transform .8s cubic-bezier(.22,1,.36,1) .3s,opacity .8s ease .3s`,
@@ -269,9 +396,12 @@ class Component extends DCLogic {
       heroRef: this.heroRef,
       rootRef: this.rootRef,
       heroSectionRef: this.heroSectionRef,
+      trustBarRef: this.trustBarRef,
       servicesRef: this.servicesRef,
       aboutRef: this.aboutRef,
+      teamRef: this.teamRef,
       comingSoonRef: this.comingSoonRef,
+      ctaRef: this.ctaRef,
       footerRef: this.footerRef,
       scrollToHero: () => this.scrollToSection(this.heroSectionRef),
       scrollToAbout: () => this.scrollToSection(this.aboutRef),
@@ -299,9 +429,6 @@ class Component extends DCLogic {
         {name:'黃心理師', role:'諮商心理師 · 兒少專長', bg:'#E4DCF0', face:'#A688B0'},
         {name:'吳心理師', role:'臨床心理師 · 職涯諮詢', bg:'#DDE7EF', face:'#8FA9C4'},
       ].map((m, i) => ({ ...m, photoLayer: `url('./img/avatar-team-${i + 1}.png') center/cover no-repeat,` })),
-      // Each item falls back to the plain #DCE6DB square (via CSS multi-background
-      // layering) until a matching icon-upcoming-*.png is dropped into img/, same
-      // "no file = no broken image" convention used by every other image slot.
       upcoming: [
         {label:'AI 情緒分析', icon:'icon-upcoming-ai-analysis'},
         {label:'線上預約系統', icon:'icon-upcoming-booking'},
@@ -310,6 +437,27 @@ class Component extends DCLogic {
         {label:'心理健康知識庫', icon:'icon-upcoming-knowledge-base'},
         {label:'線上課程', icon:'icon-upcoming-courses'},
       ].map(u => ({ ...u, iconStyle: `width:38px;height:38px;border-radius:10px;background:url('./img/${u.icon}.png') center/cover no-repeat,#DCE6DB;flex:none` })),
+      mobileMenuOpen: s.mobileMenuOpen,
+      toggleMobileMenu: () => this.setState(prev => ({ mobileMenuOpen: !prev.mobileMenuOpen })),
+      mobileMenuIconClass: s.mobileMenuOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars',
+      mobileMenuStyle: `position:absolute;top:100%;left:0;right:0;background:#FBF9F4;border-bottom:1px solid #E6DECF;box-shadow:0 16px 30px rgba(0,0,0,.08);padding:${s.mobileMenuOpen ? '6px clamp(16px,4vw,48px) 14px' : '0 clamp(16px,4vw,48px)'};max-height:${s.mobileMenuOpen ? '320px' : '0'};overflow:hidden;display:flex;flex-direction:column;opacity:${s.mobileMenuOpen ? 1 : 0};transition:max-height .3s ease,opacity .25s ease,padding .3s ease`,
+
+      // --- onboarding intro modal (full-slide images exported from Gamma) ---
+      introOpen: s.introOpen,
+      introDots: INTRO_SLIDES.map((_, i) => ({
+        onClick: () => this.setState({ introStep: i }),
+        style: `width:8px;height:8px;border-radius:50%;cursor:pointer;background:${i === s.introStep ? '#557A60' : '#DCE6DB'};transition:background .2s;flex:none`,
+      })),
+      introNextLabel: s.introStep === INTRO_SLIDES.length - 1 ? '開始今日修練 ›' : '下一步 ›',
+      introPrevStyle: `border:1px solid #C9C2B4;background:transparent;color:${s.introStep === 0 ? '#C9C2B4' : '#423D37'};padding:10px 20px;border-radius:999px;font:600 13px 'Noto Sans TC';cursor:${s.introStep === 0 ? 'default' : 'pointer'};visibility:${s.introStep === 0 ? 'hidden' : 'visible'}`,
+      introImgStyle: `width:100%;aspect-ratio:16/9;background:url('${INTRO_SLIDES[s.introStep]}') center/cover no-repeat,#EDE4D8`,
+      introBackdropStyle: `position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(46,42,36,.55);padding:20px;opacity:${s.introOpen ? 1 : 0};pointer-events:${s.introOpen ? 'auto' : 'none'};transition:opacity .3s ease`,
+      introCardStyle: `position:relative;background:#FBF9F4;border-radius:20px;overflow:hidden;max-width:min(94vw,900px);width:100%;box-shadow:0 30px 70px rgba(0,0,0,.35);transform:scale(${s.introOpen ? 1 : 0.94});transition:transform .3s cubic-bezier(.22,1,.36,1)`,
+      openIntro: this.openIntro,
+      closeIntro: this.closeIntro,
+      stopPropagation: this.stopPropagation,
+      introPrev: this.introPrev,
+      introNext: this.introNext,
     };
   }
 }

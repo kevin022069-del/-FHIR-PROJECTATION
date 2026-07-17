@@ -67,49 +67,58 @@
             <div style="font:700 16px 'Quicksand'">高危通知</div>
             <button onClick="{{ refreshFlags }}" style="border:none;background:transparent;color:#557A60;font:600 12px 'Noto Sans TC'">重新整理 ↻</button>
           </div>
-          <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
-              <div style="display:flex;flex-direction:column;gap:4px">
-                <div style="font:600 13px 'Noto Sans TC';color:#423D37;line-height:1.4">{{ f.patient }}</div>
-                <div style="font:400 11px 'Noto Sans TC';color:#7C756B;line-height:1.4">{{ f.time }}</div>
+          <div class="mh-scroll" style="max-height:260px;overflow-y:auto">
+            <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #F0EBE0">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="font:600 13px 'Noto Sans TC';color:#423D37;line-height:1.4">{{ f.patient }}</div>
+                  <div style="font:400 11px 'Noto Sans TC';color:#7C756B;line-height:1.4">{{ f.time }}</div>
+                  <div style="font:400 11px 'Noto Sans TC';color:#557A60;line-height:1.4">{{ f.fhirLabel }}</div>
+                </div>
+                <div style="background:#FBEAE6;color:#B5543C;font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px">高危</div>
               </div>
-              <div style="background:#FBEAE6;color:#B5543C;font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px">高危</div>
-            </div>
-          </sc-for>
+            </sc-for>
+          </div>
         </div>
 
         <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
             <div style="font:700 16px 'Quicksand'">今日預約</div>
           </div>
-          <sc-for list="{{ appts }}" as="a" hint-placeholder-count="3">
-            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE0;font:400 13px 'Noto Sans TC'">
-              <div style="color:#423D37;font-weight:600">{{ a.name }}</div>
-              <div style="color:#7C756B">{{ a.time }}</div>
-            </div>
-          </sc-for>
+          <div class="mh-scroll" style="max-height:260px;overflow-y:auto">
+            <sc-for list="{{ appts }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0EBE0;font:400 13px 'Noto Sans TC'">
+                <div style="color:#423D37;font-weight:600">{{ a.name }}</div>
+                <div style="color:#7C756B">{{ a.time }}</div>
+              </div>
+            </sc-for>
+          </div>
         </div>
 
         <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
             <div style="font:700 16px 'Quicksand'">我的個案</div>
           </div>
-          <sc-for list="{{ cases }}" as="c" hint-placeholder-count="4">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0EBE0">
-              <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ c.name }}</div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <div style="font:600 11px 'Noto Sans TC';color:#557A60">靈力 {{ c.spiritPower }}</div>
-                <div style="{{ c.badgeStyle }}">{{ c.status }}</div>
+          <div class="mh-scroll" style="max-height:260px;overflow-y:auto">
+            <sc-for list="{{ cases }}" as="c" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0EBE0">
+                <div style="font:600 13px 'Noto Sans TC';color:#423D37">{{ c.name }}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="font:600 11px 'Noto Sans TC';color:#557A60">靈力 {{ c.spiritPower }}</div>
+                  <div style="{{ c.badgeStyle }}">{{ c.status }}</div>
+                </div>
               </div>
-            </div>
-          </sc-for>
+            </sc-for>
+          </div>
         </div>
 
         <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px">
           <div style="font:700 16px 'Quicksand';margin-bottom:14px">資源連結</div>
-          <sc-for list="{{ resources }}" as="r" hint-placeholder-count="5">
-            <div style="padding:10px 0;border-bottom:1px solid #F0EBE0;font:500 13px 'Noto Sans TC';color:#5C564C">{{ r }}</div>
-          </sc-for>
+          <div class="mh-scroll" style="max-height:260px;overflow-y:auto">
+            <sc-for list="{{ resources }}" as="r" hint-placeholder-count="5">
+              <div style="padding:10px 0;border-bottom:1px solid #F0EBE0;font:500 13px 'Noto Sans TC';color:#5C564C">{{ r }}</div>
+            </sc-for>
+          </div>
         </div>
       </div>
     </sc-if>
@@ -120,42 +129,49 @@
           <div style="font:700 16px 'Quicksand'">高危通知</div>
           <button onClick="{{ refreshFlags }}" style="border:none;background:transparent;color:#557A60;font:600 12px 'Noto Sans TC'">重新整理 ↻</button>
         </div>
-        <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #F0EBE0">
-            <div style="display:flex;flex-direction:column;gap:4px">
-              <div style="font:600 14px 'Noto Sans TC';color:#423D37;line-height:1.4">{{ f.patient }}</div>
-              <div style="font:400 12px 'Noto Sans TC';color:#7C756B;line-height:1.4">{{ f.time }}</div>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto">
+          <sc-for list="{{ flags }}" as="f" hint-placeholder-count="2">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #F0EBE0">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font:600 14px 'Noto Sans TC';color:#423D37;line-height:1.4">{{ f.patient }}</div>
+                <div style="font:400 12px 'Noto Sans TC';color:#7C756B;line-height:1.4">{{ f.time }}</div>
+                <div style="font:400 12px 'Noto Sans TC';color:#557A60;line-height:1.4">{{ f.fhirLabel }}</div>
+              </div>
+              <div style="background:#FBEAE6;color:#B5543C;font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px">高危</div>
             </div>
-            <div style="background:#FBEAE6;color:#B5543C;font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px">高危</div>
-          </div>
-        </sc-for>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
 
     <sc-if value="{{ isApptPanel }}" hint-placeholder-val="{{ false }}">
       <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
         <div style="font:700 16px 'Quicksand';margin-bottom:14px">今日預約</div>
-        <sc-for list="{{ appts }}" as="a" hint-placeholder-count="3">
-          <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F0EBE0;font:400 14px 'Noto Sans TC'">
-            <div style="color:#423D37;font-weight:600">{{ a.name }}</div>
-            <div style="color:#7C756B">{{ a.time }}</div>
-          </div>
-        </sc-for>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto">
+          <sc-for list="{{ appts }}" as="a" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F0EBE0;font:400 14px 'Noto Sans TC'">
+              <div style="color:#423D37;font-weight:600">{{ a.name }}</div>
+              <div style="color:#7C756B">{{ a.time }}</div>
+            </div>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
 
     <sc-if value="{{ isCasesPanel }}" hint-placeholder-val="{{ false }}">
       <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:22px;max-width:640px">
         <div style="font:700 16px 'Quicksand';margin-bottom:14px">我的個案</div>
-        <sc-for list="{{ cases }}" as="c" hint-placeholder-count="4">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #F0EBE0">
-            <div style="font:600 14px 'Noto Sans TC';color:#423D37">{{ c.name }}</div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="font:600 12px 'Noto Sans TC';color:#557A60">靈力 {{ c.spiritPower }}</div>
-              <div style="{{ c.badgeStyle }}">{{ c.status }}</div>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto">
+          <sc-for list="{{ cases }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #F0EBE0">
+              <div style="font:600 14px 'Noto Sans TC';color:#423D37">{{ c.name }}</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font:600 12px 'Noto Sans TC';color:#557A60">靈力 {{ c.spiritPower }}</div>
+                <div style="{{ c.badgeStyle }}">{{ c.status }}</div>
+              </div>
             </div>
-          </div>
-        </sc-for>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
 
@@ -191,30 +207,62 @@
     </sc-if>
     <sc-if value="{{ isPairingPanel }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex;flex-direction:column;gap:14px;max-width:640px">
+        <div style="font:700 14px 'Quicksand';color:#423D37">紓壓配對紀錄</div>
         <sc-if value="{{ !pairingGroups.length }}" hint-placeholder-val="{{ true }}">
           <div style="background:#FBF9F4;border:1px dashed #E6DECF;border-radius:16px;padding:24px;text-align:center;font:400 13px 'Noto Sans TC';color:#7C756B">
             目前尚無紓壓配對紀錄
           </div>
         </sc-if>
-        <sc-for list="{{ pairingGroups }}" as="g" hint-placeholder-count="2">
-          <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:20px">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start">
-              <div>
-                <div style="font:700 14px 'Noto Sans TC';color:#423D37">{{ g.id }} · {{ g.userNick }} × {{ g.partnerNick }}</div>
-                <div style="font:400 11px 'Noto Sans TC';color:#7C756B;margin-top:4px">壓力分數 {{ g.score }} / 15 · {{ g.time }}</div>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ pairingGroups }}" as="g" hint-placeholder-count="2">
+            <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:20px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font:700 14px 'Noto Sans TC';color:#423D37">{{ g.id }} · {{ g.userNick }} × {{ g.partnerNick }}</div>
+                  <div style="font:400 11px 'Noto Sans TC';color:#7C756B;margin-top:4px">壓力分數 {{ g.score }} / 15 · {{ g.time }}</div>
+                </div>
+                <div style="{{ g.badgeStyle }}">{{ g.riskLabel }}</div>
               </div>
-              <div style="{{ g.badgeStyle }}">{{ g.riskLabel }}</div>
+              <div onClick="{{ g.onToggle }}" style="margin-top:12px;font:600 12px 'Noto Sans TC';color:#557A60;cursor:pointer">{{ g.toggleLabel }}</div>
+              <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ false }}">
+                <div class="mh-scroll" role="log" style="margin-top:10px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:#F4F0E7;border-radius:12px;padding:12px">
+                  <sc-for list="{{ g.log }}" as="entry" hint-placeholder-count="3">
+                    <div style="{{ entry.style }}">{{ entry.text }}</div>
+                  </sc-for>
+                </div>
+              </sc-if>
             </div>
-            <div onClick="{{ g.onToggle }}" style="margin-top:12px;font:600 12px 'Noto Sans TC';color:#557A60;cursor:pointer">{{ g.toggleLabel }}</div>
-            <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ false }}">
-              <div class="mh-scroll" role="log" style="margin-top:10px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:#F4F0E7;border-radius:12px;padding:12px">
-                <sc-for list="{{ g.log }}" as="entry" hint-placeholder-count="3">
-                  <div style="{{ entry.style }}">{{ entry.text }}</div>
-                </sc-for>
-              </div>
-            </sc-if>
+          </sc-for>
+        </div>
+
+        <div style="font:700 14px 'Quicksand';color:#423D37;margin-top:8px">所有群組（唯讀）</div>
+        <sc-if value="{{ !chatGroups.length }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#FBF9F4;border:1px dashed #E6DECF;border-radius:16px;padding:24px;text-align:center;font:400 13px 'Noto Sans TC';color:#7C756B">
+            目前尚無群組聊天紀錄
           </div>
-        </sc-for>
+        </sc-if>
+        <div class="mh-scroll" style="max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ chatGroups }}" as="g" hint-placeholder-count="2">
+            <div style="background:#FBF9F4;border:1px solid #E6DECF;border-radius:18px;padding:20px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <div style="font:700 14px 'Noto Sans TC';color:#423D37">{{ g.name }}</div>
+                  <div style="font:400 11px 'Noto Sans TC';color:#7C756B;margin-top:4px">{{ g.memberCount }} 位成員 · {{ g.visibilityLabel }}</div>
+                  <div style="font:400 11px 'Noto Sans TC';color:#557A60;margin-top:2px">{{ g.fhirLabel }}</div>
+                </div>
+                <div style="{{ g.badgeStyle }}">{{ g.riskLabel }}</div>
+              </div>
+              <div onClick="{{ g.onToggle }}" style="margin-top:12px;font:600 12px 'Noto Sans TC';color:#557A60;cursor:pointer">{{ g.toggleLabel }}</div>
+              <sc-if value="{{ g.expanded }}" hint-placeholder-val="{{ false }}">
+                <div class="mh-scroll" role="log" style="margin-top:10px;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;background:#F4F0E7;border-radius:12px;padding:12px">
+                  <sc-for list="{{ g.log }}" as="entry" hint-placeholder-count="3">
+                    <div style="{{ entry.style }}">{{ entry.text }}</div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
       </div>
     </sc-if>
   </div>
@@ -222,6 +270,25 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
+// See data/*.json — build-index.js inlines them as window.__MOCK_DATA so
+// this keeps working when index.html is opened via file:// with no server.
+function mockData(name, fallback) {
+  if (typeof window !== 'undefined' && window.__MOCK_DATA && window.__MOCK_DATA[name]) return window.__MOCK_DATA[name];
+  return fallback;
+}
+const DEMO_FLAGS = mockData('practitioner-flags', [
+  {patient:'個案 #小明 (patient)', time:'今日 09:42'}, {patient:'個案 #小美 (patient2)', time:'昨日 21:10'},
+]);
+const APPTS = mockData('practitioner-appointments', [
+  {name:'王小美', time:'14:00'}, {name:'李大同', time:'15:30'}, {name:'張心怡', time:'17:00'},
+]);
+// The logged-in patient's own card is prepended in renderVals() below —
+// these are just the other demo cases.
+const OTHER_CASES = mockData('practitioner-cases', [
+  {name:'小美', status:'需關注', spiritPower: 85}, {name:'林先生', status:'穩定', spiritPower: 210},
+]);
+const RESOURCES = mockData('practitioner-resources', ['臨床量表資料庫','個案統計報表']);
+
 class Component extends DCLogic {
   state = { onDuty: true, flagsVer: 0, panel: 'overview', alertOn: true, expandedGroup: null };
   renderVals() {
@@ -229,10 +296,10 @@ class Component extends DCLogic {
     const inactive = 'padding:11px 12px;border-radius:12px;font:500 13px \'Noto Sans TC\';color:#7C756B;margin-bottom:2px;cursor:pointer;';
     const items = [
       {label:'總覽', key:'overview'}, {label:'高危通知', key:'flags'}, {label:'今日預約', key:'appt'},
-      {label:'我的個案', key:'cases'}, {label:'紓壓配對紀錄', key:'pairing'}, {label:'統計報表', key:'stats'}, {label:'設定', key:'settings'},
+      {label:'我的個案', key:'cases'}, {label:'社群互動紀錄', key:'pairing'}, {label:'統計報表', key:'stats'}, {label:'設定', key:'settings'},
     ];
     const navItems = items.map(it => ({ label: it.label, onClick: () => this.setState({ panel: it.key }), style: this.state.panel === it.key ? active : inactive }));
-    const titles = { overview:'心理師儀表板', flags:'高危通知', appt:'今日預約', cases:'我的個案', pairing:'紓壓配對紀錄', stats:'統計報表', settings:'設定' };
+    const titles = { overview:'心理師儀表板', flags:'高危通知', appt:'今日預約', cases:'我的個案', pairing:'社群互動紀錄', stats:'統計報表', settings:'設定' };
 
     const riskInfo = { high:{label:'高危',bg:'#FBEAE6',fg:'#B5543C'}, medium:{label:'中度',bg:'#FBF0DC',fg:'#B5843A'}, low:{label:'低度',bg:'#DCE6DB',fg:'#2E4A34'} };
     const pairingGroups = (this.props.pairingGroups || []).map(g => {
@@ -255,35 +322,63 @@ class Component extends DCLogic {
       };
     });
 
+    // Read-only for the practitioner (per spec decision) — same expand/collapse
+    // interaction as pairingGroups above, just applied to chatGroups instead.
+    const chatGroups = (this.props.chatGroups || []).map(g => {
+      const expanded = this.state.expandedGroup === g.id;
+      const log = g.messages.map(m => ({
+        text: `${m.isMe ? '個案本人' : m.senderNick}：${m.text} · ${m.time}`,
+        style: m.isMe
+          ? 'background:#DCE6DB;color:#2E4A34;padding:8px 12px;border-radius:12px;font:500 12px \'Noto Sans TC\';align-self:flex-end;'
+          : 'background:#FFFFFF;color:#5C564C;padding:8px 12px;border-radius:12px;font:400 12px \'Noto Sans TC\';',
+      }));
+      return {
+        id: g.id, name: g.name, memberCount: g.members.length, riskFlag: g.riskFlag, log,
+        visibilityLabel: g.visibility === 'private' ? '私密' : '公開',
+        badgeStyle: `background:${g.riskFlag ? '#FBEAE6' : '#DCE6DB'};color:${g.riskFlag ? '#B5543C' : '#2E4A34'};font:700 11px 'Noto Sans TC';padding:5px 10px;border-radius:999px;flex:none`,
+        riskLabel: g.riskFlag ? '已通報' : '正常',
+        fhirLabel: g.fhirCareTeamStatus === 'synced' ? `✓ CareTeam/${g.fhirCareTeamId}` : g.fhirCareTeamStatus === 'syncing' ? 'CareTeam 同步中…' : '',
+        expanded, toggleLabel: expanded ? '收合聊天紀錄 ▴' : '查看群組聊天紀錄 ▾',
+        onToggle: () => this.setState(s => ({ expandedGroup: s.expandedGroup === g.id ? null : g.id })),
+      };
+    });
+
     return {
       goLogout: this.props.goLogout,
       navItems, headerTitle: titles[this.state.panel],
       isOverview: this.state.panel==='overview', isFlagsPanel: this.state.panel==='flags',
       isApptPanel: this.state.panel==='appt', isCasesPanel: this.state.panel==='cases',
-      isPairingPanel: this.state.panel==='pairing', pairingGroups,
+      isPairingPanel: this.state.panel==='pairing', pairingGroups, chatGroups,
       isStatsPanel: this.state.panel==='stats', isSettingsPanel: this.state.panel==='settings',
       dutyTrackStyle: `width:36px;height:20px;border-radius:999px;background:${this.state.onDuty?'#557A60':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.onDuty?'flex-end':'flex-start'}`,
       dutyDotStyle: 'width:16px;height:16px;border-radius:50%;background:#FBF9F4',
       toggleDuty: () => this.setState(s => ({ onDuty: !s.onDuty })),
       miniStats: [
-        {label:'我的個案', val:'4'}, {label:'高危通知', val:String(2 + (this.props.extraFlags||[]).length)}, {label:'今日預約', val:'3'}, {label:'本月服務', val:'28'},
+        {label:'我的個案', val:String(1 + OTHER_CASES.length)}, {label:'高危通知', val:String(DEMO_FLAGS.length + (this.props.extraFlags||[]).length)},
+        {label:'今日預約', val:String(APPTS.length)}, {label:'本月服務', val:'28'},
       ],
       flags: [
         ...(this.props.extraFlags || []),
-        {patient:'個案 #小明 (patient)', time:'今日 09:42'},
-        {patient:'個案 #小美 (patient2)', time:'昨日 21:10'},
-      ],
+        ...DEMO_FLAGS,
+      ].map(f => ({
+        ...f,
+        fhirLabel: f.fhirStatus === 'synced' ? `✓ 已寫入 FHIR Flag/${f.fhirFlagId}`
+          : f.fhirStatus === 'syncing' ? '同步 FHIR 中…'
+          : f.fhirStatus === 'error' ? 'FHIR 同步失敗'
+          : '',
+      })),
       refreshFlags: () => this.setState(s => ({ flagsVer: s.flagsVer + 1 })),
-      appts: [
-        {name:'王小美', time:'14:00'}, {name:'李大同', time:'15:30'}, {name:'張心怡', time:'17:00'},
-      ],
+      appts: APPTS,
       cases: [
-        {name: this.props.patientName || '蕭游', status:'穩定', spiritPower: this.props.patientSpiritPower ?? 0, badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
-        {name:'小美', status:'需關注', spiritPower: 85, badgeStyle:'background:#FBEAE6;color:#B5543C;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
-        {name:'林先生', status:'穩定', spiritPower: 210, badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
-        {name:'陳小姐', status:'穩定', spiritPower: 340, badgeStyle:'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'},
-      ],
-      resources: ['臨床量表資料庫','個案統計報表','督導諮詢系統','治療計劃範本','繼續教育課程'],
+        {name: this.props.patientName || '蕭游', status:'穩定', spiritPower: this.props.patientSpiritPower ?? 0},
+        ...OTHER_CASES,
+      ].map(c => ({
+        ...c,
+        badgeStyle: c.status === '需關注'
+          ? 'background:#FBEAE6;color:#B5543C;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px'
+          : 'background:#DCE6DB;color:#2E4A34;font:700 11px \'Noto Sans TC\';padding:4px 10px;border-radius:999px',
+      })),
+      resources: RESOURCES,
       statBars: [3,5,4,6,5,7,4].map((h,i) => ({ h: h*12, day:['07/05','07/06','07/07','07/08','07/09','07/10','今日'][i] })),
       toggleAlert: () => this.setState(s => ({ alertOn: !s.alertOn })),
       alertTrackStyle: `width:40px;height:22px;border-radius:999px;background:${this.state.alertOn?'#557A60':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.alertOn?'flex-end':'flex-start'}`,

@@ -132,7 +132,14 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:800},&quot;goHome&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onComplete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(summary:object)=&gt;void&quot;}}">
-const PARTNER_NICKS = ['小海豚','夜貓子','向日葵','旅行者42','拿鐵不加糖'];
+// See data/*.json — build-index.js inlines them as window.__MOCK_DATA so
+// this keeps working when index.html is opened via file:// with no server.
+function mockData(name, fallback) {
+  if (typeof window !== 'undefined' && window.__MOCK_DATA && window.__MOCK_DATA[name]) return window.__MOCK_DATA[name];
+  return fallback;
+}
+
+const PARTNER_NICKS = mockData('pairing-partners', ['小海豚','夜貓子']);
 const QUESTIONS = [
   { q:'最近一個月，你有多常覺得莫名心煩？', opts:[
     {label:'幾乎沒有', score:0}, {label:'偶爾會', score:1}, {label:'蠻常的', score:2}, {label:'幾乎每天', score:3} ]},
@@ -145,8 +152,20 @@ const QUESTIONS = [
   { q:'今天想到明天要做的事，心情是？', opts:[
     {label:'平常心', score:0}, {label:'有點在意', score:1}, {label:'有點焦慮', score:2}, {label:'非常抗拒', score:3} ]},
 ];
-const ENCOURAGEMENTS = ['你已經做得很好了！','辛苦了，記得對自己好一點','我懂那種感覺，你不孤單','加油，我們一起面對！'];
-const SUGGESTIONS = ['去外面散步 10 分鐘','聽一首喜歡的歌放空一下','寫下三件今天值得感恩的事','早點放下手機好好休息'];
+const ENCOURAGEMENTS = mockData('pairing-encouragements', ['你已經做得很好了！','辛苦了，記得對自己好一點']);
+const SUGGESTIONS = mockData('pairing-suggestions', ['去外面散步 10 分鐘','聽一首喜歡的歌放空一下']);
+
+// The pool is intentionally larger than what's shown at once (variety across
+// sessions) — pick a handful up front, same idea as PARTNER_NICKS below,
+// rather than rendering the whole pool as a giant stack of buttons.
+function sample(pool, n) {
+  const copy = pool.slice();
+  const picked = [];
+  while (picked.length < Math.min(n, copy.length)) {
+    picked.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
+  }
+  return picked;
+}
 
 class Component extends DCLogic {
   // Stable id for this pairing session so the parent (MindHarbor) can update
@@ -160,6 +179,8 @@ class Component extends DCLogic {
   state = {
     step: 'matching',
     partnerNick: PARTNER_NICKS[Math.floor(Math.random()*PARTNER_NICKS.length)],
+    encourageChoices: sample(ENCOURAGEMENTS, 4),
+    suggestChoices: sample(SUGGESTIONS, 4),
     qIndex: 0,
     userScore: 0,
     log: [],
@@ -283,8 +304,8 @@ class Component extends DCLogic {
       style: 'text-align:left;border:1px solid #E6DECF;background:#FFFFFF;color:#423D37;padding:13px 16px;border-radius:14px;font:500 14px \'Noto Sans TC\';cursor:pointer',
     })) : [];
 
-    const encouragementOptions = ENCOURAGEMENTS.map(t => ({ text: t, onSelect: () => this.sendEncouragement(t) }));
-    const suggestionOptions = SUGGESTIONS.map(t => ({ text: t, onSelect: () => this.sendSuggestion(t) }));
+    const encouragementOptions = s.encourageChoices.map(t => ({ text: t, onSelect: () => this.sendEncouragement(t) }));
+    const suggestionOptions = s.suggestChoices.map(t => ({ text: t, onSelect: () => this.sendSuggestion(t) }));
 
     const logEntries = s.log.map(e => ({
       text: e.time ? `${e.text} · ${e.time}` : e.text,
