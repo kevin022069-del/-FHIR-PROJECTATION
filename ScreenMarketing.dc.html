@@ -27,7 +27,7 @@
     }
   </style>
 </helmet>
-<div ref="{{ rootRef }}" style="position:absolute;inset:0;overflow-y:auto;box-sizing:border-box;background:url('./img/bg-marketing.jpg') top center/cover no-repeat,#F4F0E7;color:#423D37;font-family:'Noto Sans TC',sans-serif;animation:mh-page-enter .5s cubic-bezier(.22,1,.36,1) both" data-screen-label="行銷首頁">
+<div ref="{{ rootRef }}" style="{{ rootStyle }}" data-screen-label="行銷首頁">
 
   <!-- splash intro: light-green backdrop, logo slides up then whole overlay fades to reveal the homepage underneath -->
   <sc-if value="{{ !splashDone }}" hint-placeholder-val="{{ true }}">
@@ -226,8 +226,16 @@
            it would get clipped off. Keep it fully inside the card bounds. -->
       <div onClick="{{ closeIntro }}" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:#FBF9F4;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 14px 'Noto Sans TC';color:#423D37;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:1">✕</div>
 
-      <!-- full slide image, exported 16:9 from the Gamma deck -->
-      <div style="{{ introImgStyle }}"></div>
+      <!-- full slide images, exported 16:9 from the Gamma deck; laid out as a
+           horizontal track that slides via transform so switching slides
+           animates instead of snapping the background image. -->
+      <div style="{{ introImgWrapStyle }}">
+        <div style="{{ introTrackStyle }}">
+          <sc-for list="{{ introSlides }}" as="slide" hint-placeholder-count="7">
+            <div style="{{ slide.style }}"></div>
+          </sc-for>
+        </div>
+      </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;background:#FBF9F4">
         <div style="display:flex;gap:8px">
@@ -381,6 +389,9 @@ class Component extends DCLogic {
     const revealStyle = (key) => `opacity:${s.revealed[key] ? 1 : 0};transform:translateY(${s.revealed[key] ? 0 : 36}px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)`;
     return {
       splashDone: s.splashDone,
+      // Root scroll is locked while the splash is up (position:fixed overlay
+      // can't stop wheel/touch scroll from bubbling to this ancestor on its own).
+      rootStyle: `position:absolute;inset:0;overflow-y:${s.splashDone ? 'auto' : 'hidden'};box-sizing:border-box;background:url('./img/bg-marketing.jpg') top center/cover no-repeat,#F4F0E7;color:#423D37;font-family:'Noto Sans TC',sans-serif;animation:mh-page-enter .5s cubic-bezier(.22,1,.36,1) both`,
       trustBarStyle: `display:flex;justify-content:center;gap:clamp(16px,3vw,32px);padding:20px clamp(16px,4vw,48px);background:#FBF9F4;border-top:1px solid #E6DECF;font:600 12.5px 'Noto Sans TC';color:#7C756B;flex-wrap:wrap;box-sizing:border-box;${revealStyle('trustBar')}`,
       servicesStyle: `padding:clamp(48px,8vw,80px) clamp(16px,4vw,48px);max-width:1280px;margin:0 auto;${revealStyle('services')}`,
       aboutStyle: `background:#DCE6DB;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);${revealStyle('about')}`,
@@ -388,7 +399,7 @@ class Component extends DCLogic {
       comingSoonStyle: `background:#FBF9F4;border-top:1px solid #E6DECF;padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);${revealStyle('comingSoon')}`,
       ctaStyle: `background:linear-gradient(135deg,#557A60,#7C9473);padding:clamp(40px,7vw,70px) clamp(16px,4vw,48px);text-align:center;color:#FBF9F4;${revealStyle('cta')}`,
       footerStyle: `background:#2E2A24;color:#C9C2B4;padding:clamp(32px,6vw,50px) clamp(16px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;font:400 13px 'Noto Sans TC';${revealStyle('footer')}`,
-      splashOverlayStyle: `position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#DCE6DB;opacity:${s.splashFadeOut ? 0 : 1};transform:scale(${s.splashFadeOut ? 2 : 1});transition:opacity .5s ease,transform .5s ease;pointer-events:${s.splashFadeOut ? 'none' : 'auto'}`,
+      splashOverlayStyle: `position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#DCE6DB;opacity:${s.splashFadeOut ? 0 : 1};transform:scale(${s.splashFadeOut ? 2 : 1});transition:opacity .5s ease,transform .5s ease;pointer-events:${s.splashFadeOut ? 'none' : 'auto'}`,
       splashLogoIconStyle: `width:64px;height:64px;border-radius:18px;background:url('./img/logo.png') center/cover no-repeat,linear-gradient(135deg,#88AE8E,#557A60);transform:translateY(${s.splashSlideIn ? 0 : 60}px);opacity:${s.splashSlideIn ? 1 : 0};transition:transform .8s cubic-bezier(.22,1,.36,1),opacity .8s ease`,
       splashLogoTextStyle: `display:flex;flex-direction:column;align-items:center;margin-top:14px;transform:translateY(${s.splashSlideIn ? 0 : 60}px);opacity:${s.splashSlideIn ? 1 : 0};transition:transform .8s cubic-bezier(.22,1,.36,1) .3s,opacity .8s ease .3s`,
       goToLogin: this.props.goToLogin,
@@ -450,7 +461,14 @@ class Component extends DCLogic {
       })),
       introNextLabel: s.introStep === INTRO_SLIDES.length - 1 ? '開始今日修練 ›' : '下一步 ›',
       introPrevStyle: `border:1px solid #C9C2B4;background:transparent;color:${s.introStep === 0 ? '#C9C2B4' : '#423D37'};padding:10px 20px;border-radius:999px;font:600 13px 'Noto Sans TC';cursor:${s.introStep === 0 ? 'default' : 'pointer'};visibility:${s.introStep === 0 ? 'hidden' : 'visible'}`,
-      introImgStyle: `width:100%;aspect-ratio:16/9;background:url('${INTRO_SLIDES[s.introStep]}') center/cover no-repeat,#EDE4D8`,
+      introImgWrapStyle: `width:100%;aspect-ratio:16/9;overflow:hidden;position:relative`,
+      // Track holds all slides side by side (N * 100% wide) and shifts by one
+      // container-width per step; the translateX% is relative to the track's
+      // own width, so -step*(100/N)% works out to exactly -step container widths.
+      introTrackStyle: `display:flex;width:${INTRO_SLIDES.length * 100}%;height:100%;transform:translateX(-${s.introStep * 100 / INTRO_SLIDES.length}%);transition:transform .45s cubic-bezier(.22,1,.36,1)`,
+      introSlides: INTRO_SLIDES.map((src) => ({
+        style: `flex:0 0 ${100 / INTRO_SLIDES.length}%;height:100%;background:url('${src}') center/cover no-repeat,#EDE4D8`,
+      })),
       introBackdropStyle: `position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(46,42,36,.55);padding:20px;opacity:${s.introOpen ? 1 : 0};pointer-events:${s.introOpen ? 'auto' : 'none'};transition:opacity .3s ease`,
       introCardStyle: `position:relative;background:#FBF9F4;border-radius:20px;overflow:hidden;max-width:min(94vw,900px);width:100%;box-shadow:0 30px 70px rgba(0,0,0,.35);transform:scale(${s.introOpen ? 1 : 0.94});transition:transform .3s cubic-bezier(.22,1,.36,1)`,
       openIntro: this.openIntro,

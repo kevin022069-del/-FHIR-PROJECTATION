@@ -265,6 +265,24 @@
     </sc-if>
   </div>
 </div>
+
+<!-- Badge-unlock toast: a sibling of the animated screen root (not a
+     descendant) so its position:fixed is truly viewport-relative — an
+     ancestor with an active `transform` (like the root's page-enter
+     animation, held via fill-mode:both) would otherwise turn position:fixed
+     into a de-facto position:absolute relative to that ancestor (see the
+     same fix applied to the redeem toast in ScreenShop.dc.html). -->
+<sc-if value="{{ badgeToastVisible }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ badgeToastStyle }}">
+    <div style="width:40px;height:40px;border-radius:50%;flex:none;background:{{ badgeToastPhotoLayer }}{{ badgeToastColor }}"></div>
+    <div>
+      <div style="font:700 11px 'Noto Sans TC';opacity:.85">🏆 解鎖新成就</div>
+      <div style="font:700 14px 'Quicksand';margin-top:2px">{{ badgeToastName }}</div>
+      <div style="font:400 12px 'Noto Sans TC';opacity:.85;margin-top:1px">{{ badgeToastDesc }}</div>
+    </div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
 // Each badge's `test` reads the live props passed into ScreenDashboard so the
@@ -290,13 +308,50 @@ const BADGES = [
   {name:'Social Butterfly', desc:'好友數達 3 人', color:'#6C8FB0', slug:'social-butterfly', test: p => (p.friends || []).length >= 3},
 ];
 
+function unlockedSlugs(p) {
+  return BADGES.filter(b => b.test(p)).map(b => b.slug);
+}
+
 class Component extends DCLogic {
-  state = { panel: 'overview', darkMode: false, friendSearch: '', mobileNavOpen: false };
+  state = { panel: 'overview', darkMode: false, friendSearch: '', mobileNavOpen: false, badgeToast: null, badgeToastShow: false };
+  // Badges already unlocked when the dashboard first mounts are "known" —
+  // only ones that flip locked -> unlocked *during* this session should pop
+  // up a toast. Not part of state since it never drives a render itself.
+  _seenSlugs = new Set(unlockedSlugs(this.props));
+  _badgeQueue = [];
 
   componentDidUpdate(prevProps) {
     if (prevProps.openFriendsSignal !== this.props.openFriendsSignal && this.props.openFriendsSignal) {
       this.setState({ panel: 'friends' });
     }
+
+    const newlyUnlocked = BADGES.filter(b => b.test(this.props) && !this._seenSlugs.has(b.slug));
+    if (newlyUnlocked.length) {
+      newlyUnlocked.forEach(b => this._seenSlugs.add(b.slug));
+      this._badgeQueue.push(...newlyUnlocked);
+      this.maybeShowNextBadge();
+    }
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._badgeHideTimer);
+    clearTimeout(this._badgeUnmountTimer);
+  }
+
+  // Shows queued unlocks one at a time (a single check-in or task completion
+  // can satisfy several badge conditions at once) rather than overlapping them.
+  maybeShowNextBadge() {
+    if (this.state.badgeToast || !this._badgeQueue.length) return;
+    const badge = this._badgeQueue.shift();
+    clearTimeout(this._badgeHideTimer);
+    clearTimeout(this._badgeUnmountTimer);
+    this.setState({ badgeToast: badge, badgeToastShow: false });
+    requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ badgeToastShow: true })));
+    this._badgeHideTimer = setTimeout(() => this.setState({ badgeToastShow: false }), 2600);
+    this._badgeUnmountTimer = setTimeout(() => {
+      this.setState({ badgeToast: null });
+      this.maybeShowNextBadge();
+    }, 2600 + 300);
   }
 
   renderVals() {
@@ -406,6 +461,12 @@ class Component extends DCLogic {
       darkTrackStyle: `width:40px;height:22px;border-radius:999px;background:${this.state.darkMode?'#557A60':'#C9C2B4'};display:flex;align-items:center;padding:2px;cursor:pointer;justify-content:${this.state.darkMode?'flex-end':'flex-start'}`,
       darkDotStyle: 'width:18px;height:18px;border-radius:50%;background:#FBF9F4',
       clearToday: () => this.setState({ panel: 'overview' }),
+      badgeToastVisible: !!this.state.badgeToast,
+      badgeToastName: this.state.badgeToast ? this.state.badgeToast.name : '',
+      badgeToastDesc: this.state.badgeToast ? this.state.badgeToast.desc : '',
+      badgeToastColor: this.state.badgeToast ? this.state.badgeToast.color : '#9CC3A0',
+      badgeToastPhotoLayer: this.state.badgeToast ? `url('./img/badge-${this.state.badgeToast.slug}.png') center/cover no-repeat,` : '',
+      badgeToastStyle: `position:fixed;left:50%;top:24px;z-index:9999;display:flex;align-items:center;gap:12px;background:#2E4A34;color:#FBF9F4;padding:12px 20px;border-radius:20px;box-shadow:0 14px 32px rgba(0,0,0,.25);white-space:nowrap;pointer-events:none;opacity:${this.state.badgeToastShow ? 1 : 0};transform:translate(-50%,${this.state.badgeToastShow ? '0' : '-16px'}) scale(${this.state.badgeToastShow ? 1 : 0.94});transition:opacity .3s ease,transform .3s cubic-bezier(.22,1,.36,1)`,
     };
   }
 }

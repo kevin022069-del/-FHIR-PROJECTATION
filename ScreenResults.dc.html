@@ -42,16 +42,74 @@
 
     <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
       <button onClick="{{ goHome }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:14px 26px;border-radius:999px;font:600 14px 'Noto Sans TC'">回到首頁</button>
-      <button style="border:none;background:#557A60;color:#FBF9F4;padding:14px 26px;border-radius:999px;font:700 14px 'Noto Sans TC'">分享今日成果</button>
+      <button onClick="{{ openShare }}" style="border:none;background:#557A60;color:#FBF9F4;padding:14px 26px;border-radius:999px;font:700 14px 'Noto Sans TC';cursor:pointer">分享今日成果</button>
     </div>
   </div>
 </div>
 
+<!-- share modal: sibling of the animated root div (not nested inside it) so
+     position:fixed is relative to the real viewport, not to an ancestor whose
+     page-enter keyframe animation leaves an active transform behind (fill
+     mode "both" keeps the final translateY applied, which would otherwise
+     turn this into a containing block for fixed descendants). -->
+<sc-if value="{{ shareOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ shareBackdropStyle }}" onClick="{{ closeShare }}">
+    <div style="{{ shareCardStyle }}" onClick="{{ stopPropagation }}">
+      <div onClick="{{ closeShare }}" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:#F4F0E7;display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 14px 'Noto Sans TC';color:#423D37">✕</div>
+
+      <div style="font:700 18px 'Quicksand';color:#423D37;margin-bottom:4px">分享今日成果</div>
+      <div style="font:400 13px 'Noto Sans TC';color:#7C756B;margin-bottom:20px">讓朋友掃描 QR Code，或直接複製連結分享</div>
+
+      <div style="{{ qrImgStyle }}"></div>
+
+      <div style="display:flex;gap:8px;margin-top:20px;align-items:center">
+        <div style="flex:1;min-width:0;background:#F4F0E7;border:1px solid #E6DECF;border-radius:12px;padding:11px 14px;font:400 13px 'Noto Sans TC';color:#5C564C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left">{{ shareLink }}</div>
+        <button onClick="{{ copyShareLink }}" style="border:none;background:#557A60;color:#FBF9F4;padding:11px 18px;border-radius:12px;font:700 13px 'Noto Sans TC';white-space:nowrap;flex:none;cursor:pointer">{{ copyLabel }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:640,&quot;height&quot;:800}}">
 class Component extends DCLogic {
+  state = {
+    shareOpen: false,
+    copyLabel: '複製連結',
+  };
+
+  componentWillUnmount() {
+    clearTimeout(this._copyResetTimer);
+  }
+
+  openShare = () => this.setState({ shareOpen: true, copyLabel: '複製連結' });
+  closeShare = () => this.setState({ shareOpen: false });
+  stopPropagation = (e) => e.stopPropagation();
+
+  copyShareLink = async () => {
+    const link = this.shareLink;
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch (e) {
+      // Clipboard API unavailable (e.g. insecure context) — fall back to a
+      // hidden textarea + execCommand so the button still does something.
+      const ta = document.createElement('textarea');
+      ta.value = link;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e2) {}
+      document.body.removeChild(ta);
+    }
+    clearTimeout(this._copyResetTimer);
+    this.setState({ copyLabel: '已複製 ✓' });
+    this._copyResetTimer = setTimeout(() => this.setState({ copyLabel: '複製連結' }), 1800);
+  };
+
   renderVals() {
     const p = this.props;
+    const s = this.state;
     const newMindDemon = Math.max(0, p.mindDemon - p.reduction);
     const celebrationImg = "url('./img/icon-celebration.png') center/cover no-repeat,";
     const celebrationStyle = p.allDone
@@ -59,10 +117,27 @@ class Component extends DCLogic {
       : (p.reduction > 0
         ? `width:60px;height:70px;margin:0 auto 6px;border-radius:0 100% 0 100%;background:${celebrationImg}radial-gradient(circle at 35% 30%,#9CC3A0,#557A60)`
         : `width:44px;height:44px;margin:0 auto 6px;border-radius:50%;background:${celebrationImg}radial-gradient(circle at 35% 30%,#BFE0C4,#6FA37C)`);
+
+    // Mock share link (this prototype has no real backend/routing yet) that
+    // still encodes today's actual numbers so it reads as a real result link.
+    this.shareLink = `https://mindharbor.tw/share/result?demon=-${p.reduction}&spirit=${p.spiritEarned}`;
+    const qrData = encodeURIComponent(this.shareLink);
+
     return {
       celebrationStyle,
       newMindDemon, reduction: p.reduction, spiritEarned: p.spiritEarned,
       details: p.details, goHome: p.goHome,
+
+      shareOpen: s.shareOpen,
+      openShare: this.openShare,
+      closeShare: this.closeShare,
+      stopPropagation: this.stopPropagation,
+      copyShareLink: this.copyShareLink,
+      copyLabel: s.copyLabel,
+      shareLink: this.shareLink,
+      shareBackdropStyle: `position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(46,42,36,.55);padding:20px;opacity:${s.shareOpen ? 1 : 0};pointer-events:${s.shareOpen ? 'auto' : 'none'};transition:opacity .3s ease`,
+      shareCardStyle: `position:relative;background:#FBF9F4;border-radius:20px;padding:28px;max-width:min(92vw,380px);width:100%;box-shadow:0 30px 70px rgba(0,0,0,.35);text-align:center;transform:scale(${s.shareOpen ? 1 : 0.94});transition:transform .3s cubic-bezier(.22,1,.36,1)`,
+      qrImgStyle: `width:200px;height:200px;margin:0 auto;border-radius:16px;border:1px solid #E6DECF;background:url('https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=${qrData}') center/cover no-repeat,#FFFFFF`,
     };
   }
 }

@@ -189,6 +189,38 @@
   </div>
 </div>
 
+<!-- add-practitioner modal: sibling of the animated root div (not nested in
+     it) so position:fixed is truly viewport-relative — the root's page-enter
+     animation leaves a lingering transform behind (fill-mode:both), which
+     would otherwise turn position:fixed into position:absolute relative to
+     that ancestor (same fix as the toasts/modals in the other screens). -->
+<sc-if value="{{ addPractitionerOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(46,42,36,.55);padding:20px" onClick="{{ closeAddPractitioner }}">
+    <div style="position:relative;background:#FBF9F4;border-radius:20px;padding:26px;max-width:min(92vw,380px);width:100%;box-shadow:0 30px 70px rgba(0,0,0,.35)" onClick="{{ stopPropagation }}">
+      <div style="font:700 17px 'Quicksand';color:#423D37;margin-bottom:18px">新增心理師</div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">姓名</div>
+          <input value="{{ newPrName }}" onInput="{{ onNewPrNameChange }}" placeholder="例：王心理師" style="width:100%;border:1px solid #E6DECF;background:#F4F0E7;color:#423D37;border-radius:12px;padding:11px 14px;font:400 13px 'Noto Sans TC';outline:none;box-sizing:border-box"/>
+        </div>
+        <div>
+          <div style="font:600 12px 'Noto Sans TC';color:#7C756B;margin-bottom:6px">帳號</div>
+          <input value="{{ newPrAccount }}" onInput="{{ onNewPrAccountChange }}" placeholder="例：wang.doc" style="width:100%;border:1px solid #E6DECF;background:#F4F0E7;color:#423D37;border-radius:12px;padding:11px 14px;font:400 13px 'Noto Sans TC';outline:none;box-sizing:border-box"/>
+        </div>
+        <sc-if value="{{ addPrError }}" hint-placeholder-val="{{ false }}">
+          <div style="font:600 12px 'Noto Sans TC';color:#B5543C">{{ addPrError }}</div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px">
+        <button onClick="{{ closeAddPractitioner }}" style="border:1px solid #C9C2B4;background:transparent;color:#423D37;padding:10px 20px;border-radius:999px;font:600 13px 'Noto Sans TC';cursor:pointer">取消</button>
+        <button onClick="{{ submitAddPractitioner }}" style="border:none;background:#557A60;color:#FBF9F4;padding:10px 22px;border-radius:999px;font:700 13px 'Noto Sans TC';cursor:pointer">新增</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1300,&quot;height&quot;:800}}">
 const FHIR_TYPES = ['Patient','Observation','QuestionnaireResponse','CarePlan','RiskAssessment','Task','Flag','CareTeam','Communication','Appointment'];
@@ -217,7 +249,33 @@ const ADMIN_FLAGS = mockData('admin-flags', [
 ]);
 
 class Component extends DCLogic {
-  state = { panel: 'overview', selectedFhirType: 'Patient', maintenance: false, liveResults: {} };
+  state = {
+    panel: 'overview', selectedFhirType: 'Patient', maintenance: false, liveResults: {},
+    practitioners: PRACTITIONERS.slice(),
+    addPractitionerOpen: false, newPrName: '', newPrAccount: '', addPrError: '',
+  };
+
+  openAddPractitioner = () => this.setState({ addPractitionerOpen: true, newPrName: '', newPrAccount: '', addPrError: '' });
+  closeAddPractitioner = () => this.setState({ addPractitionerOpen: false });
+  stopPropagation = (e) => e.stopPropagation();
+  onNewPrNameChange = (e) => this.setState({ newPrName: e.target.value });
+  onNewPrAccountChange = (e) => this.setState({ newPrAccount: e.target.value });
+  submitAddPractitioner = () => {
+    const name = this.state.newPrName.trim();
+    const account = this.state.newPrAccount.trim();
+    if (!name || !account) {
+      this.setState({ addPrError: '請填寫姓名與帳號' });
+      return;
+    }
+    if (this.state.practitioners.some(pr => pr.account === account)) {
+      this.setState({ addPrError: '此帳號已被使用' });
+      return;
+    }
+    this.setState(s => ({
+      practitioners: [...s.practitioners, { name, account }],
+      addPractitionerOpen: false,
+    }));
+  };
 
   loadLiveType = (type) => {
     const patientId = this.props.fhirPatientId;
@@ -298,8 +356,17 @@ class Component extends DCLogic {
         {type:'CarePlan', count:'2,345'}, {type:'RiskAssessment', count:'745'},
       ],
       users: USERS,
-      practitioners: PRACTITIONERS,
-      addPractitioner: () => this.setState(s => ({ practitionersVer: (s.practitionersVer||0)+1 })),
+      practitioners: this.state.practitioners,
+      addPractitioner: this.openAddPractitioner,
+      addPractitionerOpen: this.state.addPractitionerOpen,
+      closeAddPractitioner: this.closeAddPractitioner,
+      stopPropagation: this.stopPropagation,
+      newPrName: this.state.newPrName,
+      newPrAccount: this.state.newPrAccount,
+      onNewPrNameChange: this.onNewPrNameChange,
+      onNewPrAccountChange: this.onNewPrAccountChange,
+      addPrError: this.state.addPrError,
+      submitAddPractitioner: this.submitAddPractitioner,
       flags: ADMIN_FLAGS.map(f => ({
         ...f,
         badgeStyle: f.status === '待處理'
